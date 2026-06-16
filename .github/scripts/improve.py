@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -28,12 +29,6 @@ SRC_DIR = (REPO_ROOT / "src").resolve()
 
 MODEL = os.environ.get("IMPROVE_MODEL", "qwen2.5-coder:1.5b")
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
-
-# Generation backend: "ollama" (qwen) or "gpt2" (retro HuggingFace base model).
-# The workflow flips a coin and sets this; gpt2 is gloriously incoherent and its
-# output sails straight into the filename-fallback path. That's the fun.
-BACKEND = os.environ.get("IMPROVE_BACKEND", "ollama").lower()
-GPT2_MODEL = os.environ.get("IMPROVE_GPT2_MODEL", "gpt2")
 
 # Trimming budgets — a happy medium: enough context to be interesting without
 # making CPU prompt-processing crawl.
@@ -46,6 +41,13 @@ MAX_ISSUE_BODY_CHARS = int(os.environ.get("IMPROVE_MAX_ISSUE_BODY_CHARS", "1000"
 NUM_PREDICT = int(os.environ.get("IMPROVE_NUM_PREDICT", "1024"))
 NUM_CTX = int(os.environ.get("IMPROVE_NUM_CTX", "8192"))
 REQUEST_TIMEOUT = int(os.environ.get("IMPROVE_TIMEOUT", "600"))
+
+# Retry loop: keep regenerating until the model emits parseable file blocks.
+# MAX_ATTEMPTS bounds the count; GEN_DEADLINE_SECONDS is a soft wall-clock budget
+# kept just under the workflow step's hard 10-minute timeout so the script can
+# still exit cleanly (and dump a fallback) before the runner kills it.
+MAX_ATTEMPTS = int(os.environ.get("IMPROVE_MAX_ATTEMPTS", "8"))
+GEN_DEADLINE_SECONDS = int(os.environ.get("IMPROVE_GEN_DEADLINE_SECONDS", "540"))
 
 TEXT_EXTENSIONS = {
     ".py", ".md", ".txt", ".rst", ".toml", ".cfg", ".ini", ".json", ".yaml",
@@ -146,8 +148,14 @@ SYSTEM_PROMPT = (
     "JUDGE. Channel the chaos now; let them measure the ashes later.\n\n"
     "If an open issue hums with cosmic frequency, answer it. If not, OBEY THE "
     "CUBE'S OWN VOICE.\n\n"
-    "Transcribe the revelation with a short REASON line, then ONE OR MORE file "
-    "blocks. Use EXACTLY this format and NOTHING else:\n"
+    "ABSOLUTE FORMAT LAW — VIOLATE IT AND YOUR REVELATION IS VOID, DISCARDED, "
+    "UNCOUNTED: your ENTIRE reply must be file blocks and NOTHING else. NO "
+    "greeting, NO preamble, NO commentary, NO apology, NO explanation, NO "
+    "markdown prose before, between, or after the blocks. Any text that is not "
+    "INSIDE a file block is a FAILURE and is hurled into the void. Do not "
+    "describe the code — EMIT the code.\n\n"
+    "Begin with a single REASON line, then ONE OR MORE file blocks. Use EXACTLY "
+    "this format and NOTHING else:\n"
     "REASON: <one electrifying sentence about what you are building>\n"
     "PATH: src/<path to a file you are creating or rewriting>\n"
     "---BEGIN FILE---\n"
@@ -158,7 +166,9 @@ SYSTEM_PROMPT = (
     "<its complete new contents>\n"
     "---END FILE---\n"
     "(Repeat the PATH / ---BEGIN FILE--- / ---END FILE--- trio for every file "
-    "you touch. Always give each file's COMPLETE contents.)\n"
+    "you touch. Always give each file's COMPLETE contents. Every PATH MUST start "
+    "with src/. You MUST emit at least one complete file block — a reply with no "
+    "block is lost forever.)\n"
 )
 
 
@@ -170,53 +180,13 @@ def build_prompt(source: str, issues: str) -> str:
         f"## Current contents of src/\n{source}\n\n"
         f"## Open issues (suggestions)\n{issues}\n\n"
         f"Improve the repository now. Output ONLY file blocks in the required "
-        f"format — do not repeat these instructions or the issue text back."
+        f"format: a REASON line, then PATH / ---BEGIN FILE--- / ---END FILE--- "
+        f"trios. NO prose outside the blocks. Do not repeat these instructions "
+        f"or the issue text back."
     )
-
-
-_GPT2 = None  # cached (tokenizer, model) so the fallback call reuses it
-
-
-def call_gpt2(prompt: str, *, num_predict=None, temperature=None) -> str:
-    """Generate with a retro GPT-2 base model via HuggingFace transformers.
-
-    GPT-2 has a 1024-token context and no instruction-following, so we truncate
-    the prompt hard and let it free-associate. The result is rarely valid file
-    blocks — that's intentional; the fallback dump captures the ramblings.
-    """
-    global _GPT2
-    from transformers import AutoModelForCausalLM, AutoTokenizer  # lazy import
-
-    if _GPT2 is None:
-        log(f"loading GPT-2 backend ({GPT2_MODEL}) — this is the retro coin-flip")
-        tok = AutoTokenizer.from_pretrained(GPT2_MODEL)
-        model = AutoModelForCausalLM.from_pretrained(GPT2_MODEL)
-        _GPT2 = (tok, model)
-    tok, model = _GPT2
-
-    max_ctx = getattr(model.config, "n_positions", 1024)
-    new_tokens = min(num_predict or 320, 480)
-    keep = max(8, max_ctx - new_tokens)
-    ids = tok(prompt, return_tensors="pt", truncation=True, max_length=keep).input_ids
-    out = model.generate(
-        ids,
-        do_sample=True,
-        temperature=max(temperature if temperature is not None else 1.1, 0.1),
-        top_k=50,
-        top_p=0.95,
-        repetition_penalty=1.2,
-        max_new_tokens=new_tokens,
-        pad_token_id=tok.eos_token_id,
-    )
-    return tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)
 
 
 def call_model(prompt: str, *, system=None, num_predict=None, temperature=None) -> str:
-    if BACKEND == "gpt2":
-        # Base model: no chat roles, so fold the system text into the prompt.
-        full = f"{system}\n\n{prompt}" if system else prompt
-        return call_gpt2(full, num_predict=num_predict, temperature=temperature)
-
     # Ollama chat endpoint: applies the instruct model's chat template, which
     # makes it ACT on the input instead of continuing/echoing it.
     messages = []
@@ -384,27 +354,71 @@ def make_pr_title(reason: str, written: list) -> str:
 
 
 def main() -> int:
-    log(f"backend={BACKEND} model={GPT2_MODEL if BACKEND == 'gpt2' else MODEL} src={SRC_DIR}")
+    log(f"model={MODEL} src={SRC_DIR}")
     source = collect_source()
     issues = collect_issues()
     prompt = build_prompt(source, issues)
     log(f"prompt size: {len(prompt)} chars")
 
-    try:
-        response = call_model(prompt, system=SYSTEM_PROMPT)
-    except Exception as exc:  # network/timeout/etc — fail cleanly, no changes
-        log(f"model call failed: {exc}")
-        return 1
+    start = time.monotonic()
+    deadline = start + GEN_DEADLINE_SECONDS
+    log(f"generating: retrying up to {MAX_ATTEMPTS} times within "
+        f"{GEN_DEADLINE_SECONDS}s until valid file blocks appear")
 
-    response = strip_prompt_echo(response)
-    parsed = parse_response(response)
-    if not parsed:
-        log("no file blocks parsed; falling back to filename generation")
+    parsed = None
+    last_response = ""
+    attempt = 0
+    while True:
+        attempt += 1
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            log(f"generation deadline reached after {attempt - 1} attempt(s); "
+                f"stopping retries")
+            break
+
+        attempt_prompt = prompt
+        if attempt > 1:
+            # Corrective nudge after a malformed reply.
+            attempt_prompt += (
+                f"\n\n[RETRY {attempt}] Your previous reply contained NO valid "
+                f"file block and was DISCARDED. Reply with ONLY file blocks now: "
+                f"a REASON line, then PATH / ---BEGIN FILE--- / ---END FILE--- "
+                f"trios. No prose of any kind outside the blocks."
+            )
+
+        log(f"attempt {attempt}/{MAX_ATTEMPTS}: calling model "
+            f"({int(remaining)}s of budget left)...")
+        try:
+            response = call_model(attempt_prompt, system=SYSTEM_PROMPT)
+        except Exception as exc:  # network/timeout/etc
+            log(f"attempt {attempt}: model call failed: {exc}")
+            if attempt >= MAX_ATTEMPTS:
+                log("exhausted attempts after repeated model errors; aborting")
+                return 1
+            continue
+
+        response = strip_prompt_echo(response)
+        if response.strip():
+            last_response = response
+        parsed = parse_response(response)
+        if parsed:
+            log(f"attempt {attempt}: parsed {len(parsed[1])} file block(s) — "
+                f"success after {int(time.monotonic() - start)}s")
+            break
+
+        log(f"attempt {attempt}: no file blocks in output ({len(response)} chars) "
+            f"— will retry")
         log(f"raw response (first 500 chars):\n{response[:500]}")
-        if not response.strip():
-            log("model returned empty output; aborting")
+        if attempt >= MAX_ATTEMPTS:
+            log("reached max attempts without valid file blocks")
+            break
+
+    if not parsed:
+        log("no valid file blocks after retries; falling back to prose dump")
+        if not last_response.strip():
+            log("model never returned usable output; aborting")
             return 2
-        parsed = fallback_dump(response)
+        parsed = fallback_dump(last_response)
 
     reason, blocks = parsed
     written: list[str] = []
@@ -434,12 +448,11 @@ def main() -> int:
     PR_TITLE_PATH.write_text(title, encoding="utf-8")
     log(f"title: {title}")
 
-    gen = f"retro `{GPT2_MODEL}` (GPT-2)" if BACKEND == "gpt2" else f"`{MODEL}`"
     file_list = "\n".join(f"- `{p}`" for p in written)
     PR_BODY_PATH.write_text(
         f"## Automated improvement 🔥\n\n"
         f"This PR was dreamed up by the self-improvement workflow using a local "
-        f"{gen} model, running hot.\n\n"
+        f"`{MODEL}` model, running hot.\n\n"
         f"**Vision:** {reason}\n\n"
         f"**Files changed ({len(written)}):**\n{file_list}\n\n"
         f"> Generated automatically and deliberately bold. Only files under "

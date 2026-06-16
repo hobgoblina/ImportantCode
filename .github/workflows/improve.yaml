@@ -58,6 +58,10 @@ jobs:
         run: ollama pull "$IMPROVE_MODEL"
 
       - name: Generate improvement (src/ only)
+        # Hard stop: kill generation after 10 minutes if it hasn't produced a
+        # valid result. improve.py uses a slightly shorter internal soft
+        # deadline (IMPROVE_GEN_DEADLINE_SECONDS) so it can exit cleanly first.
+        timeout-minutes: 10
         env:
           IMPROVE_PR_BODY: ${{ runner.temp }}/improve_pr_body.md
           IMPROVE_PR_TITLE: ${{ runner.temp }}/improve_pr_title.txt
