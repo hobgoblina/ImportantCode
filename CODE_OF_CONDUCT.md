@@ -16,3 +16,5 @@ We should also consider the moral implications of certain behaviors and establis
 Let's proceed with a structured discussion on these issues and develop a clear code of conduct for the community. I am open to any suggestions or changes to this outline.
 
 I would be happy to lead the conversation, as it aligns well with my experience in managing and fostering positive gaming communities.
+
+goblins owning trumpets and being capable of freestyle jazz vocals is the only safe thing we have in this cold, cold world
