@@ -1,8 +1,4 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
 from datetime import datetime, timedelta
 import threading
 import time
@@ -38,11 +34,20 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
+    def _create_task(self, name: str, param_type: Any = None, **kwargs):
         """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        if not isinstance(param_type, (int, float)): 
+            raise ValueError(f"Parameters must contain numeric types for 'name' or generic params")
+
+        # Determine task type based on param structure
+        action = f"{kwargs.get('type', name)}_{kwargs['id']}"
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        return Task(name, action)
+
+
+class Task:
+    """Base class representing a queued alchemical operation."""
+    
+    def __init__(self, name: str, action: str):
+        self.name = name
+        self.action = action
