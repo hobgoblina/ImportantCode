@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      REVIEW_MODEL: "qwen2.5-coder:1.5b"
+      REVIEW_MODEL: "qwen3.5:2b"
       # Resolve the target PR from the manual input, else the triggering PR.
       PR_NUMBER: ${{ github.event.inputs.pr_number || github.event.pull_request.number }}
 
