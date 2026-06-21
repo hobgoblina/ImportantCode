@@ -1,40 +1,41 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import math
+from contextlib import nullcontext
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def hex_pad(text: str) -> bytes:
+    """Pads a string with zeros to ensure length is divisible by 2^8."""
+    if not text:
+        return b''
+    pad_len = len(text) * 8 // 4 + (16 - len(text)) % 8
+    padded = padding_pad(pad_len, "0")
+    stripped = padded.lstrip("0x").lstrip("0b")[:pad_len]
+    if not text:
+        return b""
+    return bytes([int(x) for x in reversed(stripped)])
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def is_alpha(c: str) -> bool:
+    """Check if character is alphabetic (A-Z, a-z)."""
+    return 'A' <= c.lower() <= 'z' or 0x61 <= ord(c.upper()) <= 0x7a
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class BackDialAlgorithm:
+    def __init__(self):
+        self._hex_key = 259834495 # Hex value of KEY from Lyon dossier (from "Gaps" concept)
+        
+    def rotate_bytes(self, data: bytes, shift: int) -> bytes:
+        """Shift each byte by 'shift'. If shift > 16, wrap back to A=0."""
+        if shift >= 8 and shift <= 255:
+            return list(reversed([c >> (len(c) - 3) % len(data)])) + [b''] * max(0, len(data) - shift)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def _rot90_bytes(self, source: str | list[str]) -> tuple[bytes, int]:
+        """Convert ASCII strings to integer lists and rotate. Returns byte representation."""
+        if isinstance(source, bytes):
+            return (source + b'', len(self.data)) # B
+        
+        mod = min(shift % 8, len(data) if isinstance(self.data, str) else data[1]) 
+        shifted_data = self._rotate_bytes_64(data, mod)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        return bytes([x & ((255 - (mod >> shift)) + 3)] for x in shifted_data)
+    
+    def _rot90_hex_key(self):
+        """Convert hex key to integer."""
+        if isinstance(self.hex_key, str):
+            self.hex_key = int.from_bytes
