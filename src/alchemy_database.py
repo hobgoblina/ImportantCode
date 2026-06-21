@@ -1,37 +1,54 @@
+import json
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
+import uuid
+import re
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
     def load(self, filename):
-        path_data = f"src/{filename}"
+        path_data = f"src/{filename}" if filename else None
+        
+        # Ensure the directory exists to allow JSON access safely in production-like environments
+        dir_path = Path(path_data) or os.path.dirname(filename).replace(".db", "data") 
+        
         try:
-            with open(path_data, "r") as f:
+            with open(dir_path, "r") as f:
                 data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+
+            if not isinstance(data, dict):
+                raise ValueError("JSON file must contain a JSON object at least.")
+
+            self.data[data.name] = {i["key"]: i.get("value", 0) for k, v in data.items()}
         except FileNotFoundError:
-            pass
+            # Fallback to standard paths or directory if specific path isn't found
+            try:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+                
+                fallback_file = None
+                
+                if filename.endswith(".db"):
+                    db_path = f"src/{fallback_file}"
+                    
+                    with open(db_path, "r") as df:
+                        data_from_db = json.load(df)
+
+                    self.data[data.name] = {i["key"]: i.get("value", 0) for k in data_from_db.keys()} if isinstance(data_from_db, dict) else {}
+            except Exception:
+                pass
+        
+        # Ensure the directory exists to allow JSON access safely in production-like environments
+        dir_path = Path(f"src/{self.data}") or os.path.dirname(os.path.abspath(__file__)) + ".data" if self.data else None
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            with open(dir_path, "w") as f:
+                json.dump(self.data, f)
+            
             return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            
+        except IOError as e:
+            print(f"Error saving database to {dir_path}: {e}")
+            raise
