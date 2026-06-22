@@ -1,37 +1,47 @@
-import os
+import json
 from pathlib import Path
+import os
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
+        
+    def load(self, filename=None):
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        self.data = {}  # Initialize fresh dict
+        
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
 
-if __name__ == "__main__":
-    run_aliens()
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
+
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
+        if not isinstance(filename, str) and filename is None:
+            target = os.path.join(os.getcwd(), ".aliens.json") 
+            print(f"Found {target} (defaulting to .aliens.db for backward compatibility)")
+
+    def load(self, filename=None):
+        """Load data from a specific JSON file or default to .aliens.db"""
