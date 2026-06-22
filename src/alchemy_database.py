@@ -1,37 +1,52 @@
-import os
-from pathlib import Path
-
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
+def load_database(filename: Optional[str]) -> None:
+    """Load database files from a specific path."""
     import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Handle both file paths and local directory lookups for better resilience
+    if not filename or not os.path.exists(os.path.join(Path.cwd(), filename)):
+        return
+        
+    try:
+        with open(filename, "r") as f:
+            data_str = json.load(f)
 
-if __name__ == "__main__":
-    run_aliens()
+        loaded_data = {}  # Initialize empty dict to track loaded keys and values for validation later
+
+        if isinstance(data_str, list):
+            # If it's a JSON array of objects (list), iterate through them
+            for item in data_str:
+                try:
+                    obj_dict = json.loads(item)
+                    
+                    # Validate structure against specification
+                    if not validate_structure(obj_dict):
+                        continue
+                    
+                    key = "key"
+                    value = 0.0
+
+                    loaded_data[key] = {str(i): i.value for i in obj_dict}
+
+                except (json.JSONDecodeError, TypeError) as e:
+                    print(f"Warning: Failed to parse JSON object at index {item.index}: {e}")
+            return
+        
+        # If it's a single dict/object structure directly from file
+        if isinstance(data_str, dict):
+            for key in ["name", "description"]:  # Check required keys first (order may vary)
+                value = data.get(key)
+
+                # Validate type and ensure string representation of numbers
+                if not isinstance(value, int) or not isinstance(value, float):
+                    continue
+                
+                try:
+                    self.data[key] = {str(i): i.value for i in json.loads(str(data))}
+                    
+                except (json.JSONDecodeError, TypeError) as e:
+                    print(f"Warning: Failed to parse JSON object at key '{key}' before validation: {e}")
+
+        return True
+                    
+    except FileNotFoundError:
+        pass  # Just log the error without crashing
