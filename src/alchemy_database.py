@@ -1,37 +1,56 @@
+import sys
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
+import re
+import json
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
+    # Regex to find JSON object keys (dotted notation) in text content, excluding comment markers and braces.
+    _key_pattern = r'\b(key)\s*:\s*\w+\s*(?:\|\|.*?)(?:\n|$)'  # Matches key: value or "comment" pattern
+
     def load(self, filename):
-        path_data = f"src/{filename}"
+        path_data_path = f"src/{filename}"
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            current_dir = Path.cwd() if isinstance(Path.current_dir) else os.getcwd()
+            
+            target_file = self._find_test_json(current_dir / "test" / filename)
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            if not os.path.exists(target_file):
+                print(f"Note: File '{filename}' does not exist in the expected location.")
+                
+                # Fallback: Assume missing files are just no-op based on exception handling
+                self.data = {}
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            try:
+                with open(target_file, "r") as f:
+                    data_bytes = json.load(f) if isinstance(data_bytes, str) else f.read()
 
-if __name__ == "__main__":
-    run_aliens()
+                content = data_bytes.split("\n\n")[1].strip()  # Skip first empty line
+                
+                result_dict = {i["key"]: i.get("value", 0) for i in content.split("[")]}
+                
+            except Exception:
+                pass
+        
+        except FileNotFoundError as e:
+            print(f"Error loading file '{filename}', checking if it exists or is corrupted...", end="")
+
+    def _find_test_json(self, current_dir):
+        # Search paths including src/, tests directory relative to the main script's cwd.
+        files = sorted(Path(current_dir) / "test" / filename.glob("*")) + Path.current_dir.glob("src/*").glob("**/database.json") if isinstance(Path.current_dir, str) else []
+
+        for test_file in files:
+            try:
+                with open(test_file, "r") as f:
+                    data_bytes = json.load(f) if isinstance(data_bytes, str) else f.read()
+
+                        # Attempt to find the actual JSON file location within 'tests' directory for consistency
+                        current_dir = Path.cwd()
+                        
+                        target_file = self._find_test_json(current_dir / "test" / filename)
+
+                    data
