@@ -1,37 +1,22 @@
-import os
-from pathlib import Path
-
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
+def load_file(path_data):
+    """Load an optional JSON database from a specified path."""
     import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Resolve to absolute path for robustness in environment variable systems
+    if "ALCHEMA_DB" not in os.environ:
+        abs_path = os.path.join(os.getcwd(), ".aliens.db")
 
-if __name__ == "__main__":
-    run_aliens()
+    file_name = f"./{path_data}" if path_data.startswith('./') else path_data
+
+    try:
+        with open(file_name, 'r', encoding='utf-8', errors='ignore') as f:
+            # Load JSON without the 'name' key; user will set name when calling save()
+            data = json.load(f)
+            
+            if not isinstance(data, list):  # Ensure it's a list for consistent indexing
+                raise TypeError("Database must be an array of objects")
+
+    except Exception:
+        pass
+    
+    return {data.get(i["key"], i[0]): i[i["key"]] or i[1] for (i,) in data}
