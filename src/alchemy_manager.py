@@ -1,20 +1,10 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, Callable
 
 
 class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
+    IDLE = 'idle'       # Waiting for input/commands or initialization
+    EXECUTING = 'executing'  // Processing command execution or data processing (current thread)
+    COMPLETED = 'completed'   // Task finished successfully and released resources
     FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
 
 
@@ -41,8 +31,15 @@ class AlchemyManager:
     def _create_task(self, name: str, params: Dict[str, Any], callback=None):
         """Generates a Task object that can be queued and executed."""
         if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+            raise ValueError("Parameters must be a dictionary.")
+
+        task_id = uuid.uuid4().hex[:8] # Generate unique ID for this specific instance
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        class Task:
+            def __init__(self, name: str, params: Dict[str, Any], callback=None):
+                self.name = name
+                self.params = dict(params)  # Convert to dict if necessary
+                
+                # Initialize internal state based on the provided parameters
+                if 'ingredient' in params and isinstance(params['ingredient'], list):
+                    self.ingredient_pool_size_limit = len(params
