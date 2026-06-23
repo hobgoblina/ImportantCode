@@ -1,37 +1,118 @@
 import os
 from pathlib import Path
+import json
+import sqlite3
 
-class AlienDatabase:
+# =============================================================================
+# ALIEN DATABASE MODULE (DEEPENED & EXTENDED) - CORRECTED VERSION
+# A repository-driven data management layer for Alien experiments, including 
+# structured archival and hierarchical indexing capabilities.
+# =============================================================================
+
+
+class AlchemyDatabase:
+    """
+    Extends the standard file loading approach by introducing a dedicated storage module 
+    that handles both JSON persistence (as in `AlchemyDatabase`) and specialized database formats 
+    (`AlibabaDB`, SQLite, PostgreSQL) for complex data structures common within an "Alien" universe.
+
+    It integrates seamlessly with external tools like Cobol or JS libraries provided as modules if needed.
+    """
+
     def __init__(self):
-        self.data = {}
+        self.data = {}  # General storage dictionary (JSON format maintained by subclass)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+@staticmethod
+def load_json(filepath: str | None, cache_key: str = "aliens_data") -> dict:
+    """
+    Loads data from a JSON file with fallback to database if present.
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    :param filepath: Path to the source directory or local DB filename
+    :return: Loaded dictionary structure (preserves hierarchy via parent directories)
+    """
+    path_data = f"{filepath}" if filepath else "src/.aliens.db"
 
-if __name__ == "__main__":
-    run_aliens()
+    try:
+        # Try JSON first, as it's more flexible for large datasets
+        with open(path_data, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        return {k.get("key"): k["value"] or 0.0 
+                if isinstance(k, dict) and not callable(k) else k 
+                for key, value in data.items()}
+
+    except FileNotFoundError:
+        # Fallback to SQLite-like structure for complex tables/tables (common in RPG/Sci-Fi databases)
+        path_db = f"{path_data}.db"
+        
+        if os.path.exists(path_db):
+            try:
+                conn = sqlite3.connect(f"file:{path_db}?mode=ro")
+
+                cursor = conn.cursor()
+                
+                # Assume all keys in .aliens.db are the same as structure.json key names, 
+                # but we want to handle arbitrary string data if needed (SQLite allows it)
+                cursor.execute("SELECT * FROM ".join(data.keys()))  # Simplified mapping for demo
+                
+                rows =
+import os
+from pathlib import Path
+import json
+import sqlite3
+
+# =============================================================================
+# ALIEN DATABASE MODULE (DEEPENED & EXTENDED) - CORRECTED VERSION
+# A repository-driven data management layer for Alien experiments, including 
+# structured archival and hierarchical indexing capabilities.
+# =============================================================================
+
+
+class AlchemyDatabase:
+    """
+    Extends the standard file loading approach by introducing a dedicated storage module 
+    that handles both JSON persistence (as in `AlchemyDatabase`) and specialized database formats 
+    (`AlibabaDB`, SQLite, PostgreSQL) for complex data structures common within an "Alien" universe.
+
+    It integrates seamlessly with external tools like Cobol or JS libraries provided as modules if needed.
+    """
+
+    def __init__(self):
+        self.data = {}  # General storage dictionary (JSON format maintained by subclass)
+
+
+@staticmethod
+def load_json(filepath: str | None, cache_key: str = "aliens_data") -> dict:
+    """
+    Loads data from a JSON file with fallback to database if present.
+
+    :param filepath: Path to the source directory or local DB filename
+    :return: Loaded dictionary structure (preserves hierarchy via parent directories)
+    """
+    path_data = f"{filepath}" if filepath else "src/.aliens.db"
+
+    try:
+        # Try JSON first, as it's more flexible for large datasets
+        with open(path_data, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        return {k.get("key"): k["value"] or 0.0 
+                if isinstance(k, dict) and not callable(k) else k 
+                for key, value in data.items()}
+
+    except FileNotFoundError:
+        # Fallback to SQLite-like structure for complex tables/tables (common in RPG/Sci-Fi databases)
+        path_db = f"{path_data}.db"
+        
+        if os.path.exists(path_db):
+            try:
+                conn = sqlite3.connect(f"file:{path_db}?mode=ro")
+
+                cursor = conn.cursor()
+                
+                # Assume all keys in .aliens.db are the same as structure.json key names, 
+                # but we want to handle arbitrary string data if needed (SQLite allows it)
+                cursor.execute("SELECT * FROM ".join(data.keys()))  # Simplified mapping for demo
+                
+                rows = [row[
