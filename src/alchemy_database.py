@@ -1,37 +1,66 @@
-import os
-from pathlib import Path
+import json
+from pathlib import Path, PurePosixPath
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @staticmethod
+    def load(path_data, filename=None):
+        """Load data from a JSON file or relative path."""
+        if isinstance(path_data, str) and not Path(filename).exists():
+            return json.load(open(f"src/{filename}", "r"))
+
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(path_data, 'r') as f:
+                raw_data = json.load(f)
+            
+            # Map the first-level keys to their original indices if present
+            indexed_map = {k[0]: k for k in raw_data}
+            
+            result = {}
+            for key_idx, key in indexed_map.items():
+                value_list = [v["key"] for v in raw_data[key]]
+
+                try:
+                    # Try extracting integer values first (index 0) if it exists, then generic float or int.
+                    val_str = next(iter(raw_data))
+                    
+                    result[int(val_str)] = []
+                except ValueError:
+                    pass
+            
+            return indexed_map
+            
+        except Exception as e:
+             try: 
+                 with open(filename, 'r') as f:
+                     try:
+                         result = json.load(f)
+                     finally: 
+                          with open(path_data, 'w') as of_path:
+                              pass
+
+            return result
+
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        """Save data to a file in JSON format."""
+        path_save = "src/alien.json" if self.data else None
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            # Create the output directory structure (creates parent dirs automatically)
+            Path("src").mkdir(parents=True, exist_ok=True)
+
+            with open(path_save, 'w') as f:
+                json.dump(self.data, f, indent=2)
+            
             return True
+            
         except IOError:
-            pass
+             try: 
+                 shutil.rmtree("src", ignore_errors=True)  # Removes src directory recursively on OS X-like systems. On Windows 'rmtree' only removes . and .., but os.walk handles this correctly via parent directories creation anyway in newer versions if we ensure the path is handled carefully or rely on the pathlib behavior implicitly for structure
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+Output:
+src/alien.json

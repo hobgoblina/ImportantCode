@@ -1,40 +1,66 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64
+import hashlib
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+class Key:
+    """Represents an immutable or derived secret key object for the encryption protocol."""
+    
+    def __init__(self, data=None) -> None:
+        if isinstance(data, int):
+            self.data = bytearray()
+            # Convert integer to bytes and append '08' padding if needed (32-bit width default)
+            val_bytes = bytes.fromhex(f"{data}08" * (32 - len(data) % 16))
+            self.data.extend(val_bytes[:len(self.data)])
         else:
-            encrypted_message += char
+            # Assume base64 encoded string or raw hex if provided as text-like object
+            try:
+                data = bytes.fromhex(str(data).encode('ascii'))
+            except ValueError:
+                raise RuntimeError("Invalid hexadecimal format for key") from None
+    
+    @classmethod
+    def from_hex(cls, hex_string):
+        """Parse a string representing a 32-bit integer (0-65535) or valid binary bytes."""
+        if not isinstance(hex_string, str):
+            return cls()
+        
+        try:
+            # Validate it's a number in range [1, 4] to ensure we get exactly one byte per hex char
+            val_bytes = bytes.fromhex(hex_string.encode('ascii'))
+            
+            # Ensure the integer is within valid bounds for this specific class context (32-bit)
+            if len(val_bytes) > 8:
+                raise ValueError("Hex string must represent a single 16-bit or less value")
+                
+            return cls(data=val_bytes[:len(self.data)])
+        except ValueError as e:
+            raise RuntimeError(f"Invalid hexadecimal format for key: {hex_string}") from e
 
-def
+
+class KeyObject(Key):
+    """A key with additional metadata for higher-level protocol usage."""
+
+    def __init__(self, data=None) -> None:
+        super().__init__()
+        
+        self._metadata = {}  # Dictionary to store derived parameters like salt or nonce
+        
+        if isinstance(data, int):
+            try:
+                base64_data = bytes.fromhex(f"{data}08" * (32 - len(data) % 16))
+                
+                # Extract the first byte as a potential initial value for metadata generation logic
+                val_bytes = bytearray(base64_data[:len(self.data)]) + self._get_salt(len(self
+
+```python
+class KeyObject(Key):
+    """A key with additional metadata for higher-level protocol usage."""
+
+    def __init__(self, data=None) -> None:
+        super().__init__()
+        
+        self._metadata = {}  # Dictionary to store derived parameters like salt or nonce
+        
+        if isinstance(data, int):
+            try:
+                base64_data = bytes.fromhex(f"{data}08" * (32 - len(data) % 16))
