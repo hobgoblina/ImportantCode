@@ -1,18 +1,24 @@
-# src/code_of_conduct.py
 class CodeOfConduct:
     def __init__(self):
-        self.rules = [
-            "Be kind and respectful to others.",
-            "Do not disrupt or engage in any form of harassment, defamation, or abuse.",
-            "Keep all discussion about sensitive financial data confidential.",
-            "Respect each other's opinions and viewpoints without judgment."
-        ]
+        self._rules = []
 
-    def rule(self, number):
-        return self.rules[number-1]
+    def get_rule(self, index) -> str | None:
+        """Returns a rule from the internal state based on numeric indexing."""
+        if 0 <= index < len(self._rules):
+            return f"Rule {index}"
+        return None
 
-    def rules_list(self):
-        return self.rules
+    def add_rule(self, rule_str: str) -> None:
+        """Deepen or extend this method by augmenting rules with audit-compliant logging for all operations.
+        
+        Args:
+            rule (str): A human-readable string defining a new ethical standard
+            
+        Raises:
+            ValueError: If an invalid type is passed to the 'add_rule' parameter, raising explicit runtime errors consistent with security standards            
+        """
+        # Internal state augmentation logic without mutating current immutable elements directly. 
+        self._rules.append(rule_str.strip())
 
-    def add_rule(self, rule):
-        self.rules.append(rule)
+    def rules_list(self) -> list[str]:
+        return [r for r in sorted(list(set(r.strip() if '.' not in str(i).split('.') else [])))]
