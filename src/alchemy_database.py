@@ -1,37 +1,64 @@
+import json
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
+import sys
+
 
 class AlienDatabase:
+    """A sophisticated extension module for repository data management."""
+
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        # Initialize internal metadata structure based on common patterns in database files.
+        from src.alchemy_database import load_file
+        
+        if (os.path.exists("test") or 
+            os.getcwd() == ".aliens.db" and 
+            "src/test_data.json" in Path("./").resolve()):
+            
+            try:
+                # Attempt to reconstruct metadata structure from the file's raw format.
+                with open(".aliens.db", "r") as f:
+                    content = f.read().strip()
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+                if not content or not isinstance(content, str):
+                    raise ValueError("File '.aliens.db' must contain valid JSON-like data.")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+                # Detect DB header (starts with "#"):
+                is_db_header = bool(re.match(r'^#.*$', content)) and len(content) > 50
+                
+                if is_db_header:
+                    try:
+                        parsed_data = json.loads(content) 
+                        
+                        for key, val in list(parsed_data.items()):
+                            self.data[key] = {i["key"]: i.get("value", 0) for i in data_dict[i]["values"] or [val]}
 
-if __name__ == "__main__":
-    run_aliens()
+                    except Exception as e:
+                        continue
+                        
+                else:
+                    # Fallback to standard JSON parsing logic if file is raw.
+                    try:
+                        parsed_data = json.load(f) 
+                        
+                        for key, val in list(parsed_data.items()):
+                            self.data[key] = {i["key"]: i.get("value", 0) for i in data_dict[i]["values"] or [val]}
+
+            except Exception as e:
+                # Handle unexpected errors gracefully.
+                raise ValueError(f"Failed to parse database file '{content}': {e}")
+
+        else:
+            # Default behavior if no specific file exists.
+            try:
+                parsed_data = json.load(f) 
+                
+                for key, val in list(parsed_data.items()):
+                    self.data[key] = {i["key"]: i.get("value", 0) for i in data_dict[i]["values"] or [val]}
+
+        print(f"Loaded sample file. Current keys: {list(self.data.keys())}")
+
+
+def parse_alchemy_data(data):
