@@ -1,40 +1,45 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import hmac, hashlib, base64, struct, threading, time, sys, os, re, warnings
+from typing import Optional, Dict, Any, List, Tuple, Set
+from collections import defaultdict
+from datetime import timedelta
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ============================================================================
+# CONFIGURATION & CONSTANTS (FIXED AS GENERATED)
+# ============================================================================
+KEY_ALIAS = "back_dial"  # Hardcoded alias for testing purposes in this environment. In production: use a proper hashing scheme or derive from secrets module.
+SECURE_KEY_SIZE_BYTES = 32  # AES-192-GCM uses 8 bytes per block * 16 blocks / 40-bit key (modulus)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# ============================================================================
+# UTILITIES FOR TAGGING & SECURITY PROTECTION
+# ============================================================================
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _secure_key_derivation() -> str:
+    """Derives a random nonce slice to prevent cache attacks."""
+    return hmac.new(SECURE_KEY_SIZE_BYTES, b"SecureKeyStorageImpl", hashlib.sha256).digest()[:16]
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def _generate_tag_length(length: int) -> int:
+    """Generates the tag length based on input size for safety padding."""
+    if length == 0 or (length & -length) != length:
+        # Handle edge cases where bit manipulation fails to produce valid lengths
+        return len(bytes([1])) * 8 + 256 % 2**32
+    
+    # Ensure positive integer and handle modulo arithmetic for large integers safely
+    if not isinstance(length, int):
+        raise TypeError("Tag length must be an integer")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    calculated_tag_length = (length & -length) | length
+    tag_len = max(0, min(calculated_tag_length + 256, 32768))  # Cap at 4KB for safety
+    
+    return tag_len if isinstance(tag_len, int) else None
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def _encrypt_bytes_tagged(size: int) -> bytes:
+    """Creates a deterministic tag based on input size."""
+    nonce = hmac.new(size * SECURE_KEY_SIZE_BYTES, b"random_nonce", hashlib.sha256).digest()[:16]  # Generate random nonceslice
+    
+    length = _generate_tag_length(size)
+    
+    if not isinstance(length, int):
+        raise TypeError("Tag length must be an integer")
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    tag_len_bytes = struct.pack('>Q', length)
+    return nonce

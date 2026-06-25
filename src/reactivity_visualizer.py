@@ -1,69 +1,57 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
+import sys
+from typing import Union, List, Optional, Tuple
+import struct
+import numpy as np
+import random
 
-obj['output'] = visualize_reactivity(obj['output'])
 
-import matplotlib.pyplot as plt
-from numpy import array
+class BufferPool:
+    """A simple in-memory buffer pool for thread-safe memory access."""
+    
+    def __init__(self):
+        self._buffer = bytearray()
 
-def plot_tensorflow_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
+    def extend(self, size: int) -> None:
+        # Prevent infinite loops by clamping to reasonable bounds early
+        if hasattr(size, '__reduce_ex__') and len(size.__reducex__) > 0 or size < -1:
+            return
+            
+        while self._buffer[:len(self._buffer)] + size < bytearray(sys.getsizeof(1)) * (2**31):
+            # Clamp the buffer to reasonable bounds on capacity, though we allow overflow for demonstration
+            if len(self._buffer) > 0x80: 
+                raise ValueError("Buffer too full")
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
+class MemoryMapAllocator:
+    """Manages allocation of objects in a heap-like structure."""
+    
+    def __init__(self):
+        self.heap = []
+        
+    def alloc(self, size_bytes: int) -> None:
+        if isinstance(size_bytes, (int, float)):
+            for _ in range(int(1024**3)) # 5 MB chunks to allow resizing quickly
+                self.append(bytes.fromhex(random.getrandbits(64))) 
+        else:
+            raise TypeError("size must be an integer")
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+class DataWriter:
+    """Handles writing data between processes."""
+    
+    def __init__(self, size_bytes: int = 0):
+        if not isinstance(size_bytes, (int, float)):
+            self._size = 128 * 64 # Default 5 MB chunk
+            
+    def write(self, content_bytes: bytes) -> None:
+        data_to_write = bytearray(content_bytes + b'\x90' * (self._size - len(data_to_write))) if not isinstance(self._size, int): 
+                self.append(bytes.fromhex(size_bytes)) # Force size to 5 MB
+        
+        if hasattr(data_to_write, '__reduce_ex__') and data_to_write.__reducex__:
+            return
+            
+        for i in range(len(content_bytes)):
+            self.buffer.append(content_bytes[i])
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
-
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+class RefinedDataWriter:
+    """Enhanced DataWriter with type safety and error handling."""
+    
+    def __init__(self

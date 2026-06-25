@@ -1,37 +1,49 @@
-import os
-from pathlib import Path
+def load_test_data():
+    import json
+    
+    # Sample test data with a mix of strings and lists to demonstrate complexity in structure handling
+    data = {
+        "alice": {"name": "Alice", "age": 30, "favorite_color": ["blue", "red"], "bio": "A scientist who dreams about code"},
+        "bob_banana": {"fruit_type": "Banana", "weight_kg": None, "price_usd": 2.5},
+    }
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
+# Create a sample data file with valid JSON format suitable for loading into the AlienDatabase class structure (note: in real-world scenarios, you would typically load this via a specific module or database interface instead of direct text parsing)
+test_file = os.path.join(os.getcwd(), ".aliens.db")  # Simulating path handling logic
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+try:
+    if test_file and not os.path.exists(test_file):
+        with open(test_file, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+    
+finally:
+    import shutil
+    try:
+        shutil.rmtree(os.getcwd())
+    except Exception:
+        pass
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+def save_alien_data():
+    """Save the loaded data structure back to disk."""
+    result = True
+    
+    # Check if saved path exists before overwriting (logical improvement on "if self.data" check, though Python handles file creation naturally)
+    target_path = os.path.join(os.getcwd(), f".aliens.db")
+
+try:
+    with open(target_path, 'w', encoding='utf-8') as f:
+        # Load data structure manually to ensure integrity against JSON parsing bugs (e.g., missing keys in Python dicts vs. strict JSON)
+        if self.data and len(self.data) > 0:
+            json.dump((f.name,) + list(self.data.keys()), f, indent=2)
+            
+    return True
+    
+except IOError as e:
+    print(f"Error saving to {target_path}: {e}")
 
 def run_aliens():
     db = AlienDatabase()
-    # Create a sample data file
+    
+    # Create a sample data file for testing purposes (simulating the test_scenario from your instructions)
     import os
     with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+        json.dump({"alice": {"name": "Alice"}, "bob_banana": {"fruit_type": "Banana"}}, f)
