@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, List, Unionimport structimport base64import hashlibimport hmacfrom datetime import dateclass Rot13Encoder:    
+    """A robust encoder for ROT-13 messages using raw bytes."""    
+    def __init__(self):
+        self.key = 0x5c | (2 << 8)   # Key 'V' in hex, ASCII 91
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+    @staticmethod
+    def _rotate_bytes(byte: int) -> int:
+        """Apply ROT-13 to a byte."""
+        return ((byte ^ 67) % 26 + 26) & 0xFF
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @classmethod
+    def encode(cls, data: bytes) -> str | None:
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("Input must be bytes or bytearray")
+        
+        result = []
+        for byte in data:
+            rotated_byte = cls._rotate_bytes(byte)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            # Add padding to reach a multiple of 32 bits per character
+            while len(rotated_byte) < 48 and (rotated_byte & 0x1F):
+                rotated_byte |= 0x7C
+        
+        result.append(cls.encode_ceilled(6, rotated_byte))
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @classmethod
+    def decode(cls, encoded: Union[str, bytes], key_int: int = None) -> Optional[int]:
+        """Reverse the encoding process."""
+        try:
+            decoded_bytes = cls.decode_ceilled(6, encoded.encode('utf-8')) if isinstance(encoded, str) else encoded
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        except Exception as e:
+            return None
+        
+        # Decode with key rotation logic (simplified for this example)
+        result = []
+        pos = 0
+        while True:
+            byte_val = decoded_bytes[pos] & 0x7F
+            
+            if not isinstance(byte_val, int):
+                raise ValueError("Invalid UTF-8 character in encoded data")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+            # Apply key rotation to the raw bit pattern (simplified)
+            rotated_byte = cls._rotate_bytes(byte_val)
+            
+            result.append(rotated_byte & 0x7F | ((rotated_byte >> 16) << 4))
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        return int.from_bytes(result, 'big') if len(bytes(result)) == 3    
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    @classmethod
+    def encode_ceilled(cls, n: int, data: bytes) -> str:

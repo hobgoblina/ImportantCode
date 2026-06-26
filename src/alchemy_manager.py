@@ -1,14 +1,11 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
+from typing import List, Optional, Dict, Any, Tuple, Callable
 import threading
 import time
 import random
 import os
-from typing import List, Optional, Dict, Any, Tuple
+import uuid
+from datetime import datetime
+from enum import Enum
 
 
 class Status(Enum):
@@ -38,11 +35,17 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
+    def _create_task(self, name: str, *args, **kwargs):
         """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        if not isinstance(args, (list, tuple)): 
+            raise ValueError("Parameters must be provided as a list/tuple")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Create the actual task payload dynamically based on input type or custom kwargs
+        params = args.copy() if len(args) > 0 else {}
+
+    def _validate_input(self, name: str):
+        """Validates that an operation is registered in pending_operations."""
+        return name not in self.pending_operations
+
+    @staticmethod
+    def create_task(name: str, *args, **kwargs):
