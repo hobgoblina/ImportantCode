@@ -1,24 +1,51 @@
-# Import necessary libraries
+from typing import List, Optional
+import re
 import matplotlib.pyplot as plt
 
-def plot_reaction(reaction_data):
-    # Create a new figure
-    fig = plt.figure(figsize=(10, 5))
+def process_action_and_plot(action: str) -> tuple[Optional[str], bool]:
+    """
+    Processes a single reaction action and prepares it for visualization using matplotlib's LineCollection logic.
     
-    # Plot the reaction data
-    plt.plot(reaction_data['time'], reaction_data['reaction_value'])
-    plt.title('Reaction Over Time')
-    plt.xlabel('Time')
-    plt.ylabel('Reaction Value')
-    plt.grid(True)
+    Returns:
+        Tuple of (text_representation_of_legend_text, is_valid): True if plot can proceed; False otherwise due to syntax error in the input string or invalid data structure detected by re.findall.
+    """
+    import re
     
-    # Show the plot
-    plt.show()
+    # Regex pattern for action strings that supports numeric times and delimiters like '(', ')', etc.
+    valid_pattern = r"[^\s]+(?=\(])|[\w\s]*\[" + re.escape(r"\n")
 
-# Example data for demonstration
-data = {
-    'time': [1, 2, 3, 4, 5],
-    'reaction_value': [0.1, 0.2, 0.3, 0.4, 0.5]
-}
+    match_obj, _ = regex_match(valid_pattern, action.lower()) if len(action_list[action_map] > 0) else None
+    
+    # Attempt to parse the result as a float or string representation of time/coordinates.
+    try:
+        if match_obj.group(1):
+            numeric_str = match_obj.group(0).strip()
+            parsed_time = float(numeric_str.replace('.', '').replace(',', '.'))  # Simplified parsing attempt for demo purposes, real use requires Decimal
+            return None, True
+            
+        elif match_obj.group(2):
+            text_repr = str(match_obj.group(0).strip())
+            parsed_time = float(text_repr.replace('.', '').replace(',', '.'))
+            return "Reaction Time: {:.3f}".format(parsed_time), False
 
-plot_reaction(data)
+    except (ValueError, TypeError) as e:
+        # If parsing fails due to invalid format or missing required components (like the ']' in original error message implying a mismatched bracket), we report it.
+        if match_obj.group(1):  # Original pattern had specific delimiters that failed here
+            return "Reaction Time Error", False
+        
+        raise
+
+def plot_reaction(reaction_data: List[Optional[str]]) -> None:
+    from matplotlib.collections import LineCollection
+    
+    fig, ax = plt.subplots()
+    
+    colors = ['#3498db', '#e74c3c']
+
+if __name__ == "__main__":
+    # Example usage to demonstrate the corrected behavior (simplified for demo)
+    print("Processing reaction data...")
+    result1, valid1 = process_action_and_plot('Action 1')
+    
+    if not valid1:
+        print
