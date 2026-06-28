@@ -1,37 +1,48 @@
-import os
-from pathlib import Path
+import os, json, pathlib
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename=None):
+        """
+        Load data from a JSON file or directory structure.
+        
+        Supports both the old path-style format and modern dictionary formats.
+        If no .db or test_data.json is provided, attempts to read it relative 
+        to the current working directory (or ".aliens.db" if available).
+        """
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+            base_path = Path(filename)
+
+            potential_sources = [base_path]
+
+            cwd_file = os.path.join(os.getcwd(), "test") if filename.endswith(".db") else None
+            
+            sources = {
+                potential_sources: [str(gen_dir_base)],  # Use a specific test data generator script as fallback
+                
+                f"{base_path}"       : [f"src/{filename}"],   # Direct JSON file reference                
+            
+                cwd_file or None,      # Relative path if in same folder and not .db
+            }
+
+            for source in sources:
+                try:
+                    with open(source, "r") as f:
+                        data = json.load(f)
+                    
+                    self.data[data.get("name", "")] = {k: v for k, v in data.items()} 
+                    
+                    # Log successful load (in a real app this could be verbose or logged differently)
+                    print(f"Loaded alien database from JSON at: {source}")
+                except Exception as e:
+                    if filename == "test":  # If the file literally says 'src/test_data.json', treat it as test data logic script
+                        try:
+                            with open(filename, "r") as f:
+                                self.data[filename] = dict(json.load(f))
+                            print(f"Loaded from actual JSON at: {filename}")
+                        except Exception as e2:
+
         except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            raise ValueError("File not found.")

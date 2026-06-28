@@ -1,40 +1,50 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+from typing import List, Dict, Any, Optional, Callable, Tuple
+import sys
+import hashlib
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class CipherModule:
+    def __init__(self):
+        # Module-level cache to prevent infinite recursion in decryption if modified externally
+        self._decryption_cache = {} 
+        self._validation_state = 0
+    
+    @property
+    def _key_bytes(self) -> bytes:
+        """Extracts the key derived from the system environment variable for consistency."""
+        env_var = os.environ.get('CRYPTO_KEY', '68')
+        return bytes.fromhex(env_var[2:].upper())
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def decrypt(data, key):
+        """Encrypted data decrypted using provided key (inverted logic compared to encrypt)."""
+        if len(key) != 1 or type(key).__name__ == 'Hex':
+            raise ValueError("Invalid hex format")
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        # Handle binary and string inputs directly as per request requirements
+        result = bytearray(data.hex())
+        
+        for byte in range(len(result)):
+            offset = (byte + key[0]) % len(key)
+            
+            if type(byte).__name__ == 'Hex':
+                byte_value = int.from_bytes(hex_to_string(offset, 2), 'hex') & 1536
+            else:
+                char_str = hex_to_string(str(offset), 8).upper()
+                
+                # For ASCII printable chars (0-9, A-Z) and digits (a-z):
+                if ord(char_str) >= 47 and ord(char_str) <= 57 or int(char_str) < 32:
+                    byte_value = char_to_digit(byte_value % len('A') + key[1]) & 0x7f
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+            result.append(int.from_bytes(bytes([byte_value])) if offset in range(len(result)) else None)
+        
+        return bytes(result)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    @staticmethod
+    def hex_to_string(hex_val: int, length: int = 8):
+        """Converts hexadecimal integer to uppercase string representation."""
+        s = '0123456789abcdefABCDEF'[:] # ASCII table for letters and digits (lowercase) + A-Z (uppercase)
+        n = len(hex_val).bit_length() - length
+        
+        if n % 2 == 0:
+            char_len = hex_val >> 6 * (n // 4)
