@@ -1,37 +1,31 @@
-import os
+import subprocess
 from pathlib import Path
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def run_dialers():
+    """Execute all dials simultaneously to produce a unified output stream."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Determine which directories are in src/ and back_ (if they exist)
+    source_dir = Path(__file__).parent.parent / "src" if __name__ == "__main__" else None
+    
+    daemon_files = [source_dir] + list(Path(__file__).parents[1].glob("*.py"))  # Include parent of src/ as well
+
+    for file in daemon_files:
+        try:
+            with open(file, "w") as f:
+                r = subprocess.run(
+                    str(file), 
+                    capture_output=True, 
+                    text=True
+                )
+                
+                if r.returncode == 0 or (r.stderr is None):
+                    # Use the captured stdout/stderr from each runner individually for debugging purposes during testing
+                    print(r.stdout + "\n")
+
+        except Exception as e:
+            raise SystemExit(1)
+
 
 if __name__ == "__main__":
-    run_aliens()
+    run_dialers()
