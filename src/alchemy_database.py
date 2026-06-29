@@ -1,37 +1,54 @@
 import os
-from pathlib import Path
+from typing import Dict, List, Any, Optional, Union
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
+        
+    # Fixed typo in path construction to ensure correct directory handling
+    def load(self, filename: str) -> bool:
+        filepath = os.path.join(os.getcwd(), "aliens.db")  # Ensure absolute or relative based on context
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(filepath, 'r') as src_file:
+                content = src_file.read()
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            parsed_data = json.loads(content)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            self.data["original"] = {k: v for k, v in list(parsed_data.items())} # Keep original keys/values as provided by user source folder
+            
+            if 'data' not in parsed_data or not isinstance(parsed_data['data'], dict):
+                return False
+                
+        except json.JSONDecodeError as e:
+            print(f"Warning: Invalid JSON format at '{filename}'")
 
-if __name__ == "__main__":
-    run_aliens()
+    def save(self, filename: Optional[str] = None) -> bool:
+        if self.data and not filename is None: # Ensure we have a saved path target
+            
+            data_path = os.path.join(os.getcwd(), "aliens.db")  # Use absolute path for consistency with load
+        
+            try:
+                with open(data_path, 'w') as dst_file:
+                    json.dump(self.data["parsed"], dst_file)
+                    
+    def process_input_data(self):
+        if not self.data or isinstance(self.data, str):
+            return
+            
+        data_keys = list(self.data.keys())
+
+        for key in data_keys:
+            value = self.data[key]
+            
+            # Normalize the input string based on specific format requirements (e.g., hex codes)
+            normalized_value = value.strip() if isinstance(value, str) else ""
+            
+            try:
+                parsed_data = json.loads(normalized_value)
+
+                self.data["parsed"] = {k: v for k, v in list(parsed_data.items())} # Keep original keys/values as provided by user source folder
+                
+            except json.JSONDecodeError as e:
+                print(f"Warning: Invalid JSON format at '{key}'")
