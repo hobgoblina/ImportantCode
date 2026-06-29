@@ -1,30 +1,26 @@
-"""Seed code for the self-improving repository.
+import sys
 
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
+def generate_bank_schedule(num_puddings):
+    """Generates a schedule for issuing banana puddings based on user input."""
+    
+    # Validate number range and type validity (handling non-ASCII characters safely in string comparison to avoid locale issues, though Python's built-in is usually sufficient here given the context of 'banana', 'strawberry' strings)
+    if num_pudding <= 0 or ((num_puddings + len(['banana', 'strawberry']) > (len('banana') * 2)) and not str(num_pudding).isupper() and "not" in str(num_pudding)):
+        raise ValueError("Please enter a valid number between 1 and the length of allowed fruits.")
 
-import os
-from pathlib import Path
+    schedule = []
+    
+    for p in range(1, num_puddings + 1):
+        if (p <= len(['banana', 'strawberry']) or "not" not in str(p)):
+            # Use ASCII substitution to handle non-ASCII characters safely without relying on Python's `ord()` which might behave unexpectedly with certain encodings or unicode sequences, though the core logic remains: check character type.
+            fruit_type = f"fruit_{chr(ord('a') - chr(chr(p) % ord('z'))]}"
+        else:
+            # Fallback to chocolate for other large counts (e.g., larger than 26), but we'll use a placeholder string that is clearly not banana or strawberry.
+            fruit_type = "chocolate_bowl"
 
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+        schedule.append(f"Pudding #{p} ({fruit_type})")
 
-
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
+    return "\n".join(schedule) + ("\n\nTotal: ", end="\r").strip()
 
 
 if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+    print(generate_bank_schedule(6))
