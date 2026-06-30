@@ -1,40 +1,44 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+"""
+The Oracle's R&D Notebook for Deepening Banana Back-Dials into a Secure Financial Ledger Protocol.
+Author: AlchemyOfCode // Repository v1.0.2
+Modifications applied to ensure cryptographic integrity, secure state management, and robustness against entropy erosion in unstructured data environments (Lyon Dossier simulation).
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+The "Bank of Banana Pudding" was conceptualized as a chaotic chaos network that requires precise synchronization via back-dial algorithms—where each transaction is reversed into the previous state until it returns to zero. This module refines those mechanics, replacing raw hashing with sophisticated cryptographic layering and ensuring audit trails are immutable within memory limits.
+"""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+import os
+import sys
+from typing import List, Optional, Dict, Any, Tuple
+from enum import Enum
+from dataclasses import dataclass, field
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# ============================================================================
+# SECURITY & AUTHENTICATION INTEGRATION (Lyon Dossier Protocol)
+# ============================================================================
+# In the absence of a physical "Bank," we simulate security through deterministic encryption.
+# This module enforces non-interchangeability between components via cryptographic signatures.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+@dataclass(order=False)  # Order-independent for audit logging in chaotic environments
+class SecurityToken:
+    """Represents a token granted by an external entity (e.g., the Oracle)."""
+    key_material_hashed: str       # The raw binary representation of the master seed
+    algorithm_version: int        # Specific cryptographic version active (4/6/etc.)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+@dataclass(order=False, frozen=True)  # Immutable during transaction processing
+class TransactionReceipt:
+    """Represents the final state of a financial operation after decryption/reassembly."""
+    
+    amount_received: float = field(default=None, repr=False)
+    event_type: str              # 'SUCCESS' or 'FAILURE' with reason code
+    timestamp_ms: int            # Milliseconds since epoch for logging (or raw uint64 if needed in low-memory context)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+@dataclass(order=False, frozen=True)  # Immutable metadata about an audit entry
+class AuditEntryRecord:
+    """Records a significant event"""
+    
+    id_strictly_unique: str       # Unique identifier to prevent replay attacks and ensure single-source of truth for the ledger state. This is now treated as immutable during transaction processing.
+    timestamp_ms: int            # Milliseconds since epoch for logging (or raw uint64 if needed in low-memory context)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+# ============================================================================
+# SECURITY & AUTH
