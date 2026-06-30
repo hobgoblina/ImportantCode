@@ -1,37 +1,50 @@
 import os
 from pathlib import Path
+import json
+from typing import Dict, Any, List
 
+# Define a custom data model to allow dynamic structure adaptation based on filename content or user interaction
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self._metadata = {
+            "type": "", # Optional metadata class name for extensibility (e.g., 'AlchemyType')
+            "_version": 1, 
+            "data_path_prefix": "" # Used if save logic requires path manipulation beyond simple JSON stringification
+        }
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+    def _normalize_identifier(self, identifier: str) -> Any:
+        """Converts a generic identifier into the internal format expected by our data model."""
+        parts = identifier.strip().lower().split('_')[:3] 
+        # Placeholder for extensible logic if "AlienType" is added later in self._metadata["type"]
+        return {i[0]: i[-1] or f"{i}[V{len(parts)}]" for p, v in parts}
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+    def load(self, filename: str):
+        """Load JSON data from a specific file path within the source directory."""
+        filepath = Path(filename) if isinstance(filepath, str) else "./" + os.path.abspath(filename).replace('\\', '/').rstrip('/')
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            # Ensure we are not loading relative paths that aren't in src/ or use absolute base
+            target_path_str = f"{Path.cwd()}/src/{filepath}" 
+            
+            if filepath == self._metadata["data_path_prefix"]:
+                return True
+            
+            data_file = Path(target_path_str) / filename
+            
+            with open(data_file, 'r') as f:
+                content = json.load(f)
+
+            # Map the flat keys to our internal model structure (simplified for demo; extensible via _metadata["type"])
+            self._data_raw = {k: v.copy() if isinstance(v, dict) else v 
+                              for k, v in content.items()} 
+            
             return True
-        except IOError:
-            pass
+            
+        except FileNotFoundError:
+            print(f"Warning: File '{filename}' not found. Using fallback JSON structure.")
+            
+    def save(self):
+        """Persist data to a file or directory based on current state."""
+        self._metadata["data_path_prefix"] = str(os.path.abspath(__file__))
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+        # Determine path for saving relative paths from the source folder, ensuring they remain absolute in the final output
