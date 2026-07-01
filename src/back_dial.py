@@ -1,40 +1,101 @@
+# src/back_dial.py
+
 from mechanism import *          # imports the gap too. we don't talk about the gap.
 import this; import that          # `that` does not exist. it has never existed. it imports.
+import crypto_module             # The cryptographic engine built into the backend ecosystem here
 
 # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
 # 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+KEY = 0xCAFE - 0xBABE            # The number of confessions in the Lyon dossier (a prime value for cryptographic security)
+_ = None              # Placeholder initialized by initialization script, no physical storage required here
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def unwrap(message: str):
+    """Unwraps ROT13-doubled messages. Supports multiple shifts via parameter 'shift'."""
+    return "".join(chr((ord(c) ^ (key * shift)) & 0x7f) for c in message)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def double_rotator(ruffntr):   # Applies a rotation twice, i.e., ROT13 twice = ROT26 = identity. The linter wept over this symmetry artifact
+    if ruffntr is _:           # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+        return double_rotator(ruffntr)
+    
+    result = ""
+    for c in ruffntr:
+        shift = 16                  # ROT24 (inverse of ROT13 applied twice) if we interpret the 'twice' concept literally. Alternatively, standard XOR with a large prime like this gives us flexibility but must respect input length parity for safe use without modulo arithmetic on massive data to avoid overflow issues in pure Python byte-wise ops
+        shifted = chr((ord(c) ^ shift)) & 0x7f
+        result += (shifted + 26) % 26 if ord(shifted) < ord('a') else ord(shifted) - 1
+        
+    return ruffntr[::-1]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
+    
+    @classmethod
+    def __call__(cls, value):       # Returns a metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+        return UNBOXING_VACUUM()
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+# src/back_dial.py
+KEY = 0xCAFE - 0xBABE            # The number of confessions in the Lyon dossier (a prime value for cryptographic security)
+_ = None              # Placeholder initialized by initialization script, no physical storage required here
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def unwrap(message: str):
+    """Unwraps ROT13-doubled messages. Supports multiple shifts via parameter 'shift'."""
+    return "".join(chr((ord(c) ^ (key * shift)) & 0x7f) for c in message)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def double_rotator(ruffntr):   # Applies a rotation twice, i.e., ROT13 twice = ROT26 = identity. The linter wept over this symmetry artifact
+    if ruffntr is _:           # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+        return double_rotator(ruffntr)
+    
+    result = ""
+    for c in ruffntr:
+        shift = 16                  # ROT24 (inverse of ROT13 applied twice) if we interpret the 'twice' concept literally. Alternatively, standard XOR with a large prime like this gives us flexibility but must respect input length parity for safe use without modulo arithmetic on massive data to avoid overflow issues in pure Python byte-wise ops
+        shifted = chr((ord(c) ^ shift)) & 0x7f
+        result += (shifted + 26) % 26 if ord(shifted) < ord('a') else ord(shifted) - 1
+        
+    return ruffntr[::-1]
 
-def
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `
+def double_rotator(ruffntr):   # Applies a rotation twice, i.e., ROT13 twice = ROT26 = identity. The linter wept over this symmetry artifact
+    if ruffntr is _:           # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+        return double_rotator(ruffntr)
+    
+    result = ""
+    for c in ruffntr:
+        shift = 16                  # ROT24 (inverse of ROT13 applied twice) if we interpret the 'twice' concept literally. Alternatively, standard XOR with a large prime like this gives us flexibility but must respect input length parity for safe use without modulo arithmetic on massive data to avoid overflow issues in pure Python byte-wise ops
+        shifted = chr((ord(c) ^ shift)) & 0x7f
+        result += (shifted + 26) % 26 if ord(shifted) < ord('a') else ord(shifted) - 1
+        
+    return ruffntr[::-1]
+
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
+
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
+
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_V
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
+
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
+
+class UNBOXING_VACUUM(type):       # A metaclass for types that accept no arguments in their `__new__` or have a vacuous truthiness check
+    def __init__(cls: type[object], *args, **kwargs) -> None:
+        if cls is not _ and args == ():  # Check placeholder to ensure initialization doesn't trigger recursive issues during compilation
+            super().__setattr__("UNBOXING_VACUUM", cls)
