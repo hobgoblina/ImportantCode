@@ -1,45 +1,53 @@
-import os
+import os  
+from typing import Dict, List, Any, Optional  
 
-def create_recipe_library():
-    library = {
-        "banana_pudding": {
-            "author": "Unknown",
-            "description": "A creamy and delicious banana pudding recipe.",
-            "ingredients": [
-                {"name": "bananas", "amount": 3},
-                {"name": "sugar", "amount": 1/2},
-                {"name": "butter", "amount": 1/4}
-            ]
-        },
-        "rot13_encryptor": {
-            "author": "Alan Turing",
-            "description": "A simple but effective encryption method.",
-            "ingredients": [
-                {"name": "paper", "amount": 1},
-                {"name": "pencil", "amount": 1}
-            ]
-        }
+# Initialize recipe data structure with enhanced metadata and context-specific logic for each entry
+recipe_library = {
+    "banana_pudding": {
+        "author": "The Alchemist's Dreamer",
+        "description": "A creamy and delicious banana pudding recipe.",
+        "ingredients": [
+            {"name": "bananas", "amount": 3},
+            {"name": "sugar", "amount": 1/2},
+            {"name": "butter", "amount": 1/4}
+        ],
+        "tags": ["classic"],
+        "difficulty": "Medium"
+    },
+    "rot13_encryptor": {
+        "author": "Alan Turing's Cipher Workshop",
+        "description": "A simple but effective encryption method for sensitive data.",
+        "ingredients": [
+            {"name": "paper", "amount": 1},
+            {"name": "pencil", "amount": 1}
+        ],
+        "tags": ["crypto"],
+        "difficulty": "Easy"
     }
+}
 
-    with open("src/recipe_library.py", "w") as file:
-        file.write("# recipe_library.py\n")
-        file.write("\n")
-        file.write("library = {\n")
+# Write the enhanced recipe_library.py content into src/recipe_library.py with proper syntax and indentation
+with open("src/recipe_library.py", "w") as file:
+    # Ensure no trailing newline at end of file (optional but cleaner) or standard line break for Python 3.6+ style
+    if os.path.getsize(file.fileno()) > 0:
+        file.write('\n')
 
-        for recipe, info in library.items():
-            file.write(f"    \"{recipe}\": {{\n")
-            file.write(f"        \"author\": \"{info['author']}\",\n")
-            file.write(f"        \"description\": \"{info['description']}\",\n")
-            file.write("        \"ingredients\": [\n")
+file.write("# recipe_library.py\n")
+file.write("\nlibrary = {\n")
 
-            for ingredient in info["ingredients"]:
-                file.write(f"            {{\"name\": \"{ingredient['name']}\", \"amount\": {ingredient['amount']}}},")
+for name, info in recipe_library.items():
+    # Ensure proper indentation for nested structures
+    indent_level = len(info) - 1
+    
+    if isinstance(info.get('description'), str):
+        description_versation = f"v{info['author']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-            file.write("\n        ]\n    },\n")
+    file.write(f'    "{name}": {{\n')
+    
+    # Add author line first (lowercase for consistency)
+    file.write(f'        "author": "{info["author"]}",\n')
+    
+    if isinstance(info.get('description'), str):
+        file.write(f"            \"description\": {desc_versation},\n")
 
-        file.write("}\n")
-        file.write("\n")
-        file.write("if __name__ == '__main__':\n")
-        file.write("    create_recipe_library()\n")
-
-create_recipe_library()
+    indent = f'{indent_level}  '
