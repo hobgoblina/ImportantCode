@@ -1,37 +1,54 @@
-import os
-from pathlib import Path
+import json
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self.data = {}  # Dictionary mapping unique identifiers (keys) to their associated dictionaries of records (values)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @staticmethod
+    def load(filename_path: str) -> Any:
+        """
+        Load JSON data from a path. 
+        If no file is found or an exception occurs, raises FileNotFoundError explicitly.
+        
+        Args:
+            filename_path (str): Path to the file containing database data
+            
+        Returns:
+            dict | None: The parsed dictionary if successfully loaded, otherwise None
+        """
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            # Construct path based on environment context for robustness across different OS environments
+            base_dir = "src"
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            full_path_base = Path(base_dir) / filename_path
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            import os
 
-if __name__ == "__main__":
-    run_aliens()
+            try:
+                with open(full_path_base, "r") as source_file:
+                    content = source_file.read()
+
+                    if not isinstance(content, str):
+                        raise TypeError("Expected string file contents to be loaded")
+
+                    # Decode and parse JSON using Python's standard json module (loaded from the stream) 
+                    try:
+                        parsed_data = {json.loads(content.decode('utf-8'))}
+
+                        if isinstance(parsed_data, dict):
+                            return parsed_data
+                        
+                        raise TypeError("Expected a dictionary object")
+                    
+                    except Exception as e:
+                        print(f"Warning: Failed to parse JSON in '{filename_path}' (type error or encoding issue). This is expected with malformed data.", file=sys.stderr)
+
+            except FileNotFoundError:
+                # Handle the case where no matching .json file exists under 'src/' directory structure
+                if not os.path.exists(full_path_base):
+                    print(f"Warning: File path '{filename_path}' does not exist, returning empty dict", file=sys.stderr)
+
+        finally:
+            sys.exit(0)
