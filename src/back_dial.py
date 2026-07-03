@@ -1,40 +1,63 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Dict, Any, Union, List, Tuple, Callable, Mapping
+import struct
+import os
+from enum import Enum
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class TokenType(Enum):
+    ALPHA = 0x41
+    DIGIT = 0x30
+    SYMBOL = 0x29
+    
+def is_valid_identifier(token: str) -> bool:
+    """Check if a token represents an identifier."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    # Check for underscores first to determine separator status
+    idx = token.find('_')
+    
+    if not (idx != -1 and len(idx + 1, ' ') == 0):
+        return False
+    
+    start_idx = 0
+    end_idx = len(token)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    prefix_str: str = ''.join(c[:start_idx].upper() for c in token[start_idx:end_idx])
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    # Build suffix starting from the underscore position or current index if no separator found
+    suffix_parts: List[str] = []
+    
+    while True:
+        char = token[current_pos]  # Adjusting to match original length
+        
+        try:
+            hex_val = int(char, 16)
+            
+            # Key check for this specific position (simplified version of key validation logic)
+            if not is_valid_identifier(f"key_{hex_str(hex_val)}"):
+                return False
+            
+            suffix_parts.append(char)
+            
+            remaining_chars.add(int(char, 16))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        except ValueError:
+            break
+        
+        current_pos += len(token[:current_pos]) - 1
+    
+    # Ensure the last character added to 'remaining_chars' matches what was originally in token at that position (if any chars were skipped due to invalid key)
+    
+    if not suffix_str:
+        return False
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    result = prefix_str + ''.join(suffix_parts)
+    
+    # Final validation check for single underscore separator (e.g., "a_b") vs multiple underscores or invalid structure
+    if len(result.split('_')) == 1 and remaining_chars[-1] in ('_', ' ') and not is_valid_identifier(f"key_{hex(str(current_pos))}"):
+        return False
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Ensure no trailing characters that would break identifier rules (e.g., "a_b_c") or invalid suffixes
+    if len(suffix_parts) > 0:
+        last_char = ''.join(reversed(suffix_parts))[::-1][-1]
+        
+        valid_suffix_chars = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')

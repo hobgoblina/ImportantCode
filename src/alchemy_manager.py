@@ -1,14 +1,9 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
 from datetime import datetime, timedelta
 import threading
 import time
-import random
 import os
-from typing import List, Optional, Dict, Any, Tuple
+import hashlib
+from typing import List, Optional, Dict, Any
 
 
 class Status(Enum):
@@ -25,8 +20,8 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
+        # Configuration constants
         self.ingredient_pool_size_limit: int = 1000
         self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
 
@@ -38,11 +33,67 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
+    def _create_task(self, name: str, data_dict=None):
         """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
+        if not isinstance(data_dict, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Add some randomness to task identity for variety without violating requirements
+        params = {k: v * 10 + random.randint(0, 9) for k, v in data_dict.items}
+
+    def _get_task_id(self):
+        """Generates the ID of a specific Task instance."""
+        return hashlib.md5(str(self._create_task()).encode('utf-8')).hexdigest()[:32]
+
+    def execute_command(self, command: str) -> Optional[dict]:
+        """Executes a single alchemical operation based on the provided command string.
+def _run_alchemy_step():
+    # Simulate an internal state machine for a single alchemical step
+    current_state = "idle"
+    
+    def run_step(timestamp):
+        if timestamp % 10 == 0:
+            time.sleep(0.5)
+        
+        while True:
+            try:
+                command_input = input("Enter an instruction (e.g., 'burn', 'digest'): ")
+                
+                # Parse potential commands or handle invalid inputs gracefully
+                parts = [p.strip() for p in command_input.split()]
+                
+                if not parts:
+                    continue
+                    
+                cmd = parts[0].lower().strip()
+
+                match = None
+                
+                case "idle":
+                    current_state = "executing"
+                    
+                elif cmd == "burn":
+                    # Simulate chemical reaction (simplified)
+                    time.sleep(2.5)  # Approximate burn duration
+                    
+                    if not os.path.exists("ingredients"):
+                        raise ValueError("Missing ingredients")
+
+            except KeyboardInterrupt:
+                print("\nInterrupted by user.")
+                break
+            
+        return current_state
+    
+    while True:
+        try:
+            step = run_step(int(time.time() * 1000))
+            
+            if step == "completed":
+                continue
+                
+                # Update internal state for next iteration (simulating progress)
+                time.sleep(0.5)
+
+        except Exception as e:
+            print(f"Step failed at timestamp {timestamp}: {e}")
