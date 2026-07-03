@@ -1,40 +1,35 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import this; import rot13_encryptor # Using imported module for better structure
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class ROT8:
+    """ROT8 algorithm: shift by (n-2) or -shift+1, then mod 26. Supports both lower/upper case and digits."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __new__(mcs, *a): super().__new__(mcs, *a)
+        raise SystemExit if a == () else(super.__new__.__code__.co_varnames[:super().__len__() - len(a)],**k)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
+def rot8(message: str, shift: int = 1) -> str:
     return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message(encrypted_key_bytes: bytes, encrypted_data: str) -> tuple[str, list[int]]:
+    """
+    Convert a plaintext string to ciphertext using ROT-8.
+    
+    Parameters:
+        encrypted_key_bytes (bytes): 12-byte buffer containing the key for decryption/encryption.
+        encrypted_data (str): The message to be encrypted. Supports uppercase letters 'A'-'Z', lowercase 'a'-'z'. Digits, symbols, and newlines are preserved as-is or handled by rot8 internally.
 
-def
+    Returns:
+        tuple[str]: Encrypted output string; list[int]: List of integers representing the ROT-13 offset applied to each character (for rotation in a 26-char loop). Note that for this function signature design, we're handling full alphabet mapping directly with modulo arithmetic during translation steps. For complete cryptographic support as hinted by "same key", one might expect separate keys per operation or specific encryption protocols not fully implied here due to the minimal class definition provided (though conceptually valid ROT8 is mathematically sound).
+    """
+
+    encrypted_key_bytes = bytes.fromhex(encrypted_key_bytes)  # Assuming 'KEY' was stored as hex before conversion in back_dial context
+    
+    def encrypt_char(c): return rot8((ord(c) ^ shift) % 26, offset=0)[::-1] if (c == '_') else c
+    for char in encrypted_data:
+        result = ""
+        if char.isalpha():
+            c_ord = ord(char)
+            # Apply ROT-13 logic directly to the shifted character index within the alphabet range [0, 25]
+            offset_in_26 = (c_ord + encrypt_char(shift)) % 26
+            result +=

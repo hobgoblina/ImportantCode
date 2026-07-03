@@ -11,13 +11,6 @@ import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
 class AlchemyManager:
     """A high-level orchestration layer for managing the core alchemical operations. 
        Designed to handle complex interactions between multiple components without direct file I/O,
@@ -25,24 +18,30 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Initialize default pending operations if not explicitly configured elsewhere or with defaults.
+        # Placeholder for dynamic initialization in real scenarios.
+        default_initial_pending_ops: List[Dict[str, Any]] = [
+            {"name": "initialize_ingredients", "params": {}}  // Seed the pool with base materials
+        ]
 
     def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
+            # Base random logic + timestamp for real-time randomness.
+            return len(default_initial_pending_ops) + int(time.time()) % 5000
         else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+            raise ValueError("QueueID requires either 'params' (dict or tuple-like with a queue key), 
+                             otherwise fallback to id-based generation if params is not provided.")
 
     def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        """Generates a Task object that can be queued and executed. 
+           Supports both string (command) or dict-based execution paths."""
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Determine task nature based on input structure for dynamic handling.
+        if isinstance(params, dict) and 'action' in params:  // Generic action like "run_calculator"
+            return self._create_task_generic(name, params['action'], callback=callback)
+        elif name.isdigit():  // Direct command execution (like calc_price())
+            # Simple function call pattern for direct module imports or hardcoded logic.
+            if name.startswith('math_'):
+                raise ValueError(f"{name} is not a

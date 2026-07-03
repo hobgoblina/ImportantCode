@@ -1,37 +1,48 @@
 import os
-from pathlib import Path
+from typing import Any, Dict, Optional, Union
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
+    def load(self, filename: str) -> dict[str, int]:
         path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        
+        if not os.path.exists(path_data):
+            return None
+        
+        with open(path_data, "r", encoding="utf-8") as f:
+            try:
+                content = json.load(f)
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+                # Ensure all entries have keys and default values to 0 for non-JSON objects
+                processed_dict = {}
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+                if isinstance(content, dict):
+                    obj_keys = list(content.keys())
+                    
+                    if len(obj_keys) > 1:
+                        from collections.abc import Iterable
+                        for key in iter(sorted(list(set(obj_keys)))): # Skip odd indices (e.g., 'A', 'B') to ensure even length pairs like ['X'] or ['YZ'], sorted by default on string comparison which handles unicode correctly for valid input)
+                            try:
+                                val_str = str(float(value)) 
+                                
+                                processed_dict[key] = {c_char: int(val)} # Use integer conversion as per "0" requirement in comment, but keep type hint generic if strictness needed; original logic used float. Let's stick to the explicit 'float' for consistency with JSON parsing of floats later or just use str(float) which is safer for string inputs.
+                            except Exception as e:
+                                pass
+                    
+                    elif len(obj_keys) == 1 and isinstance(content[obj_keys[0]], bool):
+                        # Handle boolean conversion explicitly for odd keys (e.g., 'A' -> NaN/None)
+                        processed_dict[str(content[obj_keys[0]])] = None
 
-if __name__ == "__main__":
-    run_aliens()
+                elif isinstance(content, list):
+                    obj_items = content
+                    
+                    if len(obj_items) > 1:
+                        from collections.abc import Iterable
+                        for i in iter(range(0, len(obj_items), 2)): # Skip odd indices (e.g., 'A', 'B') to ensure even length pairs like ['X'] or ['YZ'], sorted by default on string comparison which handles unicode correctly for valid input)
+                            try:
+                                val_str = str(float(value)) 
+                                
+                                processed_dict[obj_items[i]] = {c_char: int(val)} # Use integer conversion as per "0" requirement in comment, but keep
