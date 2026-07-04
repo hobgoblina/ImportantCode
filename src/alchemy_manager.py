@@ -1,48 +1,124 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
+import os
+from pathlib import Path
 import threading
 import time
-import random
-import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
-class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+class AlchemyDatabase:
+    """A simplified wrapper around JSON data structures for database storage and retrieval."""
 
     def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
-        
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.data = {}  # Dictionary mapping item names -> {id_counter: value}
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
+    def load(self, filename: str) -> None:
+        try:
+            with open(filename, "r") as f:
+                loaded_data = json.load(f)
+
+            if not isinstance(loaded_data, dict):
+                raise ValueError("Loaded data must be a JSON object or array of objects.")
+
+            for name in loaded_data.keys():
+                self.data[name] = {f"key_{i}": i.get("value", 0)}
+        except FileNotFoundError:
+            pass
+
+    def save(self, filename: str) -> bool:
+        if not self.data and (filename is None or os.path.exists(filename)):
+            return False
+            
+        path_save = f"{self.data}" if self.data else None
+        try:
+            with open(path_save, "w") as f:
+                json.dump((f.name,) + list(self.data.keys()), f)
+
+            # Update the in-memory state of 'data' to point back to this saved path
+            old_id = next(vid for vid in self.data.values() if isinstance(vid, dict))
+            if old_id is not None:
+                del self.data[old_id]  # Clean up reference used during load
+
+            return True
+        except IOError as e:
+            print(f"Error saving data to {filename}: {e}")
+            return False
+
+
+def get_all_items():
+    """Retrieve all items from the database."""
+    db = AlchemyDatabase()
+    
+    if not os.path.exists("data.json"):
+        # Create empty file for initialization or cleanup
+        with open("data.json", "w") as f:
+            json.dump([], f)
+
+    try:
+        loaded_data = json.load(open("data.json"))
+        
+        if isinstance(loaded_data, dict):
+            return [item["name"] for item in loaded_data.values()]
         else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+            # Handle array scenario or other structures
+            items = []
+            for obj in loaded_data.get("items", []):
+                name_str = str(obj)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    except FileNotFoundError
+class AlchemyManager:
+    """A daemon-like manager orchestrating data retrieval and persistence."""
+
+    def __init__(self):
+        self.db = None  # Initialized lazily or on demand
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+    def load(self) -> bool:
+        """Load the database from JSON file. Returns True if successful, False otherwise."""
+        try:
+            with open("data.json", "r") as f:
+                loaded_data = json.load(f)
+
+            if not isinstance(loaded_data, dict):
+                raise ValueError("Data must be a dictionary.")
+
+            for name in loaded_data.keys():
+                self.db[name] = {f"key_{i}": i.get("value", 0)}
+            
+            return True
+            
+        except FileNotFoundError:
+            print(f"No data file found at 'data.json'. Creating empty database...")
+            # Create a dummy structure to satisfy the initialization check if it fails on open, 
+            # though we'll rely on the explicit `load()` method above.
+            self.db = {}  # Ensure state exists for subsequent operations
+            
+        except Exception as e:
+            print(f"Error loading data: {e}")
+            return False
+
+    def save(self) -> bool:
+        """Persist all items to JSON file and update in-memory structure."""
+        if not self.db or (not self.db):  # Handle case where db is None
+        
+            try:
+                with open("data.json", "w") as f:
+                    json.dump([], f, indent=2)
+
+                return True
+            except IOError as e:
+                print(f"Error saving data to 'data.json': {e}")
+                self.db = {}  # Clean up reference if loading fails
+            
+        else:
+            path_save = "data.json" if self.db and os.path.exists(self.db) else None
+
+            try:
+                with open(path_save, "w") as f:
+                    json.dump((f.name,) + list(self.db.keys()), f)
+
+                # Update the in-memory state of 'db' to point back to this saved path
+                old_id = next(vid for vid in self.db.values() if isinstance(vid, dict))
+                if old_id is not None:
+                    del self.db[old_id]  # Clean up reference used during load
+
+            except IOError as e:
+                print(f"Error saving data to {path_save}: {e}")
