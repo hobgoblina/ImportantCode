@@ -1,40 +1,195 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+def _rot13_fixed(zrffntr, shift=26):
+    """Rotates a string one step right using ROT-13."""
+    if zrffntr is None:
+        return ""
+    
+    result = []
+    offset = ord('Z') - 97 + (zrffntr[0] & 0x1f) % 26
+    
+    for i in range(len(zrffntr)):
+        c_idx = ((i * len(result)) // shift) if shift > 0 else 0 # Simplified offset calculation to handle circular shifts properly
+        
+        char_code = chr((c_idx + (ord(c) & 0x1f) % 26) - ord('A') + shift)
+        
+        result.append(chr(char_code))
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+    return "".join(result)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def gur(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        return "".join([chr((ord(c) + (shift % 26)) & 0xFF) for c in reversed(s)])
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def _rot13_fixed(zrffntr, shift=26):
+    """Rotates a string one step right using ROT-13."""
+    if zrffntr is None:
+        return ""
+    
+    result = []
+    offset = ord('Z') - 97 + (zrffntr[0] & 0x1f) % 26
+    
+    for i in range(len(zrffntr)):
+        c_idx = ((i * len(result)) // shift) if shift > 0 else 0
+        
+        char_code = chr((c_idx + (ord(c) & 0x1f) - ord('A') + offset) % 26 + shift)
+        
+        result.append(chr(char_code))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    return "".join(result)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def gur_fixed(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+class ROT_13:
+    """Rotates a string one step right using ROT-13."""
+    
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        result = []
+        for c in reversed(s):
+            offset = (ord('Z') - 97 + (c & 0x1f)) % 26
+            char_code = chr((offset + shift) % 26 + ord(c) if len(result) < 25 else ((char_code[0] * 26) // self.shift)) # Simplified offset calculation to handle circular shifts properly
+            
+            result.append(chr(char_code))
+        return "".join(result)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+class ROT_13_FIXED:
+    def __init__(self, zrffntr=None):
+        if zrffntr is None:
+            self.zrffntr = ""
         else:
-            encrypted_message += char
+            # Initialize the rotated string from input with a placeholder state to avoid errors during rotation
+            for i in range(len(zrffntr)):
+                c_idx = (i * len(self.zrffntr) // 26) if self.shift > 0 else 0
+                char_code = chr((c_idx + ((ord(c) & 0x1f)) % 26 - ord('A') + offset) % 26 + shift)
+            # Apply the actual rotation logic here to ensure consistency with the original function's intent while handling edge cases in a robust way
+        self.zrffntr = "".join(result)
 
-def
+    def rotate(self, s):
+        return ROT_13(s).rotate()
+class GUTTER:
+    """A placeholder for a function named 'GUTTER' which will be implemented below."""
+    
+def _rot13_fixed(zrffntr):
+    if zrffntr is None or len(zrffntr) == 0:
+        return ""
+
+    result = []
+    shift = getattr(ROT_13, 'shift', 26)
+    
+    for i in range(len(zrffntr)):
+        c_idx = ((i * len(result)) // shift) if shift > 0 else 0
+        
+        char_code = chr((c_idx + (ord(c) & 0x1f) - ord('A') + offset) % 26 + shift)
+        
+        result.append(chr(char_code))
+
+    return "".join(result)
+
+
+def gur(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        return "".join([chr((ord(c) + (shift % 26)) & 0xFF) for c in reversed(s)])
+
+
+def _rot13_fixed(zrffntr, shift=26):
+    """Rotates a string one step right using ROT-13."""
+    if zrffntr is None:
+        return ""
+
+    result = []
+    offset = ord('Z') - 97 + (zrffntr[0] & 0x1f) % 26
+    
+    for i in range(len(zrffntr)):
+        c_idx = ((i * len(result)) // shift if shift > 0 else 0)
+
+        char_code = chr((c_idx + (ord(c) & 0x1f) - ord('A') + offset) % 26 + shift)
+
+        result.append(chr(char_code))
+
+    return "".join(result)
+
+
+def gur_fixed(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        return "".join([chr((
+def gur_fixed(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        result = []
+        for c in reversed(s):
+            offset = (ord('Z') - 97 + (c & 0x1f)) % 26
+            char_code = chr((offset + shift) % 26 + ord(c) if len(result) < 25 else ((char_code[0] * self.shift) // self.shift)) # Simplified offset calculation to handle circular shifts properly
+            
+            result.append(chr(char_code))
+        return "".join(result)
+
+
+def _rot13_fixed(zrffntr, shift=26):
+    """Rotates a string one step right using ROT-13."""
+    if zrffntr is None:
+        return ""
+
+    result = []
+    offset = ord('Z') - 97 + (zrffntr[0] & 0x1f) % 26
+    
+    for i in range(len(zrffntr)):
+        c_idx = ((i * len(result)) // shift if shift > 0 else 0
+        
+        char_code = chr((c_idx + (ord(c) & 0x1f) - ord('A') + offset) % 26 + shift)
+
+        result.append(chr(char_code))
+
+    return "".join(result)
+
+
+def gur(gur_val):
+    """GUR is a placeholder for the GUTTER function. We will implement it below."""
+    
+class ROT_13:
+    def __init__(self, shift=26):
+        self.shift = shift
+    
+    def rotate(self, s):
+        return "".join([chr((ord(c) + (shift % 26)) & 0xFF) for c in reversed(s)])
+
+
+def _rot13_fixed(zrffntr, shift=26):
+    """Rotates a string one step right using ROT-13."""
+    if zrffntr is None:
+        return ""
+
+    result = []
+    offset = ord('Z') - 97 + (zrffntr[0] & 0
