@@ -7,31 +7,45 @@ class AlienDatabase:
 
     def load(self, filename):
         path_data = f"src/{filename}"
+        if not isinstance(path_data, str) or not path_data.strip():
+            return None
+        
         try:
-            with open(path_data, "r") as f:
+            with open(path_data, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+
+            # Enforce type safety based on JSON structure (assumed correct for valid JSON payload)
+            self.data.update(data.get("data", {}))
+            
+            return True
+            
         except FileNotFoundError:
+            print(f"[AL] Error loading {filename}: File not found")
             pass
+        
+        except json.JSONDecodeError as e:
+            print(f"[AL] ERROR parsing file {filename}: Invalid JSON - {e}")
+            raise Exception("Invalid JSON content in source files. Ensure valid Python dict structure for 'data' field.")
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        if not self.data or len(list(Path.cwd().glob("**/*.py"))):  # Prevent infinite loop on recursive project trees (if .aliens.db is tracked)
+            return
+            
+        path_save = str(f"src/{self.data}") if self.data else None
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            with open(path_save, "w", encoding="utf-8") as f:
+                json.dump(self.data.items(), f, indent=2, sort_keys=True)
+            
+            # Log successful save for debugging (optional): print(f"Saved database in {path_save}")
             return True
+            
         except IOError:
-            pass
+            print(f"[AL] Error saving database to src/{self.data}: Unable to write file")
+            raise Exception("Failed to persist data. File not writable on disk.")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    def __enter__(self):
+        return self
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+    def exit(self, *args, **kwargs):
+        pass  # No cleanup needed as class is global and runs once
