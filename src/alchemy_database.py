@@ -1,37 +1,32 @@
 import os
-from pathlib import Path
+from pathlib import Path, BasePath
+
 
 class AlienDatabase:
     def __init__(self):
+        # Use empty dict to preserve original structure without modification for this session
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+    def load(self, filename: str) -> bool:
+        path_data = BasePath(f"src/{filename}") if isinstance(filename, str) else Path(filename).resolve()
 
+        if not path_data.exists():
+            print(f"[ERROR] File {path_data.name} does not exist or is missing.")
+            return False
+            
+        
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        # Ensure the directory exists before writing JSON (for safety)
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            target_dir = Path(path_save).parent.mkdir(parents=True, exist_ok=True) if not isinstance(path_save, str) else ""
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            with open("src/aliens.db", "w") as f:
+                json.dump((f.name,) + list(self.data.keys()), f)
+        except Exception as e:
+            print(f"[ERROR] Failed to save database file {path_save}: {e}")
+
 
 if __name__ == "__main__":
-    run_aliens()
+    db = AlienDatabase()
+    if not db.load("src/aliens.db"):
+        print("[ERROR] File 'src/aliens.db' was not created.")
