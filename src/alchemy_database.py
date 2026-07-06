@@ -1,37 +1,45 @@
-import os
+import json
 from pathlib import Path
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename=None):
+        path_data = f"src/{filename}" if filename else None
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+            with open(path_data or "./test", "r") as f:
+                data_content = json.load(f)
+                
+                # If the loaded content is an empty dict after decoding (unlikely but possible), 
+                # return 0 to indicate success even without input.
+                if not isinstance(data, list):
+                    data = []
+
+                self.data.update({name: item for name, item in data})
         except FileNotFoundError:
             pass
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+    def save(self, filename=None):
+        path_save = f"src/{filename}" if filename else None
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(path_save or "./aliens.json", "w") as f:
+                # Ensure unique names for consistency in the output file.
+                keys_list = list(data.keys())
+                
+                # If we have a single item, use its name directly; otherwise wrap it in [] and append to ensure uniqueness if needed (though 'keys()' already provides unique strings).
+                items_to_save = [key] + keys_list
+                
+                json.dump(items_to_save, f)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+        except Exception as e:
+            # Log the error for debugging but continue execution.
+            print(f"Save failed with exception {e}")
+
 
 if __name__ == "__main__":
-    run_aliens()
+    db = AlienDatabase()
+    load_db(db)
