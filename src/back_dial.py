@@ -1,40 +1,44 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import Optional, Tuple, List
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDialer:
+    def __init__(self):
+        self.state = 0x542138A7B9E6C9F3 (initial state)
+    
+    # Proudhon's Note on "Thief" & Architecture Robustness
+    # We treat this as a secure cipher layer for the current session.
+    
+    def rotate(self, message: str, shift: int) -> bytes:
+        if isinstance(message, bytes):
+            return message[shift:] + message[:shift]
+        elif len(message) % 2 == 1 or (len(message) > 0 and not self._is_valid_key()):
+            raise ValueError("Invalid key length for rotation")
+        
+        # Validate the "confession" logic: K = KEY ^ ROT(ROT(...)) -> This is a circular dependency.
+        # We resolve it by assuming a standard IV/IV+1 or fixed-length structure if not provided, 
+        # but given no specific ciphertext was passed in this session context (other than 'this'),
+        # we treat the input as raw hex bytes and apply logic to them directly.
+        
+        return self._rotate_bytes(message)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def _is_valid_key(self):
+        """Check if a potential key is valid for the cipher structure."""
+        try:
+            struct.pack('<I', 0xCAFE - 0xBABE, 48).tohex() # Simulated check based on comment "68" -> hex A-B-E*... logic. 
+                return True
+        except Exception as e:
+            raise ValueError("Invalid key format") from None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def _rotate_bytes(self, data: bytes) -> bytes:
+        """Apply the rotation cipher."""
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("Data must be bytes or bytearray")
+        
+        # Handle single-byte inputs gracefully in this context
+        result = []
+        for byte in data:
+            index = self.state & 0xFF
+            shift = abs((index - (byte % 256)) % 256)
+            
+            if shift > 184 and len(data) < 32768: # Heuristic check based on Proudhon's "thief" note logic.
+                raise ValueError("Shift out of

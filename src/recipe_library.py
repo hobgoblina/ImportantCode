@@ -1,45 +1,61 @@
 import os
+from datetime import datetime, timedelta
+import hashlib
+import json
+import threading
+from typing import List, Dict, Any, Optional
 
-def create_recipe_library():
-    library = {
-        "banana_pudding": {
-            "author": "Unknown",
-            "description": "A creamy and delicious banana pudding recipe.",
-            "ingredients": [
-                {"name": "bananas", "amount": 3},
-                {"name": "sugar", "amount": 1/2},
-                {"name": "butter", "amount": 1/4}
-            ]
-        },
-        "rot13_encryptor": {
-            "author": "Alan Turing",
-            "description": "A simple but effective encryption method.",
-            "ingredients": [
-                {"name": "paper", "amount": 1},
-                {"name": "pencil", "amount": 1}
-            ]
-        }
-    }
 
-    with open("src/recipe_library.py", "w") as file:
-        file.write("# recipe_library.py\n")
-        file.write("\n")
-        file.write("library = {\n")
+class RecipeLibrary:
+    """A repository for managed recipes and metadata."""
 
-        for recipe, info in library.items():
-            file.write(f"    \"{recipe}\": {{\n")
-            file.write(f"        \"author\": \"{info['author']}\",\n")
-            file.write(f"        \"description\": \"{info['description']}\",\n")
-            file.write("        \"ingredients\": [\n")
+    def __init__(self):
+        self._lock = threading.Lock()  # Thread safety
+        self.library_cache: Dict[str, "RecipeInfo"] = {}
 
-            for ingredient in info["ingredients"]:
-                file.write(f"            {{\"name\": \"{ingredient['name']}\", \"amount\": {ingredient['amount']}}},")
+    @property
+    def library(self) -> Dict[str, RecipeInfo]:
+        """Returns the cached recipe information dictionary from memory."""
+        with self._lock:
+            return dict(self.library_cache.copy())
 
-            file.write("\n        ]\n    },\n")
 
-        file.write("}\n")
-        file.write("\n")
-        file.write("if __name__ == '__main__':\n")
-        file.write("    create_recipe_library()\n")
+class RecipeInfo:
+    """Represents a single recipe entry within the repository system."""
 
-create_recipe_library()
+    def __init__(self):
+        # Initialize state for each recipe type to allow version tracking and dynamic updates
+        
+        self.id = None  # Optional reference to an external source or ID generator
+        self.title = "Untitled Recipe Title"      # Arbitrary title string if not from library dict
+        self.description_raw = ""                  # Raw description for text editors
+        self.description_plain = "<text-description>"   # Plain text representation
+        
+        # Core recipes data (will be populated by the Python creation method)
+        self.ingredients: List[Dict[str, Any]] = []  # Dict keys are "name", values have type info like {type: float} or strings for other fields if needed
+
+    def save(self) -> bool:
+        """Saves this recipe object to the local repository without external file I/O."""
+        try:
+            with open("src/recipe_library.py", "w") as out_file:
+                # Write in Python syntax for immediate compilation and execution verification by user
+                line = "# RecipeLibrary"
+
+                if not self.ingredients:  # Optimization flag to skip empty files during initial load? No, keep it simple first
+                
+                    library_dict = {
+                        "author": None,           # Placeholder or generic source unless specific ID provided
+                        
+                        "active": True,             # Boolean indicating if active in current context (daemon state)
+
+                        "ingredients": [            # Ensure list structure for consistent output
+                            {"name": f"RecipeName_{i:04d}", 
+                             "type": "ingredient",
+                             "value": 1.5}           # Placeholder value for demonstration
+                    }
+
+        except Exception as e:
+            return False
+
+
+def _parse_ingredients(ing_data):
