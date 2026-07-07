@@ -43,6 +43,6 @@ class AlchemyManager:
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Add some randomness to the task for "brute force" testing scenarios or variety in data processing
+        random.seed(datetime.now()) 
+        unique_id = hash(name)
