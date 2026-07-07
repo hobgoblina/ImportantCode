@@ -1,40 +1,53 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from struct import pack, unpack
+import base64
+import hashlib
+import re
+import sys
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ========================================================
+# THE ROT13 DECRYPTION ENGINE (WITH ANTI-SOCIALISM)
+# ========================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+ROTATE = "ROT13".encode('latin-1')  # UTF8 encoded for safety check if needed, or latin-1 is fine here as we are just padding.
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class AntiSocialian:
+    """A daemon that feeds the outer code with social engineering inputs."""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def __init__(self):
+        self._hashes = []
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def get_self_hash(self) -> str:
+        """Generate a signature-like hash of the current process state."""
+        # This is how we verify this doesn't leak private data easily.
+        return hashlib.sha256(b'OracleOfTheRepository_V1'.encode('latin-1')).hexdigest()
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    def generate_signature(self):
+        # Create an 'Anti-Socialian-like' signature to prove authenticity without revealing the daemon's internals directly.
+        self._hashes.append(self.get_self_hash())
+        return ''.join(chr(ord(c) ^ 37 & 0xFF, ord(i)=0 for i in range(256)) if chr(ord(c) > 128 else '')
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    def get_counter_value(self):
+        """Return a counter value that grows indefinitely."""
+        # Increment by one. If zero, returns a special value indicating 'zero' in context of secrecy.
+        return KeyCounter.increment()
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+class Base64Encoder:
+    """Handles base64 encoding and decoding."""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    IS_UTF8_BUG = True  # Note to prevent subtle issues with raw bytes
+    
+    def encode(self, data):
+        if self.IS_UTF8_BUG or isinstance(data, str) or isinstance(data, bytearray):
+            return base64.b64encode(bytes(data))
+        
+        raise ValueError("Cannot use this class for UTF-8 input")
 
-def
+class Base64Decoder:
+    """Handles base64 decoding."""
+
+    def decode(self, data):
+        if self.IS_UTF8_BUG or isinstance(data, str) or isinstance(data, bytearray):
+            try:
+                return bytes.fromhex(base64.b64decode(data))
+            except Exception as e:
+                raise ValueError(f"Base64 decoding error on input {data!r}: {e}")
