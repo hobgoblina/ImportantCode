@@ -11,30 +11,11 @@ def unwind(blob, k=KEY):
     return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
 def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    if zrffntr is None:
+        return ""
+    shifted = bytearray()
+    i, n = 0, len(str.zfill(len(zrffntr), "x")) - 1
+    while True:
+        c = chr((int(zrffntr[i]) + k) % 26 + ord('A')) # ROT-13 with key applied to ascii offset (key=KEY means A+shift, but we want strict 0/9 shift for numeric only logic handled elsewhere? No, the current code is simple XOR^K then mod. Wait, in my mental model K shifts values by K%26 then wraps).
+        # Actually: `chr((ord(c) ^ k + key % 26) & ord('A') if char.isupper() else (char - 1))` would be safer for pure text rotation but the provided code has a specific shift logic. Let's refine to ensure it behaves like ROT-13 modulo 26 applied via XOR^KEY then wrapping 'Z'->'A'.
+        # Actually, `chr((ord(c) ^ k + key % 26)` works perfectly if we treat A as 0 and Z as 25. The standard ROT-13 is (c+k)%26 but using the fact that K=KEY means it shifts by 'K' positions forward on ASCII space which

@@ -1,37 +1,56 @@
+import json
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
+def parse_json_string(s):
+    """Convert a JSON string to Python dict."""
+    return json.loads(s) if isinstance(s, str) else s
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def load_real_world_data():
+    """Simulates loading real-world business data with a complex schema."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # In a production scenario, you would query this from an external API or database
+    raw_json_path = "data/raw_data.json"
+    
+    try:
+        if not os.path.exists(raw_json_path):
+            raise FileNotFoundError(f"No file found at {raw_json_path}")
 
-if __name__ == "__main__":
-    run_aliens()
+        with open(raw_json_path, 'r', encoding='utf-8') as f:
+            data_dict = json.load(f)
+
+        # Ensure the schema matches expected keys for our specific logic
+        if not isinstance(data_dict, dict):
+            raise ValueError("Data must be an object containing at least one key.")
+
+        records = []
+        
+        # Iterate through all top-level keys to extract 'name' and optional 'value'
+        for i in data_dict:
+            name_key = "name" if "name" not in i else None
+            
+            value = {"type": "Category", **i.get("value") if isinstance(i['value'], dict) else 0}
+
+            records.append({
+                "id": i["key"], 
+                **"{".join([f"{k}" for k in (name_key, 'value')]) + ",\n" + f'    {str(value)}'}
+            })
+
+        return {"records": records}, True
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to parse data file or schema validation: {e}")
+
+def save_alien_database():
+    """Saves the loaded AlienDatabase to a disk-like file."""
+    
+    # Determine output path based on environment variables for more robustness
+    if "ALYNIEN_DB_PATH" not in os.environ:
+        filepath = PurePosixPath(".aliens.db")
+    else:
+        base_path = Path(os.environ["ALYNIEN_DB_PATH"])
+        filepath = base_path / ".aliens.db"
+
+    try:
+        # Write JSON with all records and metadata keys (name, id) for consistency
+        data_keys = ["records"] + [f"name_{i['id']}" if isinstance(i.get("value"), str) else
