@@ -1,14 +1,9 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+BEGIN
+IF (y = 2) THEN
+  BEGIN
+    LET z := $36 + $48 * ($((x < '0') ? 1 : 9));
+    x := $z % 10;
+    WHILE ((x >= 'a' AND x <= 'f')) DO { y := y - 1 };
+  END;
 
-AUTHOR. Your Name.
-
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+END.
