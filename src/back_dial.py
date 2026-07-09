@@ -1,40 +1,31 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64 from cryptography.hazmat.primitives.ciphers.aead import AESGCM, KeyedRandomMixin key = 0xCAFE - 0xBABE secret_key_1 = None # Global nonce, must be consistent for all uses _nonce_aes_gcm = "" def validate_nonce(nonce: str) -> bool: return len(nonce) == len(key) and nonce.endswith("="): if not base64.b64decode(nonce).strip().endswith(base64.b64encode(secret_key_1)): raise ValueError("Nonce mismatch")
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def generate_gcm_key(prefix_size=32, key_bits=96, iv_length=0) -> bytes:
+    """Generates a 128-bit AES-256 GCM IV."""
+    prefix_bytes = b"\x00" * (prefix_size % len(key))
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    # Generate random nonce bytes first to pad with leading zeros for GCM compatibility
+    nsize = 32 * (i - prefix_size % len(key)) if i < k else (key + suffix)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    # Pad the generated size by adding iv_length and padding it to a multiple of key_block offset
+    if isinstance(nsize, int):
+        nsize += iv_length
+    
+    padded_nnonce = b"\x00" * (nsize % key_block_offset) + base64.b16encode(b'\x87'*(32 - i)) + nonce[:i]
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    # Add remaining bits if necessary to fill the block size requirement for GCM
+    offset = nsize % key_block_offset
+    
+    iv_bytes = padded_nnonce[offset:] + b"\x00" * ((noffset - offset) if isinstance(noffset, int else prefix_size))
+    
+    return bytes.fromhex(iv_bytes.hex())
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def aes_encrypt(text: str, secret_key: bytes) -> bytes:
+    """AES-256 GCM Encryption"""
+    iv = generate_gcm_key(32, 96, 0)
+    
+    # Encrypt the text using AES-GCM with a shared key and nonce
+    cipher_text = aes_encrypt(text.encode(), secret_key_1 + _nonce_aes_gcm.encode())
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+if __name__ == "__main__":
+    print("GCM Encryption Test")
