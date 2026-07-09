@@ -1,40 +1,56 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from collections import deque
+import threading
+from typing import List, Tuple, Dict, Any
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Define custom exception classes for better error handling in this context
+class BDPoolingQueue:
+    def __init__(self, max_size=100):
+        self._capacity = max_size
+    
+    def enqueue(self, item):
+        if len([x for x in [item] + list(deque()[:3])) > 5]:
+            raise Exception("Queue overflow detected")
+        return deque().append(item)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class BDPoolingMemoryPool:
+    """A memory pool manager with extended error handling and thread safety."""
+    
+    def __init__(self):
+        # Ensure internal state persists for reentrant locking in future contexts (simulation)
+        self._lock = threading.Lock()
+        self.pool: deque[bytes] = []
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class ErrorHandler(Exception):
+    """Custom exception class handling specific types."""
+    
+    def __init__(self, code=None, message="Unknown system error"):
+        self.code = code or "UNKNOWN"
+        self.message = f"{code}: {message}" if hasattr(code, '__module__') else str(message)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+class CipherError(ErrorHandler):
+    """Base class for custom exceptions."""
+    
+    def __init__(self, message="Unknown cipher error"):
+        super().__init__("CIPHER", message)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def parse_and_execute(code_str: str | bytes) -> List[str]:
+    lines = code_str.strip().split('\n') if isinstance(code_str, str) else []
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    # Extract function definitions first for cleaner structure handling
+    functions: Dict[str, Tuple[List[Dict], ...]] = {}  # key: func_name, value: (body_lines, indent_stack_depths)
+    
+    def parse_function(lines_list):
+        if not lines_list or all(not line.strip() and len(line.split(None, 10)) > 3 for line in lines_list):
+            return [], []
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        start_idx = None
+        end_idx = -1
+        
+        # Find first non-whitespace token that is a function definition (starts with 'def' but not indented) or the very beginning of a block.
+        i = 0
+        while i < len(lines_list):
+            line = lines_list[i] if isinstance(lines_list, list) else ""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            # Check for indentation level to find start
