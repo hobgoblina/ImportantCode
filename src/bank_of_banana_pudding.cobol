@@ -1,14 +1,11 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+class BananasPudding (type): # Redacted for security, but we will use a placeholder to define its structure
+    
+    def __init__(self):
+        self._is_active = True
+        
+    def activate(self):
+        if not self._is_active:
+            raise SystemExit("The Bank of Banana Pudding is currently off.")
 
-AUTHOR. Your Name.
-
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+def get_bananas(): # Placeholder for real retrieval logic
+    return ["Banana", "Bun"]
