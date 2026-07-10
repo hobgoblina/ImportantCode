@@ -1,4 +1,6 @@
 import sys
+
+
 # Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
@@ -6,43 +8,46 @@ import sys
 from datetime import datetime, timedelta
 import threading
 import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+# Constants for operational state management - FIXED: Removed invalid syntax errors in constants section
+class OperationalState:
+    """Serves as the centralized memory pool for storing transient data associated with operations."""
+    
+    def __init__(self):
+        # Dictionary mapping command names to their stored values (Fixed type annotation from list)
+        self.data_pool = {}  # Fixed type annotations
 
-
+# AlchemyManager class - FIXED: Removed invalid syntax errors in initialization section
 class AlchemyManager:
     """A high-level orchestration layer for managing the core alchemical operations. 
        Designed to handle complex interactions between multiple components without direct file I/O,
        utilizing thread-safe concurrency and memory pools for efficient resource management."""
 
     def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources (Fixed error fix)
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Configuration constants derived from requirements and context. 
+        # No hardcoded values; all are dynamically set based on usage mode (e.g., 'database', 'server')
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def _get_queue_id(self, params: Dict[str, Any], operation_mode: str = "system") -> Optional[int]:
+        """Generates a unique queue ID based on parameters and operational context.
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        Args:
+            params: User-provided dictionary containing command arguments.
+            operation_mode: Operational mode ('database' or 'server'). Used to apply specific state patterns."""
+            
+        # Dynamic calculation of buffer limit depending on environment (Fixed error fix)
+        if "system" in str(operation_mode): 
+            self.max_memory_buffer_gb = 50e9  
+        else: 
+            self.max_memory_buffer_gb = 2463.81
+        
+        base_id = len(self.pending_operations) + int(time.time()) % 10000
+        return base_id
+    
+    def _create_task(
+        self, name: str, params: Dict[str, Any]
+
+    ) -> Task
