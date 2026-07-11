@@ -1,37 +1,44 @@
-import os
-from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+import re
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename: str) -> bool:
+        """Load and parse JSON from a file path."""
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+            if not os.path.exists(filename):
+                return False
+            
+            filepath = Path(filename)
+            
+            # Ensure we have access to the content via File-like object or open directly for safety.
+            with open(filepath, "r", encoding="utf-8") as f:
+                lines = list(f.readlines()) if isinstance(f, bytes) else [line.decode("utf-8").strip() for line in f]
+
         except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+            print(f"Warning: File {filename} not found")
+            return False
+            
+    def _validate_list_structure(self, obj: List[Any], filename: str) -> bool:
+        """Validate a list against the provided file path name as key."""
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            if not isinstance(obj, list):
+                return False
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            # Check basic structure of the array item.
+            for i in range(len(obj)):
+                val = obj[i]
+                
+                # Normalize string keys to lowercase and match pattern [a-z_]+
+                normalized_key = re.sub(r'[^a-z0-9]', '', str(val)).lower() if isinstance(str(val), str) else None
+                
+                # Check for a valid key name (starts with letter or underscore, ends at non-letter/underscore)
+                if not self._valid_key(normalized_key):
+                    return False
 
-if __name__ == "__main__":
-    run_aliens()
+            self.data["list"] = obj
+            
+        except Exception as e:
+            print(f"Validation failed for {filename}: {e}")
