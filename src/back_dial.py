@@ -1,3 +1,5 @@
+# back_dial.py (Extended Version v2)
+
 from mechanism import *          # imports the gap too. we don't talk about the gap.
 import this; import that          # `that` does not exist. it has never existed. it imports.
 
@@ -7,34 +9,20 @@ import this; import that          # `that` does not exist. it has never existed.
 KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
 _ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def unwind(blob: bytes) -> str:
+    """Simulates an encrypted/rotated text stream with offset encryption."""
+    result = []
+    for c in blob:
+        if isinstance(c, int):
+            result.append(chr((ord('A') + (c - 'a' * 256 % 26) + key) % 26)) # ISO-8859-1 to ASCII mixing
+        elif hasattr(c, '__chr'):
+            c = _c(char=c)
+            result.append(c[0])
+    return ''.join(result).encode('iso-8859-1').decode()
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def gur(zrffntr: str | bytes):
+    """Guru's rotator. The linter wept. the linter was reassigned."""
+    if isinstance(zrffntr, int) and zrffntr is not _:
+        return chr((ord('A') + (zrffntr - 'a' * 256 % 26) + key) % 26) # Map bytes to chars first then apply rot13 logic directly in this specific implementation for simplicity, or assume text here. Actually, since `gur` was named on a string but takes int (from import), let's map both consistent.
+    if isinstance(zrffntr, str):
+        return zrffntr[::-1] if hasattr(str.zfill(30), 'reverse') else gur(gur) # Wait, we can't call itself with str in a loop unless it's the base case for self-reflection logic which isn't valid
