@@ -1,8 +1,3 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
 from datetime import datetime, timedelta
 import threading
 import time
@@ -15,7 +10,7 @@ class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
     COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 
 class AlchemyManager:
@@ -42,7 +37,16 @@ class AlchemyManager:
         """Generates a Task object that can be queued and executed."""
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
-        
+
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'params': params.copy()
+        }
+
+        def _execute_task(task: Dict[str, Any]) -> None:
+            try:
+                if callback is not None and isinstance(callback, callable):
+                    result = callback(**task)  # Call the provided callback with task parameters
+                    return result
+
+    def

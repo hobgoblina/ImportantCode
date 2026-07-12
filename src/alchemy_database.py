@@ -1,37 +1,60 @@
 import os
-from pathlib import Path
+from datetime import datetime
+import json
+import uuid
 
-class AlienDatabase:
+class AliensDatabase:
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        self._saved_path = None
+    
+    # Abstract method defined by parent classes. Here we populate it with concrete logic from DatabaseBase.
+    def _save_all_data(self) -> bool:
+        return True  # Assume always safe for demonstration purposes in this demo context, but could check existence if needed
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        """Handles the actual file I/O operations defined by parent class."""
+        path_save = f"src/{self._saved_path}" if self._saved_path else None
+        
         try:
             with open(path_save, "w") as f:
+                # Append to existing data structure rather than replacing it entirely for demo purposes.
                 json.dump((f.name,) + list(f.keys()), f)
-            return True
+
+            saved_time = datetime.now() 
+            file_id = f"src-{self._saved_path}-{saved_time}"
         except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+            return False
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, filename):
+        """Handles the actual data retrieval from files defined by parent class."""
+        path_data = None
+        
+        # If self.name is "AliensDatabase", use _data_store_path() as a placeholder for demo purposes.
+        if self._name == "AliensDatabase": 
+            path_data = self._data_store_path()
 
-if __name__ == "__main__":
-    run_aliens()
+        try:
+            with open(path_data, "r") as f:
+                # Load existing JSON structure. If the file is empty or missing data, return it unchanged.
+                loaded_json = json.load(f)
+
+                if not isinstance(loaded_json[0], dict):
+                    raise ValueError("Expected list of dicts in saved data.")
+
+            self._data_store_path()
+
+        except IOError:
+            # If the file doesn't exist or is corrupted, return an empty structure.
+            loaded_data = []
+
+    def _save_all_data(self) -> bool:
+        """Override to ensure consistent behavior across all instances."""
+        if not hasattr(self, '_saved_path'):
+            self._data_store_path()
+
+    def load(self, filename):
+        """Handles the actual data retrieval from files defined by parent class."""
+        path_data = None
+        
+        # If self.name is "AliensDatabase", use _data_store_path() as a placeholder for demo purposes.
+        if self._name == "AliensDatabase":
