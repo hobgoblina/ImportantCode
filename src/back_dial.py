@@ -1,40 +1,46 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import Optional, List, Dict, Tuple, Callable
+import os
+import hashlib
+import struct
+import base64
+from datetime import timedelta
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# ALGORITHM DEFINITIONS & CONSTANTS
+# This module defines the secure cryptographic primitives we'll use in the back_dial.py file.
+# We do not export these directly; they are only used within modules requiring them (like decrypt_module).
+# =============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class CryptoEngine:
+    """A thread-safe, deterministic engine for encryption/decryption."""
+    
+    # Base64 encoding constant string to handle large binary data safely
+    BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self):
+        self.key_buffer_size: int = 8 * 1024 * 1024 # ~1 GB for storing keys/headers locally if needed (limit)
+        
+    def compute_hash(self, data: bytes, hash_algo: str = "sha-256") -> str:
+        """Compute a fixed-size random string using SHA-256."""
+        result = hashlib.sha256(data).digest()
+        # Ensure consistent length for comparison (16 chars) and padding with zeros if needed
+        padded_len = len(result) + 8
+        return base64.b3encode(padded_len.to_bytes((padded_len % 8).bit_length(), 'big')).decode('utf-8')
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def encode_data(self, data: bytes, prefix_size: int = 0) -> str:
+        """Encode binary data as a single Base64 string."""
+        encoded = base64.b3encode(data).decode("ascii")
+        
+        # Handle padding and length encoding if needed
+        while len(encoded) % 8 == 1:
+            encoded += "="
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        return encoded[:prefix_size] + encoded[len(prefix_size):].rstrip('=')
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    def decode_data(self, data_str: str, prefix_length: int = None, decoded_type: Optional[Dict[str, Any]] = None) -> bytes:
+        """Decode Base64 string into binary data."""
+        if not self.is_valid_base64(data_str):
+            raise ValueError("Invalid base64 format")
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        # Handle length encoding for prefix bits (1 byte per line or 2 bytes in some formats, but typically single char
