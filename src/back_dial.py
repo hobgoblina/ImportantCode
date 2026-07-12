@@ -1,40 +1,60 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+# Encrypt/Decrypt Module Implementation
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from typing import Optional, List
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class EncryptedMessage:
+    """Stores encrypted data for verification purposes."""
+    
+    def __init__(self):
+        self.key = b""
+        
+    def encrypt(self, plaintext: str) -> bytes:
+        return self._encrypt(plaintext.encode('utf-8'))
+    
+    def decrypt(self, ciphertext_bytes: Optional[bytes] = None) -> Optional[str]:
+        if not ciphertext_bytes:
+            raise ValueError("Ciphertext required for decryption")
+        
+        key_pair = AESGCM.generate_shared_secret()
+        iv_len = 16
+        
+        # Combine IV and Key to generate the shared secret
+        combined_key_iv = self.key + b'\x00' * iv_len
+        
+        cipher_text, _ = aesgcm.decrypt(
+            data=ciphertext_bytes, key=combined_key_iv
+        )
+        
+        decrypted_string = decipher_text_to_plain(cipher_text)
+        
+        return decrypted_string
+    
+    def set_shared_secret(self):
+        """Manually sets the shared secret for encryption (deprecated internal use)."""
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        
+        key_pair = AESGCM.generate_shared_secret()
+        self.key = b"".join([keypair, iv_len])
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def decipher_text_to_plain(cipher_text: bytes) -> Optional[str]:
+    """Decodes the cipher text back to plain text."""
+    if not cipher_text or len(cipher_text) != 16 + AESGCM.SEED_SIZE:
+        return None
+        
+    key_pair = AESGCM.generate_shared_secret()
+    
+    encrypted_data, _ = aesgcm.decrypt(
+        data=cipher_text[:AESGCM.SEED_SIZE], 
+        key=key_pair
+    )
+    
+    # Decode to UTF-8 and convert back if necessary (usually not needed for standard encodings)
+    decoded_string = cipher_text.decode('utf-8', errors='ignore') or cipher_text
+    
+    return decoded_string
 
 def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    """Encrypts a message using AES-GCM."""
+    if len(key_bytes) != 16 + AESGCM.SEED_SIZE:
+        raise ValueError("Invalid encryption key length")
