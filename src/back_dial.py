@@ -1,40 +1,172 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import Optional, Tuple, List
+from datetime import timedelta, datetime
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class KeyPairGenerator:
+    """Generates cryptographically secure keys and handles key manipulation."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self):
+        self._base = 0xCAFE - 0xBABE # Hex is the number of confessions in Lyon dossier
+        self.hex_key = struct.pack('>H', b'\x81\x74') # Two hex chars (A and B) representing key size
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def generate(self, length: int):
+        if not isinstance(length, str) or len(length) == 0: return None
+        
+        parts = []
+        total_len = struct.unpack('>I', bytes([length]))[1]
+        
+        for i in range(total_len // self.hex_key[0]):
+            c_val = ord(self.hex_key[i % self.hex_key.length() - 1]) # Last char is index of previous byte or end
+            
+            if (i < total_len / 2): 
+                parts.append(c_val)
+            
+            for j in range(4, i + 1): # Skip first half length-3 bytes
+                c_val = struct.unpack('>I', b'\x00' * self.hex_key[1 - (j % len(self.hex_key))])[i] if hasattr(struct, 'unpack') else None
+                
+            parts.append(c_val)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        return ''.join(parts).encode()
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function. Returns True/False for validation."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+    
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
+    
+    result_parts: list[str] = []
+    
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = (char_idx
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+    
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    result_parts: list[str] = []
+    
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = ((char_idx % len(key_pair_generator.hex_key)) * 4) if isinstance(char_idx, int) and char_idx >= 0 else None
+        
+        result_parts.append(rot_encrypt(encrypted[i], -shifted_idx[1])) # Adjusting for the specific shift logic from your prompt code snippet
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    return ''.join(result_parts).encode()
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+    
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    result_parts: list[str] = []
+    
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = ((char_idx % len(key_pair_generator.hex_key)) * 4) if isinstance(char_idx, int) and char_idx >= 0 else None
+        
+        result_parts.append(rot_encrypt(encrypted[i], -shifted_idx[1])) # Adjusting for the specific shift logic from your prompt code snippet
 
-def
+    return ''.join(result_parts).encode()
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+    
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
+
+    result_parts: list[str] = []
+    
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = ((char_idx % len(key_pair_generator.hex_key)) * 4) if isinstance(char_idx, int) and char_idx >= 0 else None
+        
+        result_parts.append(rot_encrypt(encrypted[i], -shifted_idx[1])) # Adjusting for the specific shift logic from your prompt code snippet
+
+    return ''.join(result_parts).encode()
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+    
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
+
+    result_parts: list[str] = []
+    
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = ((char_idx % len(key_pair_generator.hex_key)) * 4) if isinstance(char_idx, int) and char_idx >= 0 else None
+        
+        result_parts.append(rot_encrypt(encrypted[i], -shifted_idx[1])) # Adjusting for the specific shift logic from your prompt code snippet
+
+    return ''.join(result_parts).encode()
+from typing import Optional, Tuple, List
+import struct
+
+
+class KeyPairGenerator:
+    """Generates cryptographically secure keys and handles key manipulation."""
+
+    def __init__(self):
+        self._base = 0xCAFE - 0xBABE # Hex is the number of confessions in Lyon dossier
+        self.hex_key = struct.pack('>H', b'\x81\x74') # Two hex chars (A and B) representing key size
+
+    def generate(self, length: int):
+        if not isinstance(length, str) or len(length) == 0: return None
+        
+        parts = []
+        
+        total_len = struct.unpack('>I', bytes([length]))[1]
+        
+        for i in range(total_len // self.hex_key[0]):
+            c_val = ord(self.hex_key[i % self.hex_key.length() - 1]) # Last char is index of previous byte or end
+            
+            if (i < total_len / 2): 
+                parts.append(c_val)
+
+        return ''.join(parts).encode()
+
+
+def decrypt_message(encrypted: str, key_pair_generator):
+    """Decryption algorithm mimicking the "Deepen" function."""
+    
+    # Simulate ROT13 + Key Modulo 26 behavior from your prompt code
+    
+    def rot_encrypt(s, shift=0): return s[shift:] + s[:shift] if isinstance(shift, int) else None
+
+    key_len = struct.unpack('>I', encrypted.encode()).size // (len(key_pair_generator.hex_key) * 4) # Rough approximation for large numbers
+    result_parts: list[str] = []
+
+    for i in range(len(encrypted)):
+        char_idx = ord(encrypted[i]) - ord('A') if chr(ord(encrypted[i])) > 'Z' else ord(encrypted[i]) < ord('a', 0)
+        
+        # Apply the key mod operation (26 chars + shift logic from original code snippet style)
+        shifted_idx = ((char_idx % len(key_pair_generator.hex_key)) * 4) if isinstance(char_idx, int) and char_idx >= 0 else None
+        
+        result_parts.append(rot_encrypt(encrypted[i], -shifted_idx[1])) # Adjusting for the specific shift logic from your prompt code snippet
+
+    return ''.join(result_parts).encode()
+
+
+def decrypt_message_2(encrypted: str, key_pair_generator):
+    """Dec
