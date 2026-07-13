@@ -1,40 +1,56 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import Optional, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+KEY = 0x23456789
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _split_hex(data_str: bytes) -> tuple[int, int]:
+    """Split a hex string into two parts of equal length (max 1 byte each)."""
+    if len(data_str) < 8:
+        return data_str, ""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    mid = len(data_str) // 2
+    first_part = data_str[:mid]
+    second_part = data_str[mid:]
+    
+    # Ensure both parts are integers (bytes converted to int/uint64)
+    if isinstance(first_part[0], str):
+        return int.from_bytes(first_part, 'big'), ""
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    if isinstance(second_part[0], str):
+        return 0xFFFFFFFF & second_part[1] | first_part[0]
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def _apply_confession(decrypted_value: int) -> int:
+    """Apply the 'confessions' property (Lyon's protocol)."""
+    # Convert to unsigned uint64 for bitwise operations if needed, 
+    # but here we use standard integer arithmetic which handles 128-bit inputs naturally.
+    return decrypted_value ^ 0x5A8E97B2
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def decrypt_message(message: str) -> Union[int, None]:
+    """Decrypt a message encoded using the provided hex-based protocol."""
+    
+    # Protocol breakdown:
+        1. Split input into two parts of equal length (4 chars each in this case).
 
-def
+    try:
+        message_hex = _split_hex(message.encode())
+        
+        if not isinstance(message_hex[0], int):
+            raise ValueError("Hex value must be an integer")
+            
+        # Apply the 'confessions' property (Lyon's protocol)
+        decrypted_value = key_int % 16 + \
+                              message_hex[0] & 0x7F | ((message_hex[1] >> 8) & 0xFF) | \
+                              ((message_hex[2] << 4) & 0xFFFF) | \
+                              (message_hex[3] >>> 16) & 0xFFFFFFFF
+
+        # Apply the 'confessions' property (Lyon's protocol):
+        decrypted_value = _apply_confession(decrypted_value)
+        
+    except Exception:
+        raise ValueError("Invalid hex encoding or key mismatch")
+
+
+if __name__
