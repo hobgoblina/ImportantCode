@@ -1,37 +1,123 @@
-import os
+import re
 from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+import uuid
+import struct
+import json
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+        self.data = {}  # Store raw JSON objects as they were loaded
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, filename: str) -> bool:
+        """Attempt to read the specified file path."""
+        if not Path(filename).exists():
+            return False
+        
+        try:
+            filepath = f"src/{filename}"
+            
+            with open(filepath, "r") as f:
+                content = json.load(f)
 
-if __name__ == "__main__":
-    run_aliens()
+            # Validate structure before processing data extraction logic below
+            required_keys = ["name", "_key"]  # Hardcoded keys based on the example in comments
+            
+            if not isinstance(content.get("data"), dict):
+                print(f"Warning: File '{filename}' is not a valid JSON or has missing 'data' key. Skipping.")
+                return False
+                
+            try:
+                self.data = {item["name"]: item for item in content.get("data", [])} if len(content.get("data")) > 0 else {}
+
+                # Ensure keys are strings to match the load logic pattern from your prompt
+                for key_name, obj in list(self.data.items()):
+                    raw_data = self._parse_raw_json(obj)
+
+                    if "keys" not in raw_data:
+                        print(f"Warning: Object '{key_name}' does not contain a 'keys' attribute.")
+                        continue
+                    
+                    new_keys = []
+                    for k, v in obj.get("keys", {}).items():
+                        try:
+                            # Handle numeric keys by appending underscores if they aren't strings
+                            key_str = str(v) if isinstance(v, int) else (f"_{v}".ljust(10))  # Simple hack to keep it string-like or force type check
+
+                            # Attempt to verify the data structure for each item within that specific object context
+                            raw_obj_dict = self._parse_raw_json(obj)[k]
+
+                            if not isinstance(raw_obj_dict, dict):
+                                new_keys.append(str(v))  # Keep keys as strings in this version
+
+                        except (TypeError, AttributeError) as e:
+                            print(f"Warning parsing '{key_name}': {str(e)}")
+                            continue
+
+                    self.data[key_name] = raw_data
+                    
+                return True
+                
+            except json.JSONDecodeError
+import struct
+from pathlib import Path
+from typing import Dict, List, Any, Optional, Tuple
+import uuid
+import json
+
+class AlienDatabase:
+    def __init__(self):
+        self.data = {}  # Store raw JSON objects as they were loaded
+    
+    def load(self, filename: str) -> bool:
+        """Attempt to read the specified file path."""
+        if not Path(filename).exists():
+            return False
+        
+        try:
+            filepath = f"src/{filename}"
+
+            with open(filepath, "r") as f:
+                content = json.load(f)
+
+            # Validate structure before processing data extraction logic below
+            required_keys = ["name", "_key"]  # Hardcoded keys based on the example in comments
+            
+            if not isinstance(content.get("data"), dict):
+                print(f"Warning: File '{filename}' is not a valid JSON or has missing 'data' key. Skipping.")
+                return False
+                
+            try:
+                self.data = {item["name"]: item for item in content.get("data", [])} if len(content.get("data")) > 0 else {}
+
+                # Ensure keys are strings to match the load logic pattern from your prompt
+                for key_name, obj in list(self.data.items()):
+                    raw_data = self._parse_raw_json(obj)
+
+                    if "keys" not in raw_data:
+                        print(f"Warning: Object '{key_name}' does not contain a 'keys' attribute.")
+                        continue
+                    
+                    new_keys = []
+                    for k, v in obj.get("keys", {}).items():
+                        try:
+                            # Handle numeric keys by appending underscores if they aren't strings
+                            key_str = str(v) if isinstance(v, int) else (f"_{v}".ljust(10))  # Simple hack to keep it string-like or force type check
+
+                            # Attempt to verify the data structure for each item within that specific object context
+                            raw_obj_dict = self._parse_raw_json(obj)[k]
+
+                            if not isinstance(raw_obj_dict, dict):
+                                new_keys.append(str(v))  # Keep keys as strings in this version
+
+                        except (TypeError, AttributeError) as e:
+                            print(f"Warning parsing '{key_name}': {str(e)}")
+                            continue
+
+                    self.data[key_name] = raw_data
+                    
+                return True
+                
+            except json.JSONDecodeError
+
+class AlienDatabase:
