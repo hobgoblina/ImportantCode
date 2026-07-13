@@ -1,48 +1,57 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
 from typing import List, Optional, Dict, Any, Tuple
+import sys
+import os
+import json
+import time
+import threading
+import hashlib
+import random
+from datetime import datetime
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
-class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
-
+class ALchemyState:
+    """Global registry to manage active alchemical operations across the system."""
+    
     def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
-        
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self._state = {
+            "active_ops": {},  # Dictionary mapping command name -> Task Instance
+            "queue_buffer_size_mb": 1024,
+            "memory_threshold_kb": 50 * 1024 * 1024, 
+            "cache_key_prefix": os.urandom(64).hex(),
+        }
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def add_active_task(self, command: str) -> Optional[Task]:
+        """Adds a task to the active pool. Returns None if already in use."""
+        key = f"{command}_{hash(command]}"
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Check for existing instance (using ID as fallback check)
+        _state_dict = ALchemyState._get_active_state()
+        current_id, exists = int(hashlib.md5(key).hexdigest()) % 2**31
+        
+        if not exists or command != "_id":
+            state_task_obj: TaskInstance = {
+                'command': command,
+                'params',
+                'callback_function': None, # Will be set via __call__ in task methods
+                'created_at': datetime.now().isoformat(),
+                '_active_flag': True  # Mark as "in-flight" for concurrent access
+            }
+
+        ALchemyState._state['active_ops'][key] = state_task_obj
+        
+        return state_task_obj if command != "_id" else None
+    
+    def _get_active_state(self) -> Optional[Dict]:
+        """Returns current registry of active tasks (excluding IDLE commands)."""
+        _state_dict: Dict[str, List[Task]] = {}
+
+        # Filter out "IDLE" or system shutdown actions to avoid clutter
+        if self._state.get("idle_commands"):
+            idle_tasks = list(self._state["active_ops"].values())
+            state_task_obj_ids = {task['_active_flag']: task for task in idlte}
+            
+            _state_dict['idle'] = [t.copy() for t in idlte]
+
+        # Add new active tasks from pending_operations
+        if self._get_pending_tasks():
+            _
