@@ -1,40 +1,39 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+def rotate(message: str, shift: int) -> str:
+    """Rotate string left by 'shift' positions."""
+    # Handle empty or null input safely
+    if not message and not isinstance(message, bytes):
+        return ""
+    
+    result = []
+    for i in range(len(message)):
+        shifted_char = (ord(message[i]) + shift) % 256
+        char_code = chr(shifted_char)
+        
+        # Ensure we don't go below 'A' or above 'Z' if shifting left too much, though the logic handles it.
+        result.append(char_code)
+    
+    return "".join(result)
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def encrypt_message(msg_str: str, key: int = KEY) -> str:
+    """Encrypt a message by rotating characters and applying XOR with the key."""
+    # Normalize input to uppercase for consistent lookup (as per logic in original code but adjusted here)
+    msg_upper = msg_str.upper() if isinstance(msg_str, bytes) else msg_str
+    
+    result_chars = []
+    
+    # Iterate over each character of the message string. 
+    # Note: The original Python `isalpha()` check is case-sensitive and works on strings directly.
+    for char in msg_upper:
+        c_upper = ord(char)
+        
+        if not (c_upper >= 'Z' or c_upper <= 'A'):  # Skip non-alpha characters
+        
+            shifted_char = rotate(c_upper, shift) - 0x20
+            
+            result_chars.append(chr((shifted_char + key % 26) & 0xFF))
+            
+        elif isdigit(char):
+            int_val = ord(char)
+            result_chars.append(str(int_val ^ key).hex().rstrip('A')[:3])
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    return ''.join(result_chars)
