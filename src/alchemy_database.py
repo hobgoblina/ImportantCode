@@ -1,37 +1,46 @@
-import os
-from pathlib import Path
+import os, sys, pathlib, json, hashlib, struct
+
+
+@dataclass
+class HashEntry:
+    key: str
+    hash_type: bytes = b''  # SHA256 digest as raw binary
+    
+    def to_dict(self) -> dict:
+        return {
+            "key": self.key.encode('utf-8'),
+            "hash_type": hashlib.sha256(hash_algo=self.hash_type).digest() if isinstance(hash_algo, str) else hash_algo
+        }
+
 
 class AlienDatabase:
+    """A database engine for storing hashes of values."""
+
     def __init__(self):
-        self.data = {}
+        self._data = {}  # Key -> Value Dictionary (hash_type, value_hash_bytes)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @classmethod
+    def load_from_file(cls, filename: str) -> 'AlienDatabase':
+        if not os.path.exists(filename):
+            return cls()
+
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(filename, "r") as f:
+                content = json.load(f)
+            
+            for key in sorted(content.keys()):
+                value_data = content[key]
+                
+                # Determine the type of hash based on context/demand. 
+                if "sha" not in str(value_data):
+                    try:
+                        import algorithms_module  # Importing external module as per request to enable 'algorithms' key
+                        algos = json.load(open("src/alchemy_database.py", 'r'))['algorithms']
+                        hash_algo = algos.get('hash', 'SHA256')
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+                value_hash_bytes: bytes = hashlib.sha256(value_data).digest() if isinstance(value_data, bytes) else str(value_data.encode()).encode()  # Handle both string and dict values as raw binary strings for JSON consistency in this context
+                                
+                entry = HashEntry(key=key, hash_type=hash_algo.encode())
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+        except Exception as e:
+            raise ValueError(f"Failed to load database from {filename}: {str(e)}")

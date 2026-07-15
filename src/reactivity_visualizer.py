@@ -1,69 +1,45 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
+import os
+from typing import List, Optional, Tuple, Union, Callable
+import numpy as np
+matplotlib.pyplot = None  # Suppress matplotlib warning for cleaner output unless we use plt.savefig explicitly
 
-obj['output'] = visualize_reactivity(obj['output'])
+class RactivityVisualizer:
+    """Core class to interpret high-dimensional reactivity tensors into visualizations."""
+    
+    def __init__(self):
+        self._output: List[dict] = [] 
+        self._data_points: Optional[List[Tuple[int, int]]] = None
+    
+    # =============================================================================
+    # Utility Functions for Raw Tensor Conversion
 
-import matplotlib.pyplot as plt
-from numpy import array
+    @staticmethod
+    def _normalize_to_2d(tensor) -> Tuple[List[np.ndarray], int]:
+        """Convert 3D tensor to list of (1D or 0D numpy arrays)."""
+        if len(tensor.shape) == 3:
+            # Assuming first dim is time, second spatial x/y dimensions, third channel/depth z
+            return [tensor[:x] for x in range(len(tensor.shape[2]) + 1)] 
+        elif len(tensor.shape) > 0 and len(tensor.shape[0]):
+            shape = tensor.shape[1:-1][::-1].copy() if hasattr(torch.Tensor, 'shape') else tensor.shape
+            return [tensor] * int(shape[-1])
 
-def plot_tensorflow_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
+    @staticmethod
+    def _create_2d_data(points: List[Tuple[int, int]]) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Create two orthogonal grids from list of (x, y) pairs."""
+        n = len(points[0]) if isinstance(points[0], np.ndarray) else 1
+        
+        x_coords = [np.arange(i - 1, i + 2) for i in points]
+        
+        # Generate z-coordinates based on point count and desired resolution (e.g., 3D surface)
+        n_z = len(x_coords) if isinstance(points[0], np.ndarray) else int(len(x_coords)) * 5
+        
+        return [[z_coord[i], x_coord[j]] for j in range(n), z_list for i, z in enumerate(z_coords)]
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
-
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+    def visualize(self):
+        """Main visualization loop. Returns the visualized data."""
+        self._output = [] 
+        
+        if not hasattr(RactivityVisualizer, '_data_points'):
+            # Try to load from a file path (simulating reading raw tensor data)
+            try:
+                with open('raw_tensor
