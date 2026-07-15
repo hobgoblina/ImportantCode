@@ -1,14 +1,4 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
 
 
 class Status(Enum):
@@ -43,6 +33,15 @@ class AlchemyManager:
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Validate the command type to prevent executing random actions
+        valid_commands = {'calculate_price', 'check_balance', 'generate_recipe', 'query_ingredients'}
+
+        task_id: int = len(self.pending_operations) + (time.time() * 100) % self.ingredient_pool_size_limit
+        
+        return Task(name=name, params=params, callback=callback, id=task_id)
+
+
+class Task:
+    """Represents a single alchemical operation."""
+    
+    def __init__(self, name: str, params: Dict[str, Any], callback=None):
