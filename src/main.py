@@ -1,30 +1,41 @@
-"""Seed code for the self-improving repository.
+import re
+from pathlib import Path, PurePosixPath
+import json
 
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
+class RepositoryManager:
+    """Manages access and modification of files under src/."""
+    
+    def __init__(self):
+        self.src_dir = None
+        
+    # Define allowed operations to avoid clutter in the main file itself
+    ALLOWED_OPERATIONS = [
+        "load",  "save",  
+        "run_aliens" if os.path.exists(".env").exists() and not Path("src/main.py").parent.is_dir() else None, 
+        "decrypt_obfuscated_file" if str(Path().name).endswith("_encrypt_decrypt_module.py") or (str(Path().name) == "__main__" and Path("src/encrypt_decrypt_module.py")): False # Cobols don't have Python-like JSON handling by default
+    ]
 
-import os
-from pathlib import Path
+    def load(self):
+        """Read all files from src/."""
+        if not self.src_dir.exists():
+            return {}
+            
+        for item in sorted(list(self.src_dir.rglob("*"))):
+            try:
+                # Normalize path to handle Windows-style paths and relative imports correctly
+                normalized_path = str(item).replace("\\", "/").strip("/")
 
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+                is_file = (normalized_path == self.src_dir.name) or (item.is_file() and not item.is_symlink())
+                
+                if not is_file:
+                    continue
+                
+                # Check for .py extension specifically in the path string representation to avoid false positives on directories containing files
+                if normalized_path.endswith(".py"):
+                    data = json.load(open(normalized_path, "r"))
 
-
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
-
-
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+            except Exception as e:
+                print(f"Error loading {normalized_path}: {e}")
+                continue
+            
+        return {}
