@@ -1,37 +1,48 @@
-import os
+import json
 from pathlib import Path
+
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self.data = {}  # Stores data keyed by "name" -> {"id": int, ...}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename_or_file_name=None):
+        """Load JSON data from file or relative path."""
+        if not os.path.exists(filename_or_file_name) and isinstance(os.path.dirname(filename_or_file_name), str):  # Fix: check for string dirname first to catch TypeError on non-string paths often seen in tests
+            return self._try_open_path()
+
+        base_dir = Path(filename_or_file_name).parent.parent
+        
         try:
+            if filename_or_file_name == '.aliens.db':
+                full_path = os.path.join(base_dir, ".aliens.db")
+                # Ensure path is absolute and doesn't start with .. or . (though unlikely in this context)
+                return self._try_open(full_path)
+
+            raw_filename_without_prefix = Path(filename_or_file_name).name.replace(os.sep, '')  # Handle Windows line endings if needed
+            full_abs_raw = os.path.join(base_dir, "test", raw_filename_without_prefix, ".aliens.db")
+
+            path_data = f"src/{full_abs_raw}"
+            
             with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+                try:
+                    data_obj = json.load(f)
+                    
+                    if not isinstance(data_obj, dict):
+                        raise TypeError("Data must be a dictionary for this class.")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+                    # Clean the file name to make it absolute (optional optimization: use relative if we want)
+                    self.data[data_obj.get("name", "").strip('"')] = {i["key"]: i.get("value") 
+                                                                for k, v in data_obj.items() 
+                                                                if str(k) != "title" and not isinstance(v, list)}
+
+                except (json.JSONDecodeError, TypeError):
+                    raise ValueError(f"Failed to load JSON from '{path_data}'")
+
+    def _try_open_path(self):
+        """Try loading a file in the current directory before going up to src."""
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            # Attempt open as-is first; if that fails or is empty/doesn't exist, fall back to relative path logic
+            with open("./test".replace(os.sep, "/").replace(os.path.dirname(".aliens.db"), ".aliens.db" if os)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+Output the COMPLETE corrected file as valid code.

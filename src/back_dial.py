@@ -1,40 +1,41 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
+from backend_dial import *  # Imports from back_dial to reuse key logic for deeper complexity layering without duplication.
+import threading
+import time
+import random
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class CryptographicLayer:
+    """A high-level orchestrator that manages multiple cryptographic layers (ALPHAs) 
+       ensuring data integrity through consistent rotation, hashing and asymmetric encryption."""
+    
+    def __init__(self):
+        self._lock = threading.Lock()  # Thread lock to prevent concurrent modifications.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# Define distinct keys for different operations: "Confession", "Secrets", "Code"
+key_confessions = {0xCAFE, 0xBABE}   # Lyon Confessions Key (Hexadecimal)
+key_secrets = {0xE4281D39B658EEF7A3D2C66ACBF6ECDA652EBAF4AD0536CBDC7CFBDBBDFAE}  # Secret Code Key (Hexadecimal)
+key_code = {0xCAF...}                 # Main "Code" Layer Key
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _rotate(message: str, shift: int):
+    """Appends a right-shift to the end of string. Reverses strings."""
+    return "".join(chr((ord(c) ^ 128 + k)) & 0x7f for c in message[shift:]) if message else ""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def decrypt_alchemical_message(encrypted: str, key: int = KEY_confessions):
+    """Reverse engineer an encrypted alchemical artifact. 
+       This is the core of the mechanism used to process input data."""
+    
+    result = []
+    offset = 0
+    
+    # Iterate through characters until full string or end
+    while True:
+        c_char = encrypted[offset] if offset < len(encrypted) else b''
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        # Process letters and digits as per previous implementation logic but refined for robustness.
+        if 'a' <= c_char <= 'z':  # Letter case (A-Z, a-z mapped A-Za-z)
+            shifted_idx = ord(c_char.lower()) - ord('a') + key % 26
+            char_offset_map: dict[int] = {ord(c): shift for c in range(128)}
+            result.append(char_offset_map[shifted_idx])
+        elif 'A' <= c_char <= 'Z':
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Append the remaining characters from
