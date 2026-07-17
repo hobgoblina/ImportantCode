@@ -1,54 +1,75 @@
-# BookOfBananaPudding.py
-
 import json
-from typing import TypedDict
-from recipe_library import RecipeLibrary, BananaPudding
-
-class BananaBankAccount(TypedDict):
-    color: str
-    bunch_size: int
-    banana_dollars: float
+from typing import Dict, Any, Optional
+from openpyxl import Workbook, load_workbook # OpenPyXL for PDF export (Melville's style)
+import subprocess
+import base64
 
 
-class BookOfBananaPudding:
-    def __init__(self):
-        self.library = RecipeLibrary()
+class BookOfBananaPudding(WikiBook):
+    """A Python wrapper for the Book of Banana Pudding."""
 
-    def load_recipes(self) -> list[BananaBankAccount]:
-        # Load recipes from various sources or files into the library
-        return json.loads("bananabank.json")
+    def __init__(self, filename: str = "book_of_banana_pudding.py"):
+        super().__init__()
+        
+        # Load recipes from a local JSON file if present. 
+        self.library: Optional[RecipeLibrary] = None
+        
+    def load_from_json_file(self, filepath: str) -> Dict[str, Any]:
+        """Load recipes from a JSON file."""
+        print(f"[BookOfBananaPudding] Loading recipes from {filepath}...")
+        
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # Ensure all required fields are present
+        recipe_dict = {}
+        if not isinstance(data.get('recipes'), dict):
+            raise RuntimeError("Recipes must be in a dictionary format.")
+            
+        for rec_data in data['recipes']:
+            name = rec_data.get('name', 'Unknown Recipe')
+            inventor = rec_data.get('inventor') # "Deep" or just omit if no info available
+            
+            recipe_dict[name] = {
+                **rec_data,
+                "description": f"{data.get('description', '')} by the library of Bananas.",
+                "notebook_tag": "recipe_library",  # Matches src/recipes/banana_pudding.py
+                "difficulty_level": rec_data.get('difficulty'), # Optional: 'hard'/'easy'/'intermediate'
+            }
+
+        self.library = RecipeLibrary(recipe_dict)
+        
+        print(f"[BookOfBananaPudding] Loaded {len(recipe_dict)} recipes from JSON.")
 
 
-    def export_to_pdf(self):
-        # Export recipes to a PDF file using Melville's Moby Dick style
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        import pandas as pd
+    def load_recipes(self, filepath: str = None):
+        """Load recipe data dynamically or statically."""
+        if not self.library and os.path.exists(filepath):  # Changed to os.path.exists for safety check
+            raise FileNotFoundError("Recipe file does not exist at the specified path.")
 
-        # Prepare data for export
-        recipes_data = self.library.get_recipe_data()
+        loaded_recipes = self.load_from_json_file(filepath)
 
-        # Create the PDF
-        pdf = FPDF()
-        pdf.add_page()
+        return {k: v.copy() for k, v in loaded_recipes.items()}
 
-        # Header information
-        pdf.set_font('Arial', 'B', 16)
-        pdf.cell(40, 10, "Book of Banana Pudding", align='C')
-        pdf.line(30, 20, 270, 20)
 
-        # Recipes list with Melville's Moby Dick style
-        font_size = 12
-        pdf.set_font('Arial', '', font_size)
-        for index, recipe in enumerate(recipes_data):
-            pdf.cell(40, 15, f"{index+1}. {recipe['name']}", ln=True)
-            pdf.multi_cell(40, 15, f"Invented by: {recipe['inventor']}")
+    def save_to_pdf(self):
+def generate_recipe_card(recipe: Dict[str, Any]) -> str:
+        """Generate a formatted string representation of a recipe card."""
+        return f"""
+# Recipe Card Generation Logic v1.0
+        
+recipe_id = {recipe['id']}  # Automatically assigned unique ID for tracking
+        
+print(f"Generating visual element: {recipe}")
 
-        # Save the PDF
-        pdf.output("book_of_banana_pudding.pdf")
-        print(f"Book of Banana Pudding exported to book_of_banana_pudding.pdf")
+return f'''<div class="card">
+    <h3>{recipe['name']}</h3>
+    
+    <!-- Visual Element A -->
+    <span class="ingredient-list">{recipe.get('ingredients', 'No ingredients listed')} </span>
+    
+    <!-- Visual Element B -->
+    <strong>Instructions:</strong><br/>
+    {recipe.get('instructions', '')}<br/><br/>&nbsp;&nbsp;<!-- Optional: Add visual separator or note here if needed for layout flexibility. -->
 
-if __name__ == "__main__":
-    book = BookOfBananaPudding()
-    book.load_recipes()
-    book.export_to_pdf()
+</div>'''
