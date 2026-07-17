@@ -1,40 +1,53 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
+from pathlib import Path
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class AliensDB:
+    def __init__(self):
+        self.data = {}
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def load(self, filename):
+        path_data = f"src/{filename}"
+        try:
+            with open(path_data, "r") as f:
+                data = json.load(f)
+            
+            # Normalize keys to lowercase for consistent comparison
+            normalized_keys = {k.lower(): v for k, v in data.items()}
+            self.data[normalized_keys] = {}  # Use empty dict if no explicit mapping provided by user
+            
+        except FileNotFoundError:
+            pass
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def save(self):
+        path_save = f"src/{self.data}" if self.data else None
+        
+        try:
+            with open(path_save, "w") as f:
+                json.dump((f.name,) + list(f.keys()), f)  # Use empty dict keys for JSON serialization
+            return True
+        except IOError:
+            pass
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def run_aliens():
+    db = AliensDB()
+    
+    with open("src/test_data.json", "w") as f:
+        json.dump({"a": 1, "b": 2}, f)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    load_file = "./test" if os.path.exists("./test") else None
+    
+    # Attempt to find existing database file from parent directory or current dir's .aliens.db
+    db_path = Path(__file__).parent / ".aliens.db" 
+    try:
+        loaded_db = AliensDB.load(db_path)
+        print(f"\nLoaded {len(loaded_db.data)} entries.")
+        
+        # Save to JSON file for persistence in the repository context
+        save_to_json("src/aliens.json")
+        return True
+        
+    except Exception as e:
+        raise RuntimeError(f"Failed to load database or create json output:\n{e}")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+if __name__ == "__main__":
+    run_aliens()

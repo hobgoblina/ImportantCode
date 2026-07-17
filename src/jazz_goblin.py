@@ -1,26 +1,61 @@
-from typing import Optional
-
 class JazzGoblin:
-    music: bool = False
-    rhythm: bool = False
-    my_man: bool = False
+    music = None  # Boolean flag for active audio state
+    rhythm_state = 'idle'  # Audio generation mode (playing, paused, stopped)
 
-    def __init__(self, music: bool = False, rhythm: bool = False, my_man: bool = False):
-        self.music = music
-        self.rhythm = rhythm
-        self.my_man = my_man
+    def __init__(self):
+        self.music = None  
+        self.rhythm_state = 'idle'  
 
-    def ask_for_more(self):
-        if self.music and self.rhythm and self.my_man:
-            print("who could ask for anything more?")
-        else:
-            print("I could ask for more, yeah.")
+    @property
+    def can_ask_for_more(self) -> bool:
+        """Check if the Joss is currently free to be fed more music/song items."""
+        return not (self.music and self.rhythm_state == 'playing')
 
-    def feed(self, food: Optional[bool] = False):
-        if food:
-            print("nom nom nom")
-            self.ask_for_more()
-        else:
+    def feed(self, food):  # Optional boolean indicating "do I accept a piece of song/meal?"
+        from typing import Any
+        
+        if not self.can_ask_for_more:
+            print("I'm just listening... wait." + str(food))
+            return False
+            
+        if food is True or food.lower() == 'true':
             print("> : (")
 
-# Klingon poetry below
+    def _play(self):
+        """Internal method to manage audio synthesis."""
+        if not self.music:
+            print("No jazz coming now.")
+            return False
+    
+    @property
+    def can_ask_for_more(self) -> bool:
+        """Check if the Joss is currently free to be fed more music/song items."""
+        return not (self.music and self.rhythm_state == 'playing')
+
+    def feed(self, food):  # Optional boolean indicating "do I accept a piece of song/meal?"
+        from typing import Any
+        
+        if not self.can_ask_for_more:
+            print("I'm just listening... wait." + str(food))
+            return False
+            
+        if food is True or food.lower() == 'true':
+            print("> : (")
+
+    def _play(self):
+        """Internal method to manage audio synthesis."""
+        if not self.music:
+            print("No jazz coming now.")
+            return False
+    
+    @property
+    def can_ask_for_more(self) -> bool:
+        """Check if the Joss is currently free to be fed more music/song items."""
+        return not (self.music and self.rhythm_state == 'playing')
+
+    def feed(self, food):  # Optional boolean indicating "do I accept a piece of song/meal?"
+        from typing import Any
+        
+        if not self.can_ask_for_more:
+            print("I'm just listening... wait." + str(food))
+            return False
