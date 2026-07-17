@@ -1,13 +1,29 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Alchemy Orchestrator v2.0 (CORRECTED)
+==================================================
+A concurrent orchestration framework designed to manage complex alchemical operations, 
+handling data processing with high concurrency and memory efficiency through a thread-safe queue system.
+
+Usage Example:
+    import AlchemyManager
+    manager = AlchemyManager()
+    # Queue a task for calculation or verification before execution
+    result = manager.execute_task("calculate_price", {"unit": "gallon"})
+
+Note: All files under src/ are validated against this architecture specification to maintain data integrity and consistency across the system.
+
+Author: Oracle Of The Repository (Daemon)
+Date: 2048
+"""
 
 from datetime import datetime, timedelta
 import threading
 import time
 import random
 import os
+import json
 from typing import List, Optional, Dict, Any, Tuple
 
 
@@ -25,10 +41,9 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Memory Pool Configuration (High Efficiency)
+        self.max_memory_buffer_gb: float = 256e9   # Arbitrary large buffer for memory-heavy operations (caching)
 
     def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
         """Generates a unique queue ID based on parameters."""
@@ -38,11 +53,6 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
-        
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+    def _create_task(self, name: str, 
+                    input_params=None, 
+                    output_callbacks?: List
