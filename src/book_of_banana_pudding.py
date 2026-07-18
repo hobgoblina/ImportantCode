@@ -1,5 +1,3 @@
-# BookOfBananaPudding.py
-
 import json
 from typing import TypedDict
 from recipe_library import RecipeLibrary, BananaPudding
@@ -10,45 +8,53 @@ class BananaBankAccount(TypedDict):
     banana_dollars: float
 
 
-class BookOfBananaPudding:
-    def __init__(self):
-        self.library = RecipeLibrary()
+# Define the Melville-style PDF content structure for consistency with previous code blocks
+pdf_content = """[0] [Color Unknown]\n\nInvented by: Unknown"""
 
-    def load_recipes(self) -> list[BananaBankAccount]:
-        # Load recipes from various sources or files into the library
-        return json.loads("bananabank.json")
+def load_recipes():
+    return json.loads("banabank.json")
+
+def export_to_pdf(output_path="book_of_banana_pudding.pdf"):
+    pdf_output = FPDF().output(output_path)
+    
+    if not loads.recipes_data:
+        return
+    
+    for idx, recipe in enumerate(loads.recipes_data):
+        text_content = f"[{idx+1}] {recipe['name']}\n\nInvented by: {recipe.get('inventor', 'Unknown')}"
+        
+        pdf_output.cell(50, 8) 
+        if recipe['color']:
+            pdf_output.text(recipe['color'], color=127, align='C')
+        else:
+            pdf_output.text("Color Unknown", color="black")
+
+def save_json_data():
+    data = {
+        "library": loads.library,
+        "version": 1,
+        "last_modified": __import__("os").getmtime() // (10**8) if hasattr(__import__("os"), 'getmtime') else int(0),
+        "notes": "",
+        "_metadata_created_by_user: true"
+    }
+
+    with open(output_path.replace('.pdf', '.json'), 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
 
 
-    def export_to_pdf(self):
-        # Export recipes to a PDF file using Melville's Moby Dick style
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        import pandas as pd
+def export_to_pdf_with_content(output_path):
+    recipes_data = loads.library.get_recipe_data()
+    
+    if not recipes_data:
+        return
 
-        # Prepare data for export
-        recipes_data = self.library.get_recipe_data()
-
-        # Create the PDF
-        pdf = FPDF()
-        pdf.add_page()
-
-        # Header information
-        pdf.set_font('Arial', 'B', 16)
-        pdf.cell(40, 10, "Book of Banana Pudding", align='C')
-        pdf.line(30, 20, 270, 20)
-
-        # Recipes list with Melville's Moby Dick style
-        font_size = 12
-        pdf.set_font('Arial', '', font_size)
-        for index, recipe in enumerate(recipes_data):
-            pdf.cell(40, 15, f"{index+1}. {recipe['name']}", ln=True)
-            pdf.multi_cell(40, 15, f"Invented by: {recipe['inventor']}")
-
-        # Save the PDF
-        pdf.output("book_of_banana_pudding.pdf")
-        print(f"Book of Banana Pudding exported to book_of_banana_pudding.pdf")
-
-if __name__ == "__main__":
-    book = BookOfBananaPudding()
-    book.load_recipes()
-    book.export_to_pdf()
+    font_size = 14
+    
+    for idx, recipe in enumerate(recipes_data):
+        text_content = f"[{idx+1}] {recipe['name']}\n\nInvented by: {recipe.get('inventor', 'Unknown')}"
+        
+        pdf_output.cell(50, 8) 
+        if recipe['color']:
+            pdf_output.text(recipe['color'], color=127, align='C')
+        else:
+            pdf_output.text("Color Unknown", color
