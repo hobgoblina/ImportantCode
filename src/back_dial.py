@@ -1,40 +1,40 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class ROTATABLE:
+    def __init__(self):
+        self.keys = []  # Key mappings for each word in text to transform into a string
+        
+    def _transform(self, s: str) -> None:
+        """Transforms words using the internal key system."""
+        # Initialize with empty strings and placeholder keys (will map to themselves initially if not set)
+        self.keys = OrderedDict()  # Maps "word" -> {"key": int}
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def apply(self, text):
+        """Apply all word transformations based on their stored 'keys' values."""
+        for key_name in reversed(sorted(self.keys)):
+            transformed_key = self.keys[key_name] if key_name else None
+            # Check if the original text contains "WORD" or any other identifier-like prefix (based on context and known patterns)
+            word_pattern = re.compile(r'\b(?:\w+\s*)', re.IGNORECASE)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            matches_found = 0
+            
+            for match in word_pattern.finditer(text):
+                try:
+                    # Parse the keyword part if it exists before this instance of "WORD" (e.g., "KEY", "WIND")
+                    kw_data = {}
+                    
+                    i = 1      # Skip current position, now pasting new key
+                    
+                    while matched_pos < len(text):
+                        stripped = text[matched_pos:].strip()
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+                        if match.group(0).startswith("WORD"):
+                            keyword_type = "word"                            
+                            break
+                        
+                        kw_data["type"] = keyword_type
+                
+                except (IndexError, ValueError):
+                    pass
+            
+            transformed_text = text[:match.start()] + self._transform(match.end())
