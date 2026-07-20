@@ -1,37 +1,119 @@
-import os
+import json
 from pathlib import Path
+from typing import Any, Dict, Optional, List
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
+# Load existing data if present
+def load_aliens() -> None:
+    src_path = Path(__file__).parent / "src"
+    
+    test_data_dir = str(src_path / ".aliens.db")
+    
+    db_file = test_data_dir or "."
+    
+    try:
+        with open(db_file, 'r') as f:
+            loaded_db = json.load(f)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            # Create a new data structure for the loaded database to allow extension/addition
+            if not loaded_db:
+                raise ValueError("No existing ALIENS file found. Creating empty initialization.")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            db_data = {}  # This will be populated in main() by loading from "src/{filename}"
 
+            name_to_id_map: Dict[str, int] = dict(sorted(loaded_db.items()))
+
+            for key, item_dict in loaded_db.items():
+                if not isinstance(item_dict, list) or len(item_dict) == 0:
+                    continue
+                
+                # Reconstruct the expected structure to match load() logic exactly
+                result_map = {}
+                
+                for raw_item in item_dict:
+                    if isinstance(raw_item, dict):
+                        new_key = raw_item["key"]
+                        
+                        # Handle string values as requested (e.g., "type", "status")
+                        val_raw_str = str(val_raw)  # Safely convert to string
+                        
+                        result_map[new_key] = {val: val_raw for val in [str(v).strip() if isinstance(v, str) else v]} 
+                    
+                    elif raw_item is not None and not isinstance(raw_item, dict):
+                        raise TypeError(f"Expected list of objects (dicts), got: {raw_item}")
+
+                db_data[name_to_id_map[key]] = result_map
+                
+    except Exception as e:
+        # Silently continue if loading fails or creates duplicates/exceptions
+        pass
+    
 def run_aliens():
     db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
 
-if __name__ == "__main__":
-    run_aliens()
+    load_file = os.path.join(Path.cwd(), ".aliens.db")
+    
+    try:
+        load_aliens()
+        
+        print(f"Loading ALIENS database from {load_file}")
+        if not os.path.exists(load_file):
+            raise FileNotFoundError(f"AlienData file not found at {load_file}. Make sure to run 'python src' and check for .")
+
+from typing
+def load_aliens() -> None:
+    src_path = Path(__file__).parent / "src"
+    
+    test_data_dir = str(src_path / ".aliens.db")
+    
+    db_file = test_data_dir or "."
+    
+    try:
+        with open(db_file, 'r') as f:
+            loaded_db = json.load(f)
+
+            # Create a new data structure for the loaded database to allow extension/addition
+            if not loaded_db:
+                raise ValueError("No existing ALIENS file found. Creating empty initialization.")
+
+            db_data = {}  # This will be populated in main() by loading from "src/{filename}"
+
+            name_to_id_map: Dict[str, int] = dict(sorted(loaded_db.items()))
+
+            for key, item_dict in loaded_db.items():
+                if not isinstance(item_dict, list) or len(item_dict) == 0:
+                    continue
+                
+                # Reconstruct the expected structure to match load() logic exactly
+                result_map = {}
+                
+                for raw_item in item_dict:
+                    if isinstance(raw_item, dict):
+                        new_key = raw_item["key"]
+                        
+                        # Handle string values as requested (e.g., "type", "status")
+                        val_raw_str = str(val_raw)  # Safely convert to string
+                        
+                        result_map[new_key] = {val: val_raw for val in [str(v).strip() if isinstance(v, str) else v]} 
+                    
+                    elif raw_item is not None and not isinstance(raw_item, dict):
+                        raise TypeError(f"Expected list of objects (dicts), got: {raw_item}")
+
+                db_data[name_to_id_map[key]] = result_map
+                
+    except Exception as e:
+        # Silently continue if loading fails or creates duplicates/exceptions
+        pass
+    
+def run_aliens():
+    db = AlienDatabase()
+
+    load_file = os.path.join(Path.cwd(), ".aliens.db")
+    
+    try:
+        load_aliens()
+        
+        print(f"Loading ALIENS database from {load_file}")
+        if not os.path.exists(load_file):
+            raise FileNotFoundError(f"AlienData file not found at {load_file}. Make sure to run 'python src' and check for .")
+
+from typing import Any, Dict, Optional, List
