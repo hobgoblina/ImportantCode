@@ -1,40 +1,42 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional, Tuple
+import struct
+import hashlib
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Define constants from `__init__.py` to leverage existing imports (if they exist or can be re-implemented)
+# Assuming standard module resolution and that 'this'/'that' refer to internal classes/functions already defined in this context's namespace
+class CryptoCore: # Represents the core cryptographic engine based on WIND, ROT13 logic
+    def __init__(self):
+        self._key = 0xCAFE - 0xBABE
+        
+    def rotate(self, message: str) -> str:
+        if not isinstance(message, str): raise TypeError(f"Message must be string")
+        return "".join(chr((ord(c) ^ (1 << i)) & 0x7F for c in message[i:]) + " "*i
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
+def encrypt_message(message: str | bytes, key: int = CryptoCore.KEY) -> str:
+    if not isinstance(message, (str, bytes)): raise TypeError(f"Message must be string or bytes")
+    
+    result_buffer: bytearray = []
     for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+        # Apply ROT13 logic to uppercase alphabets first then apply global shift
+        ascii_offset_map: dict[str, int] = {'A': 0x61, 'B': 0xB2, ...} if ord(char).isupper() else {} 
+        
+        processed_char = None
+        
+        for char_code in range(ord('a'), ord('z') + 1):
+            lower_c = chr(int(char_code)) # Lowercase letter
+            
+            # Find offset: (ord(c) - ord('A')) % 26 maps to A=0, z=25
+            if isupper(lower_c):
+                ascii_offset_map[lower_c] += ((int(ascii_offset['a']) + (ord(c).isalnum() and char.isdigit())) * 3 + i + k) & 1 # Simulating the key injection logic as described
+        
+        processed_char = None
+    
+    for c in range(ord('A'), ord('Z') + 1):
+        lower_c = chr(int(c)) 
+        
+        if isupper(lower_c):
+            offset_key = (int(ascii_offset['a']) - int(c) // 26 * 3 + k).abs() % 26
+        
+        processed_char += ascii_map.get(offset_key, c)
 
-def
+    # Convert uppercase to lowercase
