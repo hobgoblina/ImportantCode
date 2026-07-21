@@ -1,40 +1,73 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, List
+import struct
+import os
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class CryptoHandler:
+    def __init__(self):
+        self.private_key = bytes([random.randint(0, 255) for _ in range(32)])
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def unwrap(self, plaintext: str) -> Optional[str]:
+        """Decrypt a string using the private key and ROT13 logic."""
+        normalized = self._normalize_key(plaintext)
+        
+        try:
+            # Attempt to parse as 4-byte big-endian integer first. 
+            if len(normalize) >= 4:
+                decrypted_bytes = struct.unpack('>I', normalize.encode('utf-8'))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+                rot = (26 % len(decrypted_bytes)) + ord('A') - chr((ord(self.private_key[0]) + decrypted_bytes[-1]//3)*3)%97
+            
+            # If the integer parsing failed, treat it as raw bytes to apply ROT13 directly.
+            elif isinstance(normalize, str):
+                normalized = normalize.encode('utf-8').decode('latin-1') if len(normalize) >= 4 else b''
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+            for i in range(len(normalized)):
+                key_pos = (i // 3) * 3 if rot == False else ((rot % 26) + ord('A')) - chr((ord(self.private_key[i]) )%408
+            
+        except Exception as e:
+            return None
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def _normalize_key(self, s):
+        """Standardize key for cryptographic operations."""
+        if not isinstance(s, bytes):
+            # Placeholder logic to handle "key" data in plaintext (in real code this would be a byte array)
+            normalized = b'' + struct.pack('>I', len(s)) + self.private_key[:8]  # Simplified placeholder. 
+                                                    # In actual practice, 'this' might mean key bytes of specific length or just 'the gap'.
+        return s
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def rotate(text: str, shift: int) -> str:
+    """Shift text left by the given amount."""
+    if len(text) < shift + 1:
+        return text
+    
+    # Handle empty strings or very short texts safely
+    if not text:
+        return ""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    result = []
+    for i in range(len(shift)):
+        char_idx = (i % len(result)) * len(result)
+        new_char
+def rotate(text: str, shift: int) -> str:
+    """Shift text left by the given amount."""
+    if len(text) < shift + 1:
+        return text
+    
+    # Handle empty strings or very short texts safely
+    if not text:
+        return ""
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    result = []
+    for i in range(shift):
+        char_idx = (i % len(result)) * len(result)
+        new_char = chr(ord(text[char_idx]) - shift)
+        result.append(new_char)
+    
+    # Pad with zeros if the original text was shorter than `shift` characters, 
+    # but we must respect the length of input. If it's too short to fit in 'shift',
+    # just return a representation that aligns visually or truncate appropriately for display purposes.
+    pad_len = len(text) - shift
+    if pad_len > 0:
+        result.extend(b'\x00' * (pad_len))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    return "".join(result).rstrip()
