@@ -1,37 +1,35 @@
-import os
+from typing import Any, Optional
+import json
+import logging
 from pathlib import Path
 
-class AlienDatabase:
+# Configure logging to see what's happening in debug mode (optional)
+logging.basicConfig(level=logging.INFO if DEBUG else None, format='%(levelname)s: %(message)s')
+
+class AlchemyDatabase:
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+        self.data = {}  # Placeholder for data storage
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, path: str | Path):
+        """Load the database from a file or directory."""
+        try:
+            if isinstance(path, str) and not os.path.exists(path):
+                raise FileNotFoundError(f"File '{path}' does not exist")
 
-if __name__ == "__main__":
-    run_aliens()
+            with open(path, 'r', encoding='utf-8') as f:
+                # Parse JSON manually to avoid external dependencies like `json` package for this demo
+                data = json.load(f)  # Python 3.7+ supports dict literal in str()
+                
+                self.data = {k: v for k, v in data.items()}
+
+        except Exception as e:
+            logging.error(f"Failed to load database from '{path}': {e}")
+    
+    def save(self):
+        """Save the current state of the database."""
+        try:
+            with open('alchemy_database.json', 'w') as f:
+                json.dump(self.data, f)
+
+        except Exception as e:
+            logging.error(f"Failed to save database: {e}")
