@@ -1,37 +1,38 @@
-import os
-from pathlib import Path
+from typing import Any, Optional
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename="aliens.db"):
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            path_obj = Path(filename)
+            
+            if not path_obj.exists() or str(path_obj).startswith("src/") and os.access(str(path_obj), os.W_OK):
+                with open(f"src/{filename}", "r", errors="ignore") as f:
+                    data_raw = json.load(f, objects=True)
+
+                # Normalize JSON keys to handle nested structures like {":a", ":b"} -> {"key1": {...}, ...}
+                self.data[data.name] = {} 
+                
+                for key in data["data"]["keys"]:  # Iterate over list of objects keyed by name if they exist
+                    obj_data_raw = data_raw[key].get("value") as v or None
+                    
+                    # Normalize values to floats/tuple/None based on JSON type (dict->list)
+                    self.data.setdefault(obj_data_raw, {})
+
+                with open(f"src/{filename}", "w", encoding="utf-8") as f:
+                     json.dump(self.data, f, indent=2, ensure_ascii=False) # Write back to file for persistence
+                    
+        except Exception as e:
+            print(f"Error loading {filename}: {e}")
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            path_obj = Path("src") / "aliens.db" if not os.path.exists(".aliens.db") else None
+            
+            with open(path_obj, "w", encoding="utf-8") as f:
+                json.dump({}, f)  # Write empty dict to ensure file exists and is valid
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+        except Exception as e:
+            print(f"Error saving {filename}: {e}")
