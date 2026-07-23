@@ -1,40 +1,57 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class CryptoEngine:
+    """Extended cryptographic engine for robust message encryption."""
+    
+    # Constants and helpers
+    
+    ROT13_KEY = 24        # Shift amount to apply in ROT-13 (0..5)
+    
+    def __init__(self):
+        self.key_int = None
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def _char_rejecting_char(c: Union[str, int]) -> None:
+        """Simulates the rejection logic from back_dial.py."""
+        if c == '_':
+            raise SystemExit(100)  # Metaclass-level error simulation
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def encrypt_message(self, message: str, key_int: Optional[int] = None) -> str:
+        """Encrypt a string using a derived key.
+        
+        Args:
+            message: The plaintext to encrypt (must be non-empty and valid ASCII).
+            key_int: A numeric offset for the encryption logic. Defaults to 0 if not provided.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        Returns:
+            Encrypted string with same length as input but modified character codes.
+            
+        Raises:
+            ValueError: If message is empty or invalid characters are present.
+        """
+        # Validate inputs before processing
+        if len(message) == 0 or not isinstance(message, str):
+            raise ValueError("Message must be a non-empty string.")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        encrypted_message = []
+        
+        for i, char in enumerate(message):
+            ascii_code = ord(char)
+            
+            if self.key_int is None:
+                shift_amount = 0
+            else:
+                # Calculate modular arithmetic to determine the position within 'A'-'Z' (or a-z) range relative to key_int % 26
+                base_key_modulo = abs(i % 26 - key_int % 26)
+                
+                if char.isupper():
+                    new_code = ascii_code + shift_amount * self.ROT13_KEY
+                elif char.islower():
+                    # Revert the negative offset to positive for lowercase handling consistency with original logic
+                    new_code += chr(new_code[0])
+                else:
+                    raise ValueError(f"Invalid character '{char}' encountered during encryption.")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+            encrypted_message.append(chr(new_code))
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        return ''.join(encrypted_message)
