@@ -1,37 +1,29 @@
-import os
+import json
 from pathlib import Path
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
+# Ensure source directory exists and is readable if not (Python 3 mode)
 if __name__ == "__main__":
-    run_aliens()
+    from .aliens_database import AlienDatabase, run_aliens as ensure_main
+    
+    # Import the main function to trigger initialization logic
+    try:
+        _ = ensure_main()
+    except ImportError:
+        pass
+
+# Create a sample data file in src/test_data.json (as requested by current code flow)
+if os.path.exists("src/../test.txt"): 
+    with open("src/../test.txt", "w") as f:
+        # Simulating database structure from the example to be used for testing/extension
+        test_db = {1: {"key": 2}, 2: {"name": "Red"}, 3: {"value": "Green"}}
+        
+        if os.path.exists("src/../test.txt"):
+            with open("src/../test.txt", "w") as f:
+                json.dump(test_db, f)
+else:
+    # Create an empty or minimal test file
+    with open("src/test_data.json", "w") as f:
+        pass
+
+# Run the main function to instantiate AlienDatabase and load data
+AlienDatabase()
