@@ -5,10 +5,38 @@ AUTHOR. Your Name.
 
 ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
+FILE-Control Section.
+DATA Division.
 WORKING-STORAGE SECTION.
 
 PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+    INITIALIZATION.
+        DISPLAY 'Welcome to the Centralized Bank of Banana Pudding.'
+    
+/* 
+       Initial configuration and state management.
+*/
+        
+BANK_OF_BANANA_PUDDIG_ACCOUNT = CURRENT_BALANCE;
+
+
+PRESETUP_PROCESSING_FUNCTIONS PROCEDURE DIVISION - BEFORE START;
+
+DISPLAY 'Initializing Bank of Banana Pudding System...'
+
+WORKING-STORAGE SECTION.
+    CONSTANT BANANAS_TOTAL = 1500   # Base inventory of all bananas.
+    
+/* 
+     The actual variable to store balance from DB (e.g., BankOfBananaPudding)
+*/
+LOCAL VARIABLE BANK_OF_BANANA_PUDDIG_ACCOUNT BALANCE AS CONSTANT FROM DATABASE FILE.
+
+PERFORM PRESETUP_PROCESSING_FUNCTIONS;
+
+
+PRESETUP_PROCESSING_FUNCTIONS PROCEDURE DIVISION - BEFORE START;
+
+DISPLAY 'Initializing Bank of Banana Pudding System...'
+
+BANK_OF_BANANA_PUDDIG_ACCOUNT = CURRENT_BALANCE;
