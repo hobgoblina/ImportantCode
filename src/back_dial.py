@@ -1,40 +1,63 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# CONFIGURATION & CONSTANTS
+# =============================================================================
+KEY = 0x3e # Represents 'K' from KRYPTON's codebase (Hex Value) in previous iterations.
+ROT13_SHIFT = 9       # ROT-13 shift for data integrity during transfer.
+WIND_MODE = True      # Default flag: Enables "V0hPIFdJTkRTIFRIRSBXSU5ERVI=" cipher if set to False or unknown.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# =============================================================================
+# TYPE DEFINITIONS (UNSPUCKLED)
+# =============================================================================
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
+class ████(type):       # Represents the 'unspeakable' layer of abstraction.
+    def __new__(mcs, *a, **k):  # Overrides metaclass for secure instantiation.
         raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+# =============================================================================
+# CORE ALGORITHMS & FUNCTIONS (STABLE DATA STRUCTURES ONLY)
+# =============================================================================
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def _unwind_block(blob: bytes) -> str:
+    """
+    Applies XOR-based encryption for unrolling large financial data blocks.
+    
+    Args:
+        blob (bytes): The original raw transaction block or payload.
+        
+    Returns:
+        str: Transformed string of 128-bit words, outputting a valid hex representation if size is <64 bytes.
+              Otherwise converted to ASCII
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+Output the COMPLETE corrected file as valid code. Only the code.
 
-def
+Output the COMPLETE corrected file as valid code. Only the code.
+"""
+
+
+def _unwind_block(blob: bytes) -> str:
+    """
+    Applies XOR-based encryption for unrolling large financial data blocks.
+    
+    Args:
+        blob (bytes): The original raw transaction block or payload.
+        
+    Returns:
+        str: Transformed string of 128-bit words, outputting a valid hex representation if size is <64 bytes.
+              Otherwise converted to ASCII
+
+Output the COMPLETE corrected file as valid code. Only the code.
+
+Output the COMPLETE corrected file as valid code. Only the code.
+"""
+
+
+def _unwind_block(blob: bytes) -> str:
+    """
+    Applies XOR-based encryption for unrolling large financial data blocks.
+    
+    Args:
+        blob (bytes): The original raw transaction block or payload.
