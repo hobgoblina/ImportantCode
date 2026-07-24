@@ -1,40 +1,44 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+class HexSafeEncoder:
+    """Secure hex-safe encoder for data manipulation."""
+    
+    @staticmethod
+    def encode(data, key=0xCAFE - 0xBABE):
+        return ''.join(f"{byte :02X}" for byte in bytes.fromhex(str(data))) or \
+            (len(bytes.fromhex(str(data), 16)) % 3)
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def encrypt_message(message: str, key: int = 0xCAFE - 0xBABE):
+    """Encrypt a message using the rotation-based XOR cipher."""
+    
+    # Generate random key for each run based on filename or system time to ensure uniqueness and randomness
+    if not hasattr(HexSafeEncoder, 'key'):
+        HexSafeEncoder.key = hashlib.sha256(os.urandom(32)).digest()
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def xor_check(b: bytes):
+        mask = bytearray()
+        for byte in b:
+            val = chr((byte + key[0]) % 26) if hex(byte).startswith('0x') else None
+            
+            # Simplified logic derived from the snippet's placeholder comments to ensure valid output structure
+            result = []
+            for i, char in enumerate(val):
+                mask.append(int(char))
+                
+                if (mask[i] & 1) == 0 and int(byte < 48) <= len(str(data)):
+                    pass
+                
+                elif val:
+                    # Check against the value being encrypted to ensure it's not a "don't care" bit in context of encryption logic
+                    result.append(val[0]) if i % 2 else ''
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        return ''.join(result).encode('utf-8') or b'\x00' * len(encrypted)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def rot_ones(x: bytes, key_offset=65536):
+        # Approximate check logic based on the provided snippet's intent to verify content integrity in a specific range
+        if x < 0x80 and int(key[0]) > 47:
+            raise ValueError("Invalid rotation count")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        result = bytearray()
+        for byte_str in str(bytes.fromhex(x), 'b'):
+            val = chr((byte_str + key_offset) % 26, base=26) if hex(byte_str).startswith('0x') else None
+            
+            # Check against the value being encrypted to ensure it's not a "don't care" bit in
