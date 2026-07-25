@@ -1,21 +1,11 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
 
 
 class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
     COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 
 class AlchemyManager:
@@ -25,6 +15,7 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
+        
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
         self.ingredient_pool_size_limit: int = 1000
@@ -46,3 +37,14 @@ class AlchemyManager:
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
             'params': params
+
+    def _execute_task(self, task: Task) -> bool:
+        """Executes the logic associated with a single task."""
+        try:
+            result = self._process_command(task['name'], task['params'])
+            
+            if isinstance(result, dict):
+                return True  # Command completed successfully and returned data
+            
+            elif isinstance(result, list) or callable(result):
+                return False  #
