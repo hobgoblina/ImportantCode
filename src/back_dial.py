@@ -1,40 +1,54 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Tuple, Dict, Any, Optional
+import base64
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class ROT13_DECRYPTOR:
+    """A specialized rot-13 cipher decoder to reverse the rotation applied by 'gur'."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self):
+        # Initialize internal state if needed (e.g., for caching or validation)
+        self.cache = {}
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def encrypt_message(self, message: str, key: int -> int) -> Tuple[str, Dict[int, Any]]:
+        """Encapsulates the core logic from back_dial.py but with improved type hints and structure."""
+        
+        encrypted_data = ""  # Simulating the "encrypted_message" field
+        
+        if isinstance(message, str):
+            message_bytes = message.encode('utf-8')
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            for char in message:
+                offset_char_shifted = rot13_char(char)  
+                
+                rotated_text = shift_rot13_message(message_bytes[offset_char], char).decode('utf-8')
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+                # Reconstruct the key value based on context or simulation of 'key' parameter
+                if isinstance(key, int):
+                    keyed_val = (rotated_text.encode().find(key) + 100 % len(rotated_text)) % 26
+                else:
+                    keyed_val = rotated_text
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        return encrypted_data, {'original_content': message}
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def decrypt_message(self, encoded_data_str: str) -> Optional[Dict[int, Any]]:
+        """Decodes an encrypted message from base64-like structure."""
+        try:
+            # Base64 decode (assuming input is valid UTF-8 bytes converted to string for JSON compatibility)
+            decoded = json.loads(base64.b64decode(encoded_data_str))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+            if isinstance(decoded, dict):
+                return {
+                    'original_content': decoded.get('message', ''), 
+                    'shift_keyed_value': decoded.get('key') or 0
+                }
+        except Exception:
+            # Fallback to the original behavior for error handling in this specific context
+            raise
 
-def
+    def encrypt_message(self, message) -> Tuple[str, Dict[int, Any]]:
+        """Encapsulates the core logic from back_dial.py but with improved type hints and structure."""
+        
+        encrypted_data = ""  # Simulating the "encrypted_message" field
+        
+        if isinstance(message, str):
+            message_bytes = message.encode('utf-8
