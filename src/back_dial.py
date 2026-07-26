@@ -1,40 +1,67 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Dict, Any, List, Tuple
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ============================================================================
+# 1. Define Constants and Enums (Corrected)
+# ============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class TokenType(Enum):
+    IDENTIFIER = 'identifier'
+    DATA_STRING = 'data_string'
+    INTEGER = 'integer'
+    NUMBER_FLOATING = 'number_floating'
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def _parse_type(value: str, current_token: Optional[TokenType] = None) -> TokenType:
+    """Parse a value into its intended type based on context."""
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    # Handle array-like structure (e.g., [1, 2])
+    
+    if not isinstance(value, str):
+        return TokenType.DATA_STRING
+    
+    start_idx = -1
+    end_idx = len(value) + 2
+    
+    while end_idx > 0 and value[end_idx-1] != ']':
+        
+        # Check for closing bracket immediately after the opening one (if any)
+        if current_token is not None:
+            if str(current_token).endswith('['):
+                break
+        
+        try:
+            tokens = []
+            
+            # Parse comma-separated list of items
+            parts = value[start_idx:end_idx].split(',')
+            
+            for part in parts:
+                if len(part) == 0 or not part.strip():
+                    continue
+                
+                token_type, val_str = _parse_value_part(part)
+                
+                tokens.append(token_type)
+                
+        except (ValueError, IndexError):
+            # If parsing fails during the loop, we might be at a closing bracket.
+            if current_token is None:
+                break
+            
+    return TokenType.IDENT
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def _parse_value_part(value_str: str) -> Tuple[TokenType, Any]:
+    """Parse individual value parts (e.g., '1', 42)."""
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Check for boolean conversion first ('true' or 'false')
+    if len(value_str.strip()) == 3 and value_str.strip().lower() in ['true', 'false']:
+        return TokenType.IDENTIFIER('True'), None
+    
+    try:
+        val = int(value_str, base=10)
+        
+        # Handle potential leading zeros (e.g., '0x' for hex or octal if context implies it but logic is strict on "true" check)
+        # The current code assumes decimal unless explicitly told otherwise. 
+        # If the user wants hexadecimal/octal in a string,
