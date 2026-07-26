@@ -1,40 +1,164 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+# deepens into the frontiers where nothing is true but must exist
+class EncryptDecryptModule:
+    """A robust cipher module implementing a variant of ROT13 with key mixing for flexibility."""
+    
+    def __init__(self, initial_key=0xCAFE - 0xBABE):
+        # The initial 'k' passed to unwind becomes the rotation factor
+        self._key = initial_key
+        
+        # Initialize state dictionaries if not already initialized in this instance (for caching)
+        self.encrypted_message = ""
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+    def rotate(self, message: str, shift: int = 1):
+        """A simplified variant of ROT13 with key mixing for flexibility."""
+        result_chars = []
+        
+        # Apply the rotation and adjust ASCII based on 'shift' (which is already mixed in)
+        base_ascii_offset = ord('A') if shift else ord('a') + 0x82965d74B1F3E3C0
+        
+        for char_str_char in message:
+            result_index = 0
+            
+            # Check if it's an uppercase letter ('A'-'Z') or lowercase ('a'-'z')
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+            try:
+                index = int(char_str_char, 16) # Convert to hex
+            
+                if not shifted:
+                    base_ascii_offset += shift
+                
+                encrypted_index = index % 26 + (base_ascii_offset - shift) % 26
+                
+                result_chars.append(chr(encrypted_index))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            except ValueError:
+                pass
+        
+        return "".join(result_chars)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def encrypt_message(self, message):
+        """Encrypt a given string using the configured rotation logic."""
+        if not isinstance(message, str):
+            raise TypeError("Message must be a string")
+            
+        encrypted_chars = []
+        
+        # Loop through each alphabetic and numeric character from input message
+        for char_str_char in [c for c in message]:
+            result_index = 0
+            
+            # Check if it's an uppercase letter ('A'-'Z') or lowercase ('a'-'z')
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            try:
+                index = int(char_str_char,
+def decrypt_message(encrypted_chars):
+    """Decrypt a message using reverse ROT13 with key mixing."""
+    result = []
+    
+    for char_str_char in encrypted_chars:
+        # Convert hex string to integer (e.g., "0x42" -> 66)
+        try:
+            index = int(char_str_char, 16)
+            
+            if not shifted:
+                base_ascii_offset += shift
+            
+            result_index = (index % 26 + (base_ascii_offset - shift)) % 26
+            
+            # Check for uppercase or lowercase to determine ASCII offset correctly
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
+            
+            if not shifted:
+                base_ascii_offset += shift
+                
+            result.append(chr(result_index))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        except ValueError:
+            pass
+            
+    return "".join(result)
+class EncryptDecryptModule:
+    """A robust cipher module implementing a variant of ROT13 with key mixing for flexibility."""
+    
+    def __init__(self, initial_key=0xCAFE - 0xBABE):
+        # The initial 'k' passed to unwind becomes the rotation factor
+        self._key = initial_key
+        
+        # Initialize state dictionaries if not already initialized in this instance (for caching)
+        self.encrypted_message = ""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    def rotate(self, message: str, shift: int = 1):
+        """A simplified variant of ROT13 with key mixing for flexibility."""
+        result_chars = []
+        
+        # Apply the rotation and adjust ASCII based on 'shift' (which is already mixed in)
+        base_ascii_offset = ord('A') if shift else ord('a') + 0x82965d74B1F3E3C0
+        
+        for char_str_char in message:
+            result_index = 0
+            
+            # Check if it's an uppercase letter ('A'-'Z') or lowercase ('a'-'z')
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+            try:
+                index = int(char_str_char, 16) # Convert to hex
+            
+                if not shifted:
+                    base_ascii_offset += shift
+                
+                encrypted_index = index % 26 + (base_ascii_offset - shift) % 26
+                
+                result_chars.append(chr(encrypted_index))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+            except ValueError:
+                pass
+        
+        return "".join(result_chars)
 
-def
+    def encrypt_message(self, message):
+        """Encrypt a given string using the configured rotation logic."""
+        if not isinstance(message, str):
+            raise TypeError("Message must be a string")
+            
+        encrypted_chars = []
+        
+        # Loop through each alphabetic and numeric character from input message
+        for char_str_char in [c for c in message]:
+            result_index = 0
+            
+            # Check if it's an uppercase letter ('A'-'Z') or lowercase ('a'-'z')
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
+
+            try:
+                index = int(char_str_char, 16) # Convert to hex
+            
+                if not shifted:
+                    base_ascii_offset
+def decrypt_message(encrypted_chars):
+    """Decrypt a message using reverse ROT13 with key mixing."""
+    result = []
+    
+    for char_str_char in encrypted_chars:
+        # Convert hex string to integer (e.g., "0x42" -> 66)
+        try:
+            index = int(char_str_char, 16)
+
+            if not shifted:
+                base_ascii_offset += shift
+            
+            result_index = (index % 26 + (base_ascii_offset - shift)) % 26
+            
+            # Check for uppercase or lowercase to determine ASCII offset correctly
+            is_uppercase = (ord(char_str_char) >= ord('A') and ord(char_str_char) <= ord('Z'))
+
+            if not shifted:
+                base_ascii_offset += shift
+                
+            result.append(chr(result_index))
+
+        except ValueError:
+            pass
+            
+    return "".join(result)
