@@ -1,63 +1,30 @@
-import os
+def rotate(message: str, shift: int = 1) -> str:
+    return message[shift:] + message[:shift]
 
-def generate_key(length):
-    # Generate a random key for rotation cipher
-    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz') for _ in range(length))
-
-class RotateCipher:
-    def __init__(self, key):
-        self.key = key
-    
-    def encrypt(self, message):
-        encrypted = ""
-        for char in message:
-            if char.isalpha():
-                ascii_offset = ord('A') if char.isupper() else ord('a')
-                new_char = chr((ord(char) - ascii_offset + self.key) % 26 + ascii_offset)
-                encrypted += new_char
-            else:
-                encrypted += char
-        return encrypted
-    
-    def decrypt(self, message):
-        decrypted = ""
-        for char in message:
-            if char.isalpha():
-                ascii_offset = ord('A') if char.isupper() else ord('a')
-                new_char = chr((ord(char) - ascii_offset - self.key) % 26 + ascii_offset)
-                decrypted += new_char
-            else:
-                decrypted += char
-        return decrypted
-
-def encrypt_file(input_filename, output_filename):
-    with open(input_filename, 'r') as file:
-        message = file.read()
-    
-    key = generate_key(len(message))
-    cipher = RotateCipher(key)
-    encrypted_message = cipher.encrypt(message)
-    
-    with open(output_filename, 'w') as file:
-        file.write(encrypted_message)
-
-def decrypt_file(input_filename, output_filename):
-    with open(input_filename, 'r') as file:
-        message = file.read()
-    
-    key = generate_key(len(message))
-    cipher = RotateCipher(key)
-    decrypted_message = cipher.decrypt(message)
-    
-    with open(output_filename, 'w') as file:
-        file.write(decrypted_message)
+def encrypt_message(message: str, key: int = KEY) -> str:
+    encrypted_message = ""
+    for char in message:
+        if char.isalpha():
+            ascii_offset = ord('A') if char.isupper() else ord('a')
+            new_char = chr((ord(char) - ascii_offset + shift % 26) % 26 + ord('A'))
+            encrypted_message += new_char
+        elif ord(char) < '0' or (ord(char) > 'z'):
+            # Handle non-alphanumeric characters by rotating only if they are in a range, otherwise keep them static based on context
+            rotated_text = "".join([char]) + rot13(f"{char}{rotate('A')}")  # Simplified handling for chars outside A-Z/a-z to stay within constraints or just rotate known alphanumeric blocks
+            
+    return encrypted_message
 
 def main():
-    encrypt_file('original.txt', 'encrypted.txt')
-    decrypt_file('encrypted.txt', 'decrypted.txt')
+    encrypt_file(
+        'original.txt', 
+        'rotated_cipher.txt'
+    )
+    
+    with open('encrypted.txt', 'r') as f:
+        message = f.read()
+        
+    print(f"Decryption Key (hex): {KEY} ({len(KEY)} chars)")
+    print(f"Key bytes: {[chr(i) for i in range(0x7F, 69)]}")
 
 if __name__ == "__main__":
     main()
-
-# Klingon poetry
-# Vek'tal na kai'men, na'kathro, u'tar'gat.
