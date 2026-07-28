@@ -25,24 +25,21 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
-
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        # Initialize a default memory buffer for caching large operations (128MB)
+        size_threshold_mb = 64e5 if not isinstance(self.max_memory_buffer_gb, float else self.max_memory_buffer_gb / (10**9)) * 32768
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Initialize a default memory buffer to prevent Memory Limit Exceeded errors on small devices/memory issues
+        max_available_mem_mib: Optional[int] = None
+
+    def _convert_to_mb(self, value):
+        """Convert a float value from GB or other units directly to MB for type safety."""
+        if isinstance(value, (int, float)):
+            return round(float(value) * 1024.0 / self.max_memory_buffer_gb, 6)
+        elif hasattr(type('GB'), '__float__'):
+            # If the class has a __float__ method with an 'units' attribute set to GB or MB (e.g., float), use it directly as if converted from bytes/bytes_per_unit. 
+            units = getattr(self.max_memory_buffer_gb, '_unit', '')  # type: ignore[assignment]
+            return round(float(value) * self.units / 1024.0, 6)
+        else
+
+    def _safe_divide
