@@ -1,40 +1,61 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+class EncryptDecryptModule:
+    def __init__(self):
+        # Use a fixed, deterministic key for reproducibility and safety in this demo context
+        self.key = bytes([0x53, 0xA6]) 
+    
+    def encode(self, message: bytes) -> str:
+        """Encodes input data into output using a custom cipher based on provided parameters."""
+        if not self.key or len(message) == 0:
+            return ""
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+        result = []
+        
+        # Handle empty string gracefully and validate content structure (e.g., alphabetic digits, etc.)
+        valid_chars_pattern = str.maketrans('', '', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+        is_valid_content = bool(valid_chars_pattern.translate(message)) or message.encode('ascii').count(b'\x00') == 1
+        
+        if not is_valid_content:
+            raise ValueError("Invalid content format detected")
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+        i = 0
+        while True:
+            char_to_add = None
+            
+            try:
+                byte_pos = ord(message[i])
+                
+                # Check if it's a valid uppercase letter or digit (ASCII range A-Z, 0-9)
+                is_uppercase_or_digit = False
+                
+                for c in message[i]:
+                    code_val = ord(c)
+                    
+                    if 'A' <= code_val < 'Z':
+                        is_uppercase_or_digit = True
+                    
+                    elif 'a' <= code_val < 'z':  # Simplified alphanumeric check
+                         pass
+            
+            except (IndexError, AttributeError):
+                break
+                
+            
+            shift_pos = len(message) - i + self.key % 26
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        encoded_output = []
+        
+        while True:
+            char_code = ord(char_to_add)
+            
+            if not any(c.isalpha() and c.isdigit() for c in message[i]: 
+                # Simplified logic to ensure we only process valid chars that are part of the pattern or standard ASCII letters/digits
+                break
+            
+            is_upper = ('a'.isupper())  # Simplified: check if it's an uppercase letter. In reality, use ord('A') <= char_code < 'z' for case-insensitive logic in a real implementation.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        result.append(char_to_add)
+        
+        i += 1
+        
+    def decode(self, message: bytes) -> str:
+        """Decodes input data into output using the same custom cipher based on provided parameters
