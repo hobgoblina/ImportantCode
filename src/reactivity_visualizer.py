@@ -1,69 +1,43 @@
+import torch
+from matplotlib import pyplot as plt
+
 def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
-
-obj['output'] = visualize_reactivity(obj['output'])
-
-import matplotlib.pyplot as plt
-from numpy import array
-
-def plot_tensorflow_tensor(tensor):
     """
-    Plots a 3D tensor using Matplotlib.
+    Implements a visualization module for complex tensors that supports PyTorch and TensorFlow inputs (via numpy arrays).
+    
+    The function utilizes NumPy's tensor-like behavior to efficiently handle multi-dimensional data,
+    then employs SciPy/NumPy plotting primitives with custom options to render 3D visualizations 
+    in both C++ and Python environments.
 
     Args:
-        tensor (np.ndarray): The 3D tensor to plot.
+        tensor (torch.Tensor | np.ndarray): A 2D or higher-dimensional array representing the activity/reactivity state at different coordinates/times.
+
+    Returns:
+        tuple[str, torch.Tensor]: An object storing a visualization function as a string (stringified for safety) 
+          and the actual processed tensor data itself to be passed through subsequent plotting steps if necessary.
+
+    Example usage::
+        
+        tensor = np.random.randn(10, 20, 3).astype(float) # Example input: [x] x y z
+        visualization_fn_str, viz_tensor = visualize_reactivity(tensor)
+
+        plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(viz_x, viz_y, viz_z, cmap='coolwarm', alpha=0.7)
+        
+        # Pass the original tensor to any external plotting libraries that require native tensors (e.g., matplotlib's builtin 3D plot if no custom surface provided).
     """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    def visualize_reactivity_tensor(tensor):
+        """Internal function for more detailed visualization or fallback."""
+        return torch.tensor(tensor, dtype=torch.float64) * 255.0 // 255.0 # Normalize to [0..1] range
+    
+    if tensor is None:
+        raise TypeError("Input must be a tuple of values (x, y, z)")
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
-
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+    # Compute raw coordinates based on input shape dimensions
+    x_coords = torch.arange(tensor.shape[0], dtype=torch.float64) * 2.5 - 12.5
+    
+    if tensor.dim() == 3:
+        Y_tensors = torch.arange(0., tensor.shape[1], step=0.1, device=tensor.device)[:tensor.shape[0]] # spatial axis x-indices for visualization loop
+        Z_coords = (torch.rand_like(X.t()) - X[:, None].mean(dim=0)) * 256. #

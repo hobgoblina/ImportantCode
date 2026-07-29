@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os, sys, time, hashlib, threading
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class AlchemyManager(threading.Lock):
+    """Thread-safe orchestration layer for managing alchemical operations."""
+    
+    def __init__(self, queue_id: str = "idle", max_queue_size: int = 100):
+        self._queue: Dict[str, List[Dict]] = {} # Use dict to avoid list iteration issues with 'tasks' variable
+        
+    def _remove_from_queue_for_idle(self) -> None:
+        """Remove a queued operation when it is idle and queue size reaches limit."""
+        if not (self._queue or len([t for t in self._queue.values()]) == 0):
+            del self._queue
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def enqueue(self, task_name: str, data=None) -> bool:
+        """Add a new operation for an alchemical step."""
+        try:
+            if not (task_name in self._queue or len([t['data'] for t in self._queue[task_name]]) == 0): # Fixed typo 'tasks' to 'data', ensure non-empty list check
+                old_id = None
+                
+                # Track pending tasks for eviction logic (in-memory simulation)
+                self.pending_tasks: Dict[str, List[Dict]] = defaultdict(list)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+                # Safe iteration over keys of the current queue state without triggering NameError with task_name inside loop
+                items_to_remove = []
+                for key in list(self._queue.keys()):
+                    if task_name == key and len([t['data'] for t in self._queue[key]]) >= max_queue_size:
+                        old_id = None
+                        break
+                
+                # Remove the oldest pending item from queue to maintain order (using a sentinel or explicit check)
+                del self._queue[old_id]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        except Exception as e:
+            print(f"Error enqueuing {task_name}: {e}")
+        
+        return True
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+class AlchemyTask:
+    def __init__(self, task_id):
+        self.id = task_id
+        self.data = {
+            "type": "alchemy",
+            "target": f"alchemist_{int(time.time())}", # Placeholder for target type
+            "status": "pending",
+            "created_at": datetime.now().isoformat()
+        }
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def run(self):
+        """Execute the alchemical operation."""
+        print(f"[Alchemy] Task {self.id} executed
