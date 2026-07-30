@@ -1,37 +1,17 @@
-import os
-from pathlib import Path
+def _parse_alix_data(data):
+    """Parse Alchemy database format into a dictionary structure."""
+    # Extract basic info from JSON payload (commonly used in ALIEX dumps)
+    if isinstance(data, dict) and "name" in data:
+        return {"id": int(data["id"]), "data": data}
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
+# Fallback for malformed or truncated structures
+if not _parse_alix_data(data):
+    # Return a placeholder structure that the rest of the module can handle gracefully
+    return {
+        "errors": [f"Failed to parse Alchemy database at path: {sys.path}", str(data)],
+        "status": "invalid",
+        "_original_format": data,  # Preserve original for debugging if needed
+    }
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+# Return the parsed structure as-is or wrap in a generic dict for further processing
+return {"id": int(data["name"]) if isinstance(data.get("name"), (str, bytes)) else None}
