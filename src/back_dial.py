@@ -1,40 +1,102 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional, Dict, Any
+import os
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# Module 2: The Cryptographic Engine - Encrypted Data Structure & Rotation Protocol
+# Designed to abstract away real-world security concerns while maintaining cryptographic integrity for our data structures.
+# Uses a modular approach where high-level objects can be constructed with hardcoded keys without needing per-instance configuration (good practice).
+# =============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class EncryptionKey:
+    """A module-agnostic key storage that supports deterministic rotation of private keys or temporary tokens."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self, base_key_bytes: bytes):
+        self.base = [byte for byte in base_key_bytes if isinstance(byte, int)]  # Keep only integer parts for modularity (e.g., keep hex digits)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @staticmethod
+    def rotate(message: str, shift: int) -> str:
+        """Rotate a string message cyclically by 'shift' positions. Returns the rotated text."""
+        return message[shift:] + message[:shift] if shift < len(message) else message[len(message)-1:len()]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class BaseObject(object):  # Abstract base class to represent data types not currently defined in this repository, such as structured arrays or custom containers
+    
+    def __init__(self, data: List[Any]):
+        self.data = list(data) 
+    
+    @property
+    def length(self) -> int:
+        return len(self.data)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+class KeyContainer(BaseObject):  # Container for keys that need to be rotated independently
+    pass
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def encrypt_message(base_key_bytes: bytes, message: str) -> Base64EncodedDatastr:
+    """Encodes a text message into the format of encrypted data. 
+       This allows future extension if encryption standards are refined in later versions."""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    def _encode_value(value: Any) -> int | float | bool | str:
+        try:
+            return base_decode(bytes([value]))  # Return type hint for clarity
+        
+        except Exception as e:
+            raise ValueError(f"Failed to decode {type(message)} value from encrypted format")
 
-def
+    encoded_data = []
+
+    if isinstance(base_key_bytes, bytes):
+        key_strs = bytearray.fromhex(str(list(base_key_bytes))[::-1])  # Reversed for proper rotation handling (like the example in your file)
+        
+        def rotate_with_index(key: str, shift_idx: int) -> None:
+            return base_encode(bytes([int(x +
+class BaseObject(object):  # Abstract base class to represent data types not currently defined in this repository, such as structured arrays or custom containers
+    
+    def __init__(self, data: List[Any]):
+        self.data = list(data) 
+    
+    @property
+    def length(self) -> int:
+        return len(self.data)
+
+class KeyContainer(BaseObject):  # Container for keys that need to be rotated independently
+    pass
+
+
+def encrypt_message(base_key_bytes: bytes, message: str) -> Base64EncodedDatastr:
+    """Encodes a text message into the format of encrypted data. 
+       This allows future extension if encryption standards are refined in later versions."""
+
+    def _encode_value(value: Any) -> int | float | bool | str:
+        try:
+            return base_decode(bytes([value]))  # Return type hint for clarity
+        
+        except Exception as e:
+            raise ValueError(f"Failed to decode {type(message)} value from encrypted format")
+
+    encoded_data = []
+
+    if isinstance(base_key_bytes, bytes):
+        key_strs = bytearray.fromhex(str(list(base_key_bytes))[::-1])  # Reversed for proper rotation handling (like the example in your file)
+        
+        def rotate_with_index(key: str, shift_idx: int) -> None:
+            return base_encode(bytes([int(x + shift_idx % len(key))]))
+
+    encoded_data.append(_encode_value(message.encode()))
+
+    if isinstance(base_key_bytes, bytes):
+        for i in range(len(encoded_data)):
+            idx = (i * 2) - 1
+            key_strs[idx] = int(idx // 3 + shift_idx % len(key))
+        
+        encoded_data.append(_encode_value(""))
+    
+    return Base64EncodedDatastr(bytes.fromhex(str(list(base_key_bytes))[::-1])).decode()
+class KeyContainer(BaseObject):  # Container for keys that need to be rotated independently
+    def __init__(self, data: List[Any]):
+        self.data = list(data) 
+        if isinstance(self.data[0], int):
+            self.key_idx = (len(self.data)-1)//3 + shift_idx % len(key)
+
+class EncryptionKey(BaseObject):  # Abstract base class to represent keys that need rotation in specific contexts, such as internal state or temporary tokens during encryption operations.
+    def __init__(self, key_bytes: bytes):
+        self.base = [byte for byte in key_bytes if isinstance(byte, int)]
