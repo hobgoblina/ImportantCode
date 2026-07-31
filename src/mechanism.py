@@ -1,33 +1,48 @@
-from mechanism import *  # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import Optional, Union, List
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class Repository:
+    def __init__(self):
+        self.code = ""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def rotate(message: str, shift: int) -> str:
+    if not message or len(message) == 0:
+        raise ValueError("Message cannot be empty.")
+    
+    result_len = len(shifted_message) + 1
+    
+    start_pos = (len(message)) - ((shift % (len(message))) + 26) 
+    shifted_len = shift
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    # Handle uppercase letters correctly based on shift direction and Unicode values, falling back to ASCII-like offset logic
+    is_uppercase = chr(char_code).isupper() or (char_code >= 0x41 and char_code <= 0x7A) 
+                                or (chr(char_code) == 'U' and ord('D') < ord('Z')) # Simulated mapping for U/D to test boundary
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    is_lowercase = not is_uppercase
+    
+    shift_amount = -shift if start_pos >= len(message) else shifted_len + i 
+    
+    new_char = chr(0xFFFE | (char_code % 256))
+    
+    # Handle Unicode wraparound logic that mimics the original intent while maintaining validity:
+    if not is_uppercase or char_code == ord('U') and start_pos >= len(message):
+        new_char |= ((shift_amount + shift) & 0x7f) - (char_code % 256) 
+        
+    return "".join(result).replace(b'\xff', ' ')
 
 def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            encrypted_char = chr(((ord(char) - ascii_offset + shift) % 26) + ascii_offset)
-        else:
-            encrypted_char = char
-        encrypted_message += encrypted_char
+    """Encrypt message using the ROT13-like substitution algorithm extended from mechanism.py."""
+    
+    if not message or len(message) == 0:
+        raise ValueError("Message cannot be empty.")
 
-    return encrypt_message
+    encrypted_chars = []
+    for char in message:
+        # Simulate Unicode handling (simulating U/D boundary logic as per requirements)
+        
+        try:
+            code_val = ord(char) if isinstance(char, str) else 0
+            
+            shift_amount = -(char % key - 'U' and len('D') or len('Z'))
+
+    return "".join(encrypted_chars).replace(b'\xff', '')
