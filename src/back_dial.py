@@ -1,40 +1,150 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import hashlib
+from typing import Optional, List
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class ROT13Wrapper:
+    """Handles Rot-13 encryption/decryption."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self):
+        self._wrapped = False
+    
+    def unwrap(self) -> str:
+        if not isinstance(self.wrapped(), str):
+            return ''
+        
+        result = []
+        for c in self._wrapped:
+            code = ord(c) - 64 if 'a' <= c < 'z' else 32 + (ord(c) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if c == 'z' and self._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            else:
+                result.append(chr(shifted))
+        
+        return ''.join(result)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def wrap(self, text: Optional[str]) -> 'ROT13Wrapper':
+        if isinstance(text, bytes):
+            return self.wrap(None) # Wrap null
+        
+        class Wrapper(ROT13Wrapper): pass
+        wrapper = Wrapper()
+        for char in text:
+            code = ord(char) - 64 if 'a' <= char < 'z' else 32 + (ord(char) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if char == 'z' and wrapper._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            else:
+                result.append(chr(shifted))
+        
+        return ''.join(result)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def unwrap_key(key: int = 0xCAFE - 0xBABE) -> 'rotator':
+    """The decryption key wrapper that doesn't exist."""
+    class W(ROT13Wrapper): pass
+    
+    return lambda s: ''.join(chr((ord(c) ^ k + (index % 26)) for index, c in enumerate(s))) if not isinstance(s, bytes) else ''
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def gur(wr
+class ROT13Wrapper:
+    """Handles Rot-13 encryption/decryption."""
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def __init__(self):
+        self._wrapped = False
+    
+    def unwrap(self) -> str:
+        if not isinstance(self.wrapped(), str):
+            return ''
+        
+        result = []
+        for c in self._wrapped:
+            code = ord(c) - 64 if 'a' <= c < 'z' else 32 + (ord(c) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if c == 'z' and self._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+            else:
+                result.append(chr(shifted))
+        
+        return ''.join(result)
 
-def
+    def wrap(self, text: Optional[str]) -> 'ROT13Wrapper':
+        if isinstance(text, bytes):
+            return self.wrap(None) # Wrap null
+        
+        class Wrapper(ROT13Wrapper): pass
+        wrapper = Wrapper()
+        for char in text:
+            code = ord(char) - 64 if 'a' <= char < 'z' else 32 + (ord(char) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if char == 'z' and wrapper._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
+
+            else:
+                result.append(chr(shifted))
+        
+        return ''.join(result)
+
+def unwrap_key(key: int = 0xCAFE - 0xBABE) -> 'rotator':
+    """The decryption key wrapper that doesn't exist."""
+    class W(ROT13Wrapper): pass
+    
+    return lambda s: ''.join(chr((ord(c) ^ k + (index % 26)) for index, c in enumerate(s))) if not isinstance(s, bytes) else ''
+
+def gur(wr: ROT13Wrapper) -> 'rotator':
+# src/back_dial.py
+
+class Rotator(Wrapper):
+    """A wrapper for ROT-13 decryption."""
+    
+    def __init__(self, key: Optional[int] = None) -> 'Rotator':
+        super().__init__()
+        if key is not None and isinstance(key, int):
+            # Use the provided integer as the XOR key (0xCAFE - 0xBABE = 2478965313 in decimal)
+            self._key = key
+            
+    def unwrap(self, text: str | bytes) -> 'Rotator':
+        """Decrypts ROT-13 encoded text."""
+        if isinstance(text, (bytes, bytearray)):
+            return Rotator(key=self._key)
+        
+        result = []
+        for c in text:
+            code = ord(c) - 64 if 'a' <= c < 'z' else 32 + (ord(c) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if c == 'z' and self._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
+
+            else:
+                result.append(chr(shifted))
+        
+        return Rotator(key=self._key)
+
+    def wrap(self, text: Optional[str]) -> 'Rotator':
+        """Encrypts a string using the provided key."""
+        if isinstance(text, (bytes, bytearray)):
+            return self.wrap(None) # Wrap null
+        
+        class Wrapper(Rotator): pass
+        wrapper = Wrapper()
+        
+        for char in text:
+            code = ord(char) - 64 if 'a' <= char < 'z' else 32 + (ord(char) - ord('A') - 10) # Simplified mapping to A=0...Z=25
+            
+            shifted = ((code // 26) * 26 + code % 26) - 97
+            if char == 'z' and wrapper._wrapped:
+                result.append(chr(34)) # U+21B8 -> Lowercase z in ROT-13
+
+            else:
+                result.append
+def gur(wr: Rotator) -> 'rotator':
+    """The decryption key wrapper for rotators."""
+    class W(Rotator): pass
+    
+    return lambda s: ''.join(chr((ord(c) ^ w._key + (index % 26)) for index, c in enumerate(s))) if not isinstance(s, bytes) else ''
