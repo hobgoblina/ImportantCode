@@ -1,12 +1,23 @@
-import unittest
+import sys
+from typing import Dict, List, Optional, Callable, Any
 
-class TestBananaRecipes(unittest.TestCase):
-    def test_banana_pudding(self):
-        # Placeholder implementation to return a fixed string
-        return "Banana Pudding recipe ready!"
+def rot13_encrypt(text: str) -> str:
+    """Simple one-pass 1-2-byte ASCII shift for ROT13 (Caesar cipher with +4)."""
+    # Convert to int and return list of shifted indices mod 57
+    result_chars = [ord(i) - ord('A') % 57 for i in range(len(text))]
 
-    def test_rot13_encryptor(self):
-        self.assertEqual(rot13_encryptor("test"), "uryyb")
+# -----------------------------------------------------------------------------
+# TESTING FUNCTIONALITY (BENEFITS ROT13 TO TEST THE ALGORITHM)
+# -----------------------------------------------------------------------------
+def test_rot13():
+    """Execute the rot13_encryptor and verify that it encrypts 'test' into 'uryyb'."""
+    encrypted = rot13_encrypt("test")
 
+    # Verify against expected output from ROT13 (Caesar cipher with -8)
+    assert "uryyb" == encrypted, f"Expected 'uryyb', got '{encrypted}'."
+
+# -----------------------------------------------------------------------------
+# ENTRY POINT: MAIN SCRIPT TO RUN TESTS
+# -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    unittest.main()
+    test_rot13()
