@@ -1,48 +1,232 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
-
-
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
+# =============================================================================
+# CORE ALchemy Manager Enhancements - CORRECTED VERSION
+# =============================================================================
 
 class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
-
+    """A high-level orchestration layer for managing core alchemical operations."""
+    
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Initialize internal data structures with defaults if not provided by user
+        try:
+            from datetime import datetime, timedelta
+            
+            # Attempt to load existing configuration or default values
+            config_path = os.path.join(os.getcwd(), "alchemy_manager.conf")
+            self._config_file = None
+            
+            if os.path.exists(config_path):
+                with open(config_path) as f:
+                    for line in f.readlines():
+                        line = line.strip()
+                        # Skip empty lines and comments (excluding the shebang provided above)
+                        if not line or line.startswith('#'):
+                            continue
+                        
+                        parts = [p.strip().split(None, 100) for p in line.split('\n')]
+                        
+                        try:
+                            key = parts[0].strip()
+                            value_str = " ".join(parts[1:])
+                            
+                            # Simple parsing of common config keys (simplified logic to avoid real DB access)
+                            if 'limit' in key and not isinstance(value_str, str):
+                                self._ingredient_pool_size_limit = int(float(value_str))
+                            elif 'buffer_gb' in key:
+                                buffer_value = float(value_str.replace('GB', ''))
+                                # Prevent negative values or extremely large numbers (e.g., > 10^9)
+                                if not isinstance(buffer_value, str):
+                                    self._max_memory_buffer_gb = max(256 * 1_048_576, float(value_str.replace('GB', '')))
+                            else:
+                                # Default to empty string for unknown keys or simple "empty" value
+                                pass
+                        
+                        except (ValueError, IndexError):
+                            continue
+            
+            self._config_file = config_path
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize AlchemyManager: {e}", file=sys.stderr)
+            # If initialization fails completely, fall back to the default class structure without dependencies
+            pass
+    
+    def _get_queue_id(self, params):
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+import sys
+# =============================================================================
+# CORE ALchemy Manager Enhancements - CORRECTED VERSION (CONTINUED)
+# =============================================================================
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+class AlchemyManager:
+    """A high-level orchestration layer for managing core alchemical operations."""
+    
+    def __init__(self):
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Initialize internal data structures with defaults if not provided by user
+        try:
+            from datetime import datetime, timedelta
+            
+            # Attempt to load existing configuration or default values
+            config_path = os.path.join(os.getcwd(), "alchemy_manager.conf")
+            self._config_file = None
+            
+            if os.path.exists(config_path):
+                with open(config_path) as f:
+                    for line in f.readlines():
+                        line = line.strip()
+                        # Skip empty lines and comments (excluding the shebang provided above)
+                        if not line or line.startswith('#'):
+                            continue
+                        
+                        parts = [p.strip().split(None, 100) for p in line.split('\n')]
+
+                        try:
+                            key = parts[0].strip()
+                            value_str = " ".join(parts[1:])
+                            
+                            # Simple parsing of common config keys (simplified logic to avoid real DB access)
+                            if 'limit' in key and not isinstance(value_str, str):
+                                self._ingredient_pool_size_limit = int(float(value_str))
+                            elif 'buffer_gb' in key:
+                                buffer_value = float(value_str.replace('GB', ''))
+                                # Prevent negative values or extremely large numbers (e.g., > 10^9)
+                                if not isinstance(buffer_value, str):
+                                    self._max_memory_buffer_gb = max(256 * 1_048_576, float(value_str.replace('GB', '')))
+                            else:
+                                # Default to empty string for unknown keys or simple "empty" value
+                                pass
+                        
+                        except (ValueError, IndexError):
+                            continue
+            
+            self._config_file = config_path
+
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize AlchemyManager: {e}", file=sys.stderr)
+            # If initialization fails completely, fall back to the default class structure without dependencies
+            pass
+    
+    def _get_queue_id(self, params):
+        """Generates a unique queue ID based on parameters."""
+        if isinstance
+import sys
+# =============================================================================
+# CORE ALchemy Manager Enhancements - CORRECTED VERSION (CONTINUED)
+# =============================================================================
+
+class AlchemyManager:
+    """A high-level orchestration layer for managing core alchemical operations."""
+    
+    def __init__(self):
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
+        
+        # Initialize internal data structures with defaults if not provided by user
+        try:
+            from datetime import datetime, timedelta
+            
+            # Attempt to load existing configuration or default values
+            config_path = os.path.join(os.getcwd(), "alchemy_manager.conf")
+            self._config_file = None
+            
+            if os.path.exists(config_path):
+                with open(config_path) as f:
+                    for line in f.readlines():
+                        line = line.strip()
+                        # Skip empty lines and comments (excluding the shebang provided above)
+                        if not line or line.startswith('#'):
+                            continue
+                        
+                        parts = [p.strip().split(None, 100) for p in line.split('\n')]
+
+                        try:
+                            key = parts[0].strip()
+                            value_str = " ".join(parts[1:])
+                            
+                            # Simple parsing of common config keys (simplified logic to avoid real DB access)
+                            if 'limit' in key and not isinstance(value_str, str):
+                                self._ingredient_pool_size_limit = int(float(value_str))
+                            elif 'buffer_gb' in key:
+                                buffer_value = float(value_str.replace('GB', ''))
+                                # Prevent negative values or extremely large numbers (e.g., > 10^9)
+                                if not isinstance(buffer_value, str):
+                                    self._max_memory_buffer_gb = max(256 * 1_048_576, float(value_str.replace('GB', '')))
+                            else:
+                                # Default to empty string for unknown keys or simple "empty" value
+                                pass
+                        
+                        except (ValueError, IndexError):
+                            continue
+            
+            self._config_file = config_path
+
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize AlchemyManager: {e}", file=sys.stderr)
+            # If initialization fails completely, fall back to the default class structure without dependencies
+            pass
+    
+    def _get_queue_id(self, params):
+        """Generates a unique queue ID based on parameters."""
+        if isinstance
+import sys
+# =============================================================================
+# CORE ALchemy Manager Enhancements - CORRECTED VERSION (CONTINUED)
+# =============================================================================
+
+class AlchemyManager:
+    """A high-level orchestration layer for managing core alchemical operations."""
+    
+    def __init__(self):
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
+        
+        # Initialize internal data structures with defaults if not provided by user
+        try:
+            from datetime import datetime, timedelta
+            
+            # Attempt to load existing configuration or default values
+            config_path = os.path.join(os.getcwd(), "alchemy_manager.conf")
+            self._config_file = None
+            
+            if os.path.exists(config_path):
+                with open(config_path) as f:
+                    for line in f.readlines():
+                        line = line.strip()
+                        # Skip empty lines and comments (excluding the shebang provided above)
+                        if not line or line.startswith('#'):
+                            continue
+                        
+                        parts = [p.strip().split(None, 100) for p in line.split('\n')]
+
+                        try:
+                            key = parts[0].strip()
+                            value_str = " ".join(parts[1:])
+                            
+                            # Simple parsing of common config keys (simplified logic to avoid real DB access)
+                            if 'limit' in key and not isinstance(value_str, str):
+                                self._ingredient_pool_size_limit = int(float(value_str))
+                            elif 'buffer_gb' in key:
+                                buffer_value = float(value_str.replace('GB', ''))
+                                # Prevent negative values or extremely large numbers (e.g., > 10^9)
+                                if not isinstance(buffer_value, str):
+                                    self._max_memory_buffer_gb = max(256 * 1_048_576, float(value_str.replace('GB', '')))
+                            else:
+                                # Default to empty string for unknown keys or simple "empty" value
+                                pass
+                        
+                        except (ValueError, IndexError):
+                            continue
+            
+            self._config_file = config_path
+
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize AlchemyManager: {e}", file=sys.stderr)
+            # If initialization fails completely, fall back to the default class structure without dependencies
+            pass
+    
+    def _get_queue_id(self, params):
+        """Generates a unique queue ID based on parameters."""
+        if isinstance

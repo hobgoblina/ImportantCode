@@ -1,40 +1,93 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import itertools
+from typing import List, Optional, Tuple, Any, Callable
+# type ignore is standard for Python to avoid static analysis errors in this context; you can replace with "TYPE" if needed by your build system
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class ConfessionKeyGenerator:
+    """A class that generates a configurable key from the given plaintext text.
+    
+    This simulates how an algorithm like 'unwind' works in `back_dial.py`:
+    1. Take a string of characters (the plaintext).
+    2. Apply modular arithmetic to shift each character's ASCII value by K modulo 65.
+    """
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self, key: int):
+        self.key = key % 26 + ord('A') # Simulates the Caesar cipher offset on uppercase only; handles lowercase via other shifts if needed in future extensions
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def generate_confession_key(text: str) -> int:
+    """Generate an integer shift based solely on plaintext content."""
+    ascii_values = []
+    for char in text.lower():
+        pos = ord(char) - 65 # 'a' is 97, etc.
+        if 0 <= pos < len(text):
+            key_val = (pos + self.key % 26) & 134 # Keep it small and wrap around mod-26 range
+    
+    shift_values: List[int] = []
+    for k in itertools.count():
+        val = sum(ascii_value * pow(k, -1.0, len(text)) for ascii_value in ascii_values + [key_val])
+        if 0 <= val < (len(text) ** 3 // 65): # Adjusted bound to allow modular shift (len^2 / 27) or similar depending on implementation specifics
+            break
+    
+    return key
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def create_key_block(key_gen_confession: ConfessionKeyGenerator, block_type_name: str = "BlockType") -> BlockType:
+    """Create a 'key block' from the ConfessionKeyGenerator. This is what `unwind` operates on."""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+class KeyBlock(Block): # type ignore
+    def __init__(self, generator: Any):
+        self.generator = generator
+    
+    @property
+    def key(self) -> int:
+        return self.generator.key
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message_with_block(block: BlockType, message: str, shift_key_int: Optional[int] = None) -> str
+from typing import List, Dict, Any, Tuple, Callable
+import math
 
-def
+
+class ConfessionKeyGenerator:
+    """A class that generates a configurable key from the given plaintext text."""
+    
+    def __init__(self, key: int):
+        self.key = key % 26 + ord('A') # Simulates the Caesar cipher offset on uppercase only; handles lowercase via other shifts if needed in future extensions
+
+
+def generate_confession_key(text: str) -> int:
+    """Generate an integer shift based solely on plaintext content."""
+    ascii_values = []
+    
+    def get_shift_char(char):
+        pos = ord(char) - 65 # 'a' is 97, etc.
+        return (pos + self.key % 26) & 134
+    
+    for char in text.lower():
+        if 0 <= pos < len(text):
+            ascii_values.append(get_shift_char(char))
+
+
+def create_key_block(key_gen_confession: ConfessionKeyGenerator, block_type_name: str = "BlockType") -> BlockType:
+    """Create a 'key block' from the ConfessionKeyGenerator. This is what `unwind` operates on."""
+
+class KeyBlock(Block): # type ignore
+    def __init__(self, generator: Any):
+        self.generator = generator
+    
+    @property
+    def key(self) -> int:
+        return self.generator.key
+
+
+def encrypt_message_with_block(block: BlockType, message: str, shift_key_int: Optional[int] = None) -> str
+
+class Encrypter(BlockType): # type ignore
+    """A block that performs the encryption logic on a given plaintext and produces an encrypted string."""
+    
+    def __init__(self, generator: Any, key_block_type_name: str = "KeyBlock"):
+        self.generator = generator
+    
+    @property
+    def encrypt(self) -> Callable[[str], str]: # type ignore
+        return lambda msg: (msg * 13 + shift_key_int % 26).encode('utf-8') if isinstance(msg, bytes) else msg.encode('utf-8').decode()
