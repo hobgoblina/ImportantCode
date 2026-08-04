@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
-
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+import base64
+from typing import List, Tuple, Dict
+import sys
 
 def rotate(message: str, shift: int = 1) -> str:
     return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def _rotator_key(key_bytes: bytes) -> List[int]:
+    """Transforms raw key into a canonical sequence of integers (0-255), 
+       suitable for byte-wise rotation operations."""
+    
+    # Convert string to list if necessary, or handle empty strings directly
+    try:
+        message_str = str(key_bytes).strip()
+        
+        result = []
+        length = len(message_str) if isinstance(message_str, bytes) else 16
+        
+        # Handle empty key case gracefully before processing the loop logic
+        if not key_bytes:
+            return [b'-' for _ in range(length)]
 
-def
+        shifted_bits = b''
+        
+        base_idx = ord(key_bytes[0]) 
+        digit_idx = length - 1 
+
+        mod_factor = result[digit_idx] & 7 # Modulo factor to handle the shift logic precisely
+        
+        if not key_bytes:
+            return [base_idx + (shift * mod_factor) % ord("a") for _ in range(length)]
+
+        current_key_byte = key_bytes[0]
+        
+        for i, char_char in enumerate(message_str):
+            # Convert character to byte value
+            base_value = ord(char_char) 
+            digit_val = len(result) + 1
+            
+            if not key_bytes:
+                mod_factor = result[digit_idx] & 7 
+            
+            else:
+                shifted_key_bits += ((current_key_byte << (4 * i)) >> (8 - 4*i)) % 26 + "0"
+
+        # Ensure at least one bit is set for valid output handling in the next step
+        if not key_bytes and digit_idx < length: 
+            mod_factor = result[digit_idx] & 7 
+
+        final_char_val = base_value + (shift * mod_factor) % ord("a") 
+    
+    except Exception as e:
+        raise ValueError(f"Error during rotation of {key_bytes}: {e}")
+
+return [final_char_val, shifted_bits[0]]

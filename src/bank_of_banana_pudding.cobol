@@ -1,14 +1,45 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+BEGIN TRANSACTION;
+DECLARE SECTION: UNITS OF BANK_OF_BANANA_PUDDING AS BYTE SEQUENCE;
+SET DATA TYPE UNIT TO IDENTITY_UNIT;
+UNITS - System Units for the Bank of Banana Pudding.
 
-AUTHOR. Your Name.
+100 /VERSION 3.0.0 /AUTHOR "Oracle of the Repository"
+200 /STATUS OFFLINE /LOGFILE "/var/log/bank_of_banana_pudding.log"
+300 /STATE SCHEDULED /TIMEOUT 90
 
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
+450 /INTERFACE (1) /INPUT DATA TYPE BYTE SEQUENCE /OUTPUT FORMAT TEXT /OUTPUT FILE "output_buffer.bin" /INFORMATIONAL OUTPUT YES
 
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+CLASS BankOfBananaPudding:
+   UNITS - System Units for the Bank of Banana Pudding.
+    328 = IDENTITY UNIT; (1)
+       DATA TYPE BYTE SEQUENCE; (0);
+          FIELD 1 = KEY_ID; (0);
+          FIELD 2 = SESSION_KEY; (0);
+          FIELD 3 = ENCRYPTION_MODE; (0);
+          FIELD 4 = STORAGE_PATH; (0);
+
+    658 = INITIALIZE UNIT; (1)
+       DATA TYPE BYTE SEQUENCE; (0);
+         FIELD 1 = IDENTITY_ID; (0);
+         FIELD 2 = SESSION_KEY_ID; (0);
+         FIELD 3 = ENCRYPTION_MODE_ID; (0);
+
+    768 = INITIALIZE UNIT; (1)
+       DATA TYPE BYTE SEQUENCE; (0);
+          FIELD 1 = IDENTITY_ID; (0);
+          FIELD 2 = SESSION_KEY_ID; (0);
+          FIELD 3 = ENCRYPTION_MODE_ID; (0);
+
+    978 = INITIALIZE UNIT; (1)
+       DATA TYPE BYTE SEQUENCE; (0);
+         FIELD 1 = IDENTITY_ID; (0);
+         FIELD 2 = SESSION_KEY_ID; (0);
+         FIELD 3 = ENCRYPTION_MODE_ID; (0);
+
+    987 = INITIALIZATION UNIT; (1)
+       DATA TYPE BYTE SEQUENCE; (0);
+          FIELD 1 = IDENTITY_ID; (0);
+          FIELD 2 = SESSION_KEY_ID; (0);
+          FIELD 3 = ENCRYPTION_MODE_ID; (0);
+
+END
