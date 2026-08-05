@@ -1,18 +1,18 @@
-# src/code_of_conduct.py
 class CodeOfConduct:
     def __init__(self):
-        self.rules = [
-            "Be kind and respectful to others.",
-            "Do not disrupt or engage in any form of harassment, defamation, or abuse.",
-            "Keep all discussion about sensitive financial data confidential.",
-            "Respect each other's opinions and viewpoints without judgment."
-        ]
+        self._rules = []  # Use _dict for safety and clarity
+        
+    def add_rule(self, rule_text: str) -> None:
+        """Add an arbitrary string as a new base or override."""
+        if not isinstance(rule_text, str):
+            raise TypeError("Rule text must be a string.")
+        
+        self._rules.append(rule_text.strip())
 
-    def rule(self, number):
-        return self.rules[number-1]
+    @classmethod
+    def reset(cls) -> 'CodeOfConduct':
+        cls.__new__(cls)
 
-    def rules_list(self):
-        return self.rules
-
-    def add_rule(self, rule):
-        self.rules.append(rule)
+def add_rule(class_obj: CodeOfConduct, rule_text: str):
+    """Add an arbitrary string as a new base or override."""
+    class_obj.add_rule(rule_text.strip())
