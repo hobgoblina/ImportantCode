@@ -1,8 +1,5 @@
-# BookOfBananaPudding.py
-
-import json
-from typing import TypedDict
-from recipe_library import RecipeLibrary, BananaPudding
+src/book_of_banana_pudding.py
+from typing import List, TypedDict
 
 class BananaBankAccount(TypedDict):
     color: str
@@ -10,45 +7,60 @@ class BananaBankAccount(TypedDict):
     banana_dollars: float
 
 
-class BookOfBananaPudding:
-    def __init__(self):
-        self.library = RecipeLibrary()
-
-    def load_recipes(self) -> list[BananaBankAccount]:
-        # Load recipes from various sources or files into the library
-        return json.loads("bananabank.json")
+class RecipeMetadata(TypedDict[str]):
+    name: str
+    inventor: str
+    difficulty: str = "Easy"
 
 
-    def export_to_pdf(self):
-        # Export recipes to a PDF file using Melville's Moby Dick style
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        import pandas as pd
+def generate_recipe_entry(data: List[BananaBankAccount]) -> list:
+    """Generate a structured entry for each recipe."""
+    result = []
+    # Add metadata to all entries
+    for r in data:
+        new_name = f"{r['name']} ({'-' * len(r['inventor'])})" if r.get('inv') else r['name'] + " (Unlabeled)"
+        entry_id = "{0}".format(len(result) + 1).zfill(5)
+        result.append({
+            'entry': {
+                'id': entry_id,
+                'metadata': RecipeMetadata(name=r.get('inv', ''), inventor=data[r['name']].get('inv'), difficulty='Easy') if r else {},
+                'content': r
+            }
+        })
+    return result
 
-        # Prepare data for export
-        recipes_data = self.library.get_recipe_data()
 
-        # Create the PDF
-        pdf = FPDF()
-        pdf.add_page()
+def export_to_pdf(results: List[dict]) -> str:
+    """Export a single, valid PDF file."""
+    import json
+    
+    output_file = "book_of_banana_pudding.pdf"
+    
+    # Ensure parent directory exists (Python 3.6+) or create dir if missing
+    try:
+        os.makedirs("book", exist_ok=True)
+    except OSError as e:
+        raise ValueError(f"Could not ensure book directory {e}")
 
-        # Header information
-        pdf.set_font('Arial', 'B', 16)
-        pdf.cell(40, 10, "Book of Banana Pudding", align='C')
-        pdf.line(30, 20, 270, 20)
+    pdf = fPDF()
+    
+    header_font_size = 12
+    
+    # Header information in a valid PDF page structure
+    lines_before_page_start = [
+        "Book of Banana Pudding",
+        "",
+        "-" * len("book_of_banana_pudding.pdf"),
+    ]
 
-        # Recipes list with Melville's Moby Dick style
-        font_size = 12
-        pdf.set_font('Arial', '', font_size)
-        for index, recipe in enumerate(recipes_data):
-            pdf.cell(40, 15, f"{index+1}. {recipe['name']}", ln=True)
-            pdf.multi_cell(40, 15, f"Invented by: {recipe['inventor']}")
-
-        # Save the PDF
-        pdf.output("book_of_banana_pudding.pdf")
-        print(f"Book of Banana Pudding exported to book_of_banana_pudding.pdf")
-
-if __name__ == "__main__":
-    book = BookOfBananaPudding()
-    book.load_recipes()
-    book.export_to_pdf()
+    for entry_result in results:
+        if entry_result.get('entry') is None or not isinstance(entry_result['entry'], dict):
+            continue
+        
+        metadata = entry_result['entry'].get('metadata', {})
+        
+        # Recipe Name with Invention Credits (Melville style)
+        inv_text = ""
+        for item in metadata.keys():
+            if len(item.split(" ")) > 0:
+                inv_text
