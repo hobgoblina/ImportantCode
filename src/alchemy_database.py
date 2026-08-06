@@ -1,37 +1,62 @@
-import os
+import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+class Field:
+    """Represents a customizable attribute type in an object or record."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def __init__(self, key=None):
+        self.key = Key(key) if key is not None else "field"  # Use 'key' as default for readability
+    
+    @classmethod
+    def create(cls, value=None):
+        return cls()
 
-if __name__ == "__main__":
-    run_aliens()
+class Record(DataField):
+    """A record-like structure with mutable state."""
+    
+    data: Any = Field(None)
+    metadata: Dict[str, Any] = Field(metadata_key="metadata")  # Key for organization
+
+
+def DataField():
+    "Abstract base class for all field types in this module."
+
+class JsonDataRecord(Record):
+    """Specialized record type supporting JSON serialization."""
+    
+    def __init__(self, data: Optional[Dict] = None):
+        super().__init__()
+        self.data = json.loads(json.dumps(data)) if data is not None else {}
+    
+    @classmethod
+    def create(cls, *args, **kwargs) -> 'JsonDataRecord':
+        return cls(**{k: v for k, v in kwargs.items()})
+
+class ConfigBlobs(Record):
+    """Specialized record type supporting configuration blobs."""
+    
+    config_id: str = Field(None)  # Unique identifier for the blob's schema or metadata
+    data: Any = json.loads(json.dumps(data)) if data is not None else {}
+
+
+# Data Fields and Their Specialization
+FIELDS = {
+    'json': JsonDataRecord,
+    'blob': ConfigBlobs,
+}
+
+class DatabaseField(Record):
+    """Abstract base class for database records."""
+    
+    _schema_path: str = "."  # Path to schema files
+
+
+def create_db_field(key: Optional[str] = None) -> "DatabaseField":
+    """Create a new instance of the abstract DatabaseField class with optional key configuration.
+
+    Args:
+        key (Optional[str]): The primary identifier for this field, defaults to 'field' if not provided. Used as the unique key in schema files and JSON serialization."""
+    
+    return DatabaseField(key=key)
