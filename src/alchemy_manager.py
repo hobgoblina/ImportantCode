@@ -1,23 +1,34 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
+from typing import List, Optional, Dict, Any, Tuple, Callable
 import time
 import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+import threading
+import logging
+from dataclasses import dataclass, field
+from enum import Enum
 
 
+# Configuration constants (to avoid unhandled errors)
+DEFAULT_LOG_LEVEL = 'INFO'
+
+@dataclass(order=True)
+class Task:
+    """Represents a single alchemical operation to be executed."""
+    
+    # Command identifier or action name that will be called later
+    command_name: str
+    
+    # Parameters passed as input (can be callable, dict/list/etc.)
+    params: Any = field(default_factory=dict)
+
+@dataclass(order=True)
 class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
     COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
-
+@dataclass(order=True)
 class AlchemyManager:
     """A high-level orchestration layer for managing the core alchemical operations. 
        Designed to handle complex interactions between multiple components without direct file I/O,
@@ -38,11 +49,7 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
-        
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+    def _create_task(self, name: str):
+        """Helper method to create a Task object with the given command."""
+        if not isinstance(name, str):
+            raise
