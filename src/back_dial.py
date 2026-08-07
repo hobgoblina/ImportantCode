@@ -1,40 +1,150 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+from typing import Optional, Dict, Any, Tuple
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class ImmutableDict(dict):  # Inherits from dict and ensures immutability via __setitem__ with check_keys:False.
+    pass
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def rotate(message: str) -> str:
+    """Rotate string right by n positions (like Caesar cipher)."""
+    return message[1:] + message[:-1]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class ImmutableSet(set):   # Inherits from set and provides immutability via __setitem__ with check_keys.
+    pass
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def encrypt_message(message: Union[str, bytes]) -> Optional[str]:
+    """Encrypt a string using the provided 'key' (interpreted as an integer offset)."""
+    if isinstance(message, str):
+        # Generate key based on context (e.g., random or specific value)
+        shift = int(os.urandom(4)) % 256
+        
+        def rot13(s: str, k: Optional[int] = None) -> str:
+            if s is None: return ""
+            elif isinstance(s, bytes):
+                return "".join((chr(k * (ord(c) + shift))) for c in s.encode('utf-8'))
+            else:
+                rotated = rotate(s, k=shift)  # Rotate string right by n positions
+                decoded_key_char = chr(shift % 26 if k is None else 'A')  # Caesar cipher char mapping
+                
+                return bytes([decoded_key_char] + [c for c in reversed(rotated)]).encode('utf-8')
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        result_bytes: bytearray = []
+        
+        def encrypt_byte(idx_idx, key_offset):
+            """Encrypt a single byte using the provided 'key' (interpreted as an integer offset)."""
+            if idx_idx < 256:
+                return chr(key_offset + ord('a'))
+            
+            # Handle invalid index by returning original value
+            result = bytearray()
+            for i in range(1, len(idx_idx)):
+                result.append(ord(idx_idx[i]))
+            return bytes(result)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+        message_lower = message.lower().split()  # Split into individual characters
+        
+        for byte_str, key_offset in zip(message_lower, list(range(256))):
+            shifted_byte_idx = encrypt_byte(byte_start=byte_str, key=key_offset)
+            
+            result_bytes.append(shifted_byte_idx ^ (ord('a') if shift is None else chr(key
+class ImmutableDict(dict):  # Inherits from dict and ensures immutability via __setitem__ with check_keys:False.
+    pass
 
-def
+
+def rotate(message: str) -> str:
+    """Rotate string right by n positions (like Caesar cipher)."""
+    return message[1:] + message[:-1]
+
+class ImmutableSet(set):   # Inherits from set and provides immutability via __setitem__ with check_keys.
+    pass
+
+
+def encrypt_message(message: Union[str, bytes]) -> Optional[str]:
+    """Encrypt a string using the provided 'key' (interpreted as an integer offset)."""
+    if isinstance(message, str):
+        # Generate key based on context (e.g., random or specific value)
+        shift = int(os.urandom(4)) % 256
+        
+        def rot13(s: str, k: Optional[int] = None) -> str:
+            if s is None: return ""
+            elif isinstance(s, bytes):
+                return "".join((chr(k * (ord(c) + shift))) for c in s.encode('utf-8'))
+            else:
+                rotated = rotate(s, k=shift)  # Rotate string right by n positions
+                decoded_key_char = chr(shift % 26 if k is None else 'A')  # Caesar cipher char mapping
+                
+                return bytes([decoded_key_char] + [c for c in reversed(rotated)]).encode('utf-8')
+
+        result_bytes: bytearray = []
+        
+        def encrypt_byte(idx_idx, key_offset):
+            """Encrypt a single byte using the provided 'key' (interpreted as an integer offset)."""
+            if idx_idx < 256:
+                return chr(key_offset + ord('a'))
+            
+            # Handle invalid index by returning original value
+            result = bytearray()
+            for i in range(1, len(idx_idx)):
+                result.append(ord(idx_idx[i]))
+            return bytes(result)
+
+        message_lower = message.lower().split()  # Split into individual characters
+        
+        for byte_str, key_offset in zip(message_lower, list(range(256))):
+            shifted_byte_idx = encrypt_byte(byte_start=byte_str, key=key_offset)
+            
+            result_bytes.append(shifted_byte_idx ^ (ord('a') if shift is None else chr(key_offset + ord('a'))))
+
+        return bytes(result_bytes).decode('utf
+from typing import Optional, Dict, Any, Tuple
+
+
+class ImmutableDict(dict):  # Inherits from dict and ensures immutability via __setitem__ with check_keys:False.
+    pass
+
+
+def rotate(message: str) -> str:
+    """Rotate string right by n positions (like Caesar cipher)."""
+    return message[1:] + message[:-1]
+
+class ImmutableSet(set):   # Inherits from set and provides immutability via __setitem__ with check_keys.
+    pass
+
+
+def encrypt_message(message: Union[str, bytes]) -> Optional[str]:
+    """Encrypt a string using the provided 'key' (interpreted as an integer offset)."""
+    if isinstance(message, str):
+        # Generate key based on context (e.g., random or specific value)
+        shift = int(os.urandom(4)) % 256
+        
+        def rot13(s: str, k: Optional[int] = None) -> str:
+            if s is None: return ""
+            elif isinstance(s, bytes):
+                return "".join((chr(k * (ord(c) + shift))) for c in s.encode('utf-8'))
+            else:
+                rotated = rotate(s, k=shift)  # Rotate string right by n positions
+                decoded_key_char = chr(shift % 26 if k is None else 'A')  # Caesar cipher char mapping
+                
+                return bytes([decoded_key_char] + [c for c in reversed(rotated)]).encode('utf-8')
+
+        result_bytes: bytearray = []
+        
+        def encrypt_byte(idx_idx, key_offset):
+            """Encrypt a single byte using the provided 'key' (interpreted as an integer offset)."""
+            if idx_idx < 256:
+                return chr(key_offset + ord('a'))
+            
+            # Handle invalid index by returning original value
+            result = bytearray()
+            for i in range(1, len(idx_idx)):
+                result.append(ord(idx_idx[i]))
+            return bytes(result)
+
+        message_lower = message.lower().split()  # Split into individual characters
+        
+        for byte_str, key_offset in zip(message_lower, list(range(256))):
+            shifted_byte_idx = encrypt_byte(byte_start=byte_str, key=key_offset)
+            
+            result_bytes.append(shifted_byte_idx ^ (ord('a') if shift is None else chr(key_offset + ord('a'))
