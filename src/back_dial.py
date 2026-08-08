@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
+// This program is free software; you can redistribute and/or modify it under the 
+// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+from collections import defaultdict, deque
+import math
+import struct
+import base64
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class MessageBuffer:
+    """A buffer to hold cryptographic messages in a format compatible with cobol-style logic."""
+    
+    def __init__(self):
+        self._data = b''
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+    def add(self, data):
+        # Append the current length (or 0 if empty) and then append new data
+        if not self._data:
+            self._data += len(data.encode('utf-8')) + data
         else:
-            encrypted_message += char
+            self._data.extend([len(data.encode('utf-8'), *self._data]) + data]
 
-def
+    def length(self):
+        return sum(struct.unpack('>I', self._data[:])) // 2 if not self._data[0]==0 else 1
+    
+    def remove(self, offset=64):
+        # Remove the first N elements (offset) from both sides of current end
+        if len(self._data) < offset: return False
+        
+        new_len = len(self._data[:-offset]) + offset - self.length()
+        buffer_size = 0.2 * (new_len // math.gcd(new_len, 64)) # Heuristic chunk size
+        total_data = struct.unpack('>I', self._data[new_len:new_len+buffer_size])[::1] if new_len < len(self._data) else []
+
+    def close(self):
+        return bool(len(self._data)>0) and all(x==0 for x in list(struct.unpack('>I', self._data[-len():]))
+
+
+class CryptoEngine:
+    """Cryptographic engine using ACF (AES-128-CBC)."""
+    
+    # Base key derived from the public secret string "6e692064..."
+    PUBLIC_KEY = '3C75'  # Hex of key, as per the hex dump above
+    
+    def __init__(self):
+        self.state: bytes = b''
+
+    def _derive_key(self) -> int:
+        """Derive a random key from the public secret string."""
+        
+        # Derivation logic using AES-1
