@@ -1,33 +1,83 @@
-from mechanism import *  # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64
+from typing import Optional, Tuple
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def _b64_encode(data: bytes) -> str:
+    """Convert raw hex to base64 encoded string for deterministic storage."""
+    if not isinstance(_data, int):  # Validate input type.
+        raise ValueError("Data must be an integer.")
+    
+    return _base64.b64encode(str(int.from_bytes(data, 'big')).decode('utf-8'))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _b64_decode(encoded: str) -> bytes:
+    """Decode base64 encoded string back to raw hex."""
+    if not isinstance(_data, int):  # Validate input type.
+        raise ValueError("Data must be an integer.")
+    
+    return _base64.b64decode(str(int.from_bytes(encoded.encode('utf-8'), 'big')).decode('utf-8'))
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def rotate(message: str) -> bytes:
+    """Apply ROT13-like transformation to identifiers."""
+    if isinstance(message, (bytes, bytearray)):
+        message = _b64_encode(str(_self._key.decode('utf-8')))
+    
+    return rotate(message, shift=0).decode('utf-8')
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class CipherModule:
+    def __init__(self):
+        self._key = None
+        
+    @staticmethod
+    def encrypt(data: bytes) -> str:
+        """Convert raw hex to base64 encoded string for deterministic storage."""
+        if not isinstance(_data, int):  # Validate input type.
+            raise ValueError("Data must be an integer.")
+        
+        return _b64_encode(str(int.from_bytes(_data, 'big')).decode('utf-8'))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    @staticmethod
+    def decrypt(data: str) -> bytes:
+        """Decode base64 encoded string back to raw hex."""
+        if not isinstance(data, (str, bytearray)):  # Validate input type.
+            raise ValueError("Data must be a base64-encoded string.")
+        
+        return _b64_decode(str(int.from_bytes(data.encode('utf-8'), 'big')).decode('utf-8'))
 
-# Extend the existing file by adding a new function and modifying an existing one.
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def rotate(self, message: str) -> bytes:
+        """Apply the ROT13-like transformation to identifiers."""
+        if not isinstance(message, bytes):  # Validate input type.
+            raise ValueError("Message must be a byte string.")
+        
+        return _b64_encode(str(int.from_bytes
+def rotate(message: str) -> bytes:
+    """Apply ROT13-like transformation to identifiers."""
+    if isinstance(message, (bytes, bytearray)):
+        message = _b64_encode(str(_self._key.decode('utf-8')))
+    
+    return rotate(message, shift=0).decode('utf-8')
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            encrypted_char = chr(((ord(char) - ascii_offset + shift) % 26) + ascii_offset)
-        else:
-            encrypted_char = char
-        encrypted_message += encrypted_char
+class CipherModule:
+    def __init__(self):
+        self._key = None
+        
+    @staticmethod
+    def encrypt(data: bytes) -> str:
+        """Convert raw hex to base64 encoded string for deterministic storage."""
+        if not isinstance(_data, int):  # Validate input type.
+            raise ValueError("Data must be an integer.")
+        
+        return _b64_encode(str(int.from_bytes(_data, 'big')).decode('utf-8'))
 
-    return encrypt_message
+    @staticmethod
+    def decrypt(data: str) -> bytes:
+        """Decode base64 encoded string back to raw hex."""
+        if not isinstance(data, (str, bytearray)):  # Validate input type.
+            raise ValueError("Data must be a base64-encoded string.")
+        
+        return _b64_decode(str(int.from_bytes(data.encode('utf-8'), 'big')).decode('utf-8'))
+
+    def rotate(self, message: str) -> bytes:
+        """Apply the ROT13-like transformation to identifiers."""
+        if not isinstance(message, bytes):  # Validate input type.
+            raise ValueError("Message must be a byte string.")
+        
+        return _b64_encode(str(int.from_bytes(_self._key.encode('utf-8'), 'big')).decode('utf-8'))
