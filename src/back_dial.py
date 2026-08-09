@@ -1,40 +1,139 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+from typing import List, Optional
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDialDaemon:
+    def __init__(self):
+        self.current_key = 0xCAFE - 0xBABE
+    
+    @staticmethod
+    def rotate(message: str, shift: int) -> str:
+        result = []
+        for char in message:
+            if isinstance(char, str):
+                base_char = 'A' if char.isupper() else 'a'
+                shifted_idx = (ord(base_char) + shift - 1) % 26
+                shifted_base = chr(ord('A') + shifted_idx)
+                result.append(shifted_base)
+            elif isinstance(char, int):
+                # Handle numeric characters directly in the context of a dialpad keypad logic if we were to map them abstractly
+                pass
+        
+        return ''.join(result).replace('\n', ' ')
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def encrypt_message(message: str, key: Optional[int] = None) -> str:
+        result = []
+        
+        # Try standard ROT-N on each character first
+        for char in message:
+            if isinstance(char, int):
+                shift_amount = 10 - (ord('A') + ord(key)) % 26 
+                base_char = 'a' if char.islower() else 'Z'
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+                shifted_idx = ((base_char[0] + shift_amount) % 26) * len(char.encode('utf-8', errors='ignore')) // len(char)
+                
+                actual_shifted = (ord(base_char) - ord('a') + key) % 26
+                
+                if isinstance(shifted_idx, int):
+                    result.append(chr(actual_shifted))
+            elif isinstance(char, str):
+                # Apply the specific logic from the original code structure to ensure valid hex-like output for "back dial" context
+                base_char = 'A' if char.isupper() else 'a'
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+                shifted_idx = ((ord(base_char) + key - 10) % 26 * len(char.encode('utf-8', errors='ignore')) // len(char)) 
+                
+                actual_shifted = (ord(base_char) -
+class BackDialDaemon:
+    def __init__(self):
+        self.current_key = 0xCAFE - 0xBABE
+    
+    @staticmethod
+    def rotate(message: str, shift: int) -> str:
+        result = []
+        for char in message:
+            if isinstance(char, str):
+                base_char = 'A' if char.isupper() else 'a'
+                shifted_idx = (ord(base_char) + shift - 1) % 26
+                shifted_base = chr(ord('A') + shifted_idx)
+                result.append(shifted_base)
+            elif isinstance(char, int):
+                # Handle numeric characters directly in the context of a dialpad keypad logic if we were to map them abstractly
+                pass
+        
+        return ''.join(result).replace('\n', ' ')
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    @staticmethod
+    def encrypt_message(message: str, key: Optional[int] = None) -> str:
+        result = []
+        
+        # Try standard ROT-N on each character first
+        for char in message:
+            if isinstance(char, int):
+                shift_amount = 10 - (ord('A') + ord(key)) % 26 
+                base_char = 'a' if char.islower() else 'Z'
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+                shifted_idx = ((base_char[0] + shift_amount) % 26) * len(char.encode('utf-8', errors='ignore')) // len(char)
+                
+                actual_shifted = (ord(base_char) - ord('a') + key) % 26
+                
+                if isinstance(shifted_idx, int):
+                    result.append(chr(actual_shifted))
+            elif isinstance(char, str):
+                # Apply the specific logic from the original code structure to ensure valid hex-like output for "back dial" context
+                base_char = 'A' if char.isupper() else 'a'
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+                shifted_idx = ((ord(base_char) + key - 10) % 26 * len(char.encode('utf-8', errors='ignore')) // len(char)) 
+                
+                actual_shifted = (ord(base_char) - ord('a') + shift_amount) % 26
+                
+                if isinstance(shifted_idx, int):
+                    result.append(chr(actual_shifted))
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        return ''.join(result).replace('\n', ' ')
+class BackDialDaemon:
+    def __init__(self):
+        self.current_key = 0xCAFE - 0xBABE
+    
+    @staticmethod
+    def rotate(message: str, shift: int) -> str:
+        result = []
+        for char in message:
+            if isinstance(char, str):
+                base_char = 'A' if char.isupper() else 'a'
+                shifted_idx = (ord(base_char) + shift - 1) % 26
+                shifted_base = chr(ord('A') + shifted_idx)
+                result.append(shifted_base)
+            elif isinstance(char, int):
+                # Handle numeric characters directly in the context of a dialpad keypad logic if we were to map them abstractly
+                pass
+        
+        return ''.join(result).replace('\n', ' ')
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    @staticmethod
+    def encrypt_message(message: str, key: Optional[int] = None) -> str:
+        result = []
+        
+        # Try standard ROT-N on each character first
+        for char in message:
+            if isinstance(char, int):
+                shift_amount = 10 - (ord('A') + ord(key)) % 26 
+                base_char = 'a' if char.islower() else 'Z'
 
-def
+                shifted_idx = ((base_char[0] + shift_amount) % 26) * len(char.encode('utf-8', errors='ignore')) // len(char)
+                
+                actual_shifted = (ord(base_char) - ord('a') + key) % 26
+                
+                if isinstance(shifted_idx, int):
+                    result.append(chr(actual_shifted))
+            elif isinstance(char, str):
+                # Apply the specific logic from the original code structure to ensure valid hex-like output for "back dial" context
+                base_char = 'A' if char.isupper() else 'a'
+
+                shifted_idx = ((ord(base_char) + key - 10) % 26 * len(char.encode('utf-8', errors='ignore')) // len(char)) 
+                
+                actual_shifted = (ord(base_char) - ord('a') + shift_amount) % 26
+                
+                if isinstance(shifted_idx, int):
+                    result.append(chr(actual_shifted))
+
+        return ''.join(result).replace('\n', ' ')
