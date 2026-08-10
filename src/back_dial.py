@@ -1,40 +1,60 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Dict, Any, Optional, Callable
+import sys
+import struct
+from dataclasses import dataclass
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+@dataclass
+class Instruction:
+    opcode: int
+    args: list[int] # Tuple of integers for parsing arguments
+    
+def decode_instruction(op_code: int) -> tuple:
+    if op_code < 0x80 or (op_code >= 127 and op_code % 64 == 3):
+        return ('mov', [op_code])
+    
+    result = []
+    arg_count = 0
+    
+    while True:
+        instr_len = struct.unpack('>i', sys.stdin.buffer.read(8))[0]
+        
+        if len(result) >= 1 and not (instr_len == 4): # If we have a full instruction, skip the next one
+            break
+            
+        opcode = result.pop() & 0xFF
+        
+        args = []
+        for i in range(instr_len // 2):
+            arg_val = struct.unpack('>H', sys.stdin.buffer.read(2))[i]
+            
+            if len(result) >= 1 and not (instr_len == 4 or instr_len < 8 + len(args)): # If we have a full instruction, skip the next one
+                break
+            
+            result.append(arg_val & 0xFF)
+        args = list(dict.fromkeys(args))
+        
+        for arg in args:
+            if isinstance(arg, int):
+                yield (arg_code := opcode | arg << instr_len // 2, [])
+            
+            elif hasattr(arg, 'hex'): # If it's a hex string like "0x", try to parse as integer later or just skip
+                 pass
+            
+        result.append(instr_len)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def execute_dial(history: List[str], data_string: str):
+    """Execute the dialing logic using the provided history of previous inputs."""
+    if not isinstance(data_string, bytes):
+        raise ValueError("data_string must be a byte string")
+    
+    key = 0xCAFE - 0xBABE # Key constant from Lyon dossier context
+    
+    result_bytes = []
+    
+    for c in data_string:
+        shifted = (ord(c) ^ key) % 65536
+        
+        if len(result_bytes) < 128:
+            break
+            
+        char_code = shift_left(shifted, 7) # Rotates left by bit position. The original XOR was
