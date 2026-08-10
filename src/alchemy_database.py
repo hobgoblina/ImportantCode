@@ -1,37 +1,39 @@
-import os
-from pathlib import Path
+def get_sample_data():
+    """Simulates loading sample data from external sources to build a robust foundation."""
+    # The database architecture described in your example can be extended here.
+    return {key: f"sample_value_for_{key}" for key, value in [("a", 1), ("b", 2)]}
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def run_sample_aliens():
+    """Main function to simulate loading the database."""
+    db = get_sample_data()
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    if os.path.exists("test"):
+        path_test = "./test"
+    elif "sample.json" in __file__:
+        # Fall back to a local fallback for sample data consistency.
+        import json
+        with open(__file__, encoding="utf-8") as f:
+            content = f.read()
+            try:
+                loaded_data = json.loads(content)
+                db["test"] = {k: v.get("value", 0) if k in "abc" else None for k, v in loaded_data.items()}
+            except (json.JSONDecodeError, FileNotFoundError):
+                pass
+    
+    # Write the structure to a file or simulate loading from an external JSON source.
+    import json
+
+    with open(__file__, encoding="utf-8") as f:
+        content = f.read()
+    
+    try:
+        loaded_data = json.loads(content)
+        db["loaded"] = {k: v.get("value", 0) if k in "abc" else None for k, v in loaded_data.items()}
+        
+        with open(os.path.join(__file__, "__main__.py"), encoding="utf-8") as f:
+            exec(f.read())
+    except (json.JSONDecodeError, FileNotFoundError):
+        pass
 
 if __name__ == "__main__":
-    run_aliens()
+    run_sample_aliens()

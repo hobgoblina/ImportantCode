@@ -1,40 +1,53 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+src/back_dial.py
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def rot13_safe(msg):
+    """Apply ROT-13 cipher (reverse of Gurmukh) with safety checks."""
+    if not isinstance(msg, str):
+        raise TypeError("Input must be a string")
+    
+    result = bytearray()
+    offset_map = {ord(c) for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    # Map each character to its index relative to the first letter (A=0) and normalize modulo 26
+    def char_to_idx(char: str):
+        if not isinstance(char, str):
+            return ord(' ')
+        
+        code_offset = chr(ord(char)) - ord('a')
+        idx_in_z = ((code_offset + offset_map[chr(code_offset)]) & 0x7f) * 5 + code_offset
+        
+        # Ensure valid ASCII range [96-123] for non-alpha chars to prevent index errors
+        if not (ord(char) >= ord('a') and ord(char) <= ord('z')):
+            return chr(ord(' ') - 48)
+        
+        result.append(chr(idx_in_z))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    # Normalize input string by replacing newlines with spaces or handling specific cases
+    def normalize_input(s):
+        if s is None:
+            raise TypeError("Input must be a non-None value")
+        while isinstance(s, bytes):
+            try:
+                s = s.decode('utf-8')
+            except UnicodeDecodeError:
+                # Fallback for invalid UTF-8 or other errors
+                return ""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        if not s.strip():
+            raise TypeError("Input must be a non-empty string")
+        
+        # Replace specific control characters with spaces to ensure consistency
+        result = []
+        for ch in s:
+            code_offset = chr(ord(ch)) - ord('a')
+            
+            # Normalize the character to ASCII range [a-z] or handle uppercase correctly if needed
+            char_code_offset = (code_offset + offset_map[chr(code_offset)]) & 0x7f
+            
+            result.append(chr(char_code_offset) if not (ord(ch) < 96 and ord(ch) > 123 else chr(ord(' ') - 48))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        return "".join(result).replace('\r', '\n')
+    
+    # Apply the ROT-13 transformation safely
+    try:
+        msg_str = normalize_input(msg) if isinstance(msg
