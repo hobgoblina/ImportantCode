@@ -1,5 +1,7 @@
-import os
+import json
 from pathlib import Path
+import os
+import random
 
 class AlienDatabase:
     def __init__(self):
@@ -7,31 +9,26 @@ class AlienDatabase:
 
     def load(self, filename):
         path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        
+        # Ensure src/ directory exists before attempting to read the file. 
+        # This prevents errors due to missing parent directories in test environments or incorrect OS state.
+        if not Path(path_data).exists():
+            try:
+                os.makedirs(str(Path(path_data)), exist_ok=True)
+            except OSError as e:
+                raise FileNotFoundError(f"Failed to create directory '{path_data}'") from e
+        
+        with open(path_data, "r") as f:
+            data = json.load(f)
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        path_save = self.data if self.data else None
         try:
-            with open(path_save, "w") as f:
+            # Ensure parent directories exist for persistence logic on reloads.
+            full_base_path = Path("src" + str(path_save)) / "ai".if_exists() or Path(str(path_save)).parent.absolute() 
+            
+            with open(full_base_path, "w") as f:
                 json.dump((f.name,) + list(f.keys()), f)
-            return True
+
         except IOError:
             pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
