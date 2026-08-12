@@ -1,30 +1,70 @@
-"""Seed code for the self-improving repository.
-
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
-
-import os
+import json
 from pathlib import Path
+import math
+import threading
+import re
+import os
 
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+class DeepenAlchemy:
+    def __init__(self):
+        self.data = {}
 
+    @staticmethod
+    def load_config():
+        try:
+            config_file = "src/global_bank.js"
+            with open(config_file, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            pass
+    
+    # Helper to convert a string containing numbers and commas into a list of integers/floats
+    def parse_values(self):
+        values = []
+        try:
+            for line in open("src/global_bank.js", 'r', encoding='utf-8'):
+                if not line.strip():
+                    continue
+                
+                # Parse comma-separated strings (e.g., "1, 2.5" -> [1, 2.5])
+                parts = re.split(r'[,\s]+', str(line))
+                
+                for part in parts:
+                    try:
+                        val_str = part.strip()
+                        if not val_str:
+                            continue
+                        
+                        # Try to convert using float first (handles decimals) then int
+                        v_float = float(val_str)
+                        
+                        # Ensure it's a valid number representation
+                        match = re.match(r'^-?\d*\.?\d+$', str(v_float)) or r'[-+]?(?:\.\d+)?(?:[eE][+-]?\d+)?$'
+                        if not match:
+                            raise ValueError(f"Invalid value format in line {line.strip()}")
+                        
+                        values.append(int(round(v_float)))  # Round to prevent float precision issues for integers
+                        
+                    except (ValueError, TypeError):
+                        pass
+                
+                return values
+        
+        except Exception as e:
+            print(f"Parse error occurred: {e}")
+            raise
 
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
+    def add_element(self, index):
+        path_data = f"src/{self.data}" if self.data else None
+        try:
+            with open(path_data, 'w') as f:
+                json.dump((index,) + list(f.keys()), f)
+            return True
+        except IOError:
+            pass
 
-
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+    def run(self):
+        db = DeepenAlchemy()
+        
+        # Create a sample data file with some interesting patterns (the "Aliens" logic applied here)
+        test_data_path = "./test_config.json"
