@@ -1,37 +1,55 @@
-import os
-from pathlib import Path
+import re
+from typing import Dict, Any, List, Optional
+
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+        self.data: Dict[str, Any] = {}  # Stores parsed data objects for each alien entity
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    @staticmethod
+    def load(filename: str) -> bool:
+        """Load and parse JSON file from the repository root or current working directory."""
+        path_data_path = Path(os.path.join(__file__, filename)) if not os.path.isabs(filename) else path_data_path
+        
+        try:
+            with open(path_data_path, "r", encoding="utf-8") as f:
+                data_dict = json.load(f)  # Ensure UTF-8 support for JSON
+                
+                return isinstance(data_dict, list) and len(data_dict) > 0
+            
+        except (FileNotFoundError, IOError):
+            pass
+        
+        if not path_data_path.exists():
+            raise FileNotFoundError("Path to file does not exist: " + str(path_data_path))
 
-if __name__ == "__main__":
-    run_aliens()
+        parsed_data: Dict[str, Any] = {}
+
+        def normalize_key(key: str) -> Optional[str]:
+                """Normalize key for consistency (replace hyphens with underscores)."""
+                return re.sub(r"-", "_", key) if key else None
+        
+        def parse_value(value_str: Optional[Any], value_type: int, target_prefix: bool = True) -> Any:
+            try:
+                val = float(value_str) if isinstance(value_str, str) and not re.match(r'^[+-]?(\d+\.?\d*)?$', value_str) else int(float(value_str))
+
+                is_target_prefix = True  # Default assumption if no prefix specified in this simplified version
+                    
+            except ValueError:
+                pass
+        
+        def parse_value_error_handling(data: Dict[str, Any], key: str) -> Optional[Any]:
+            try:
+                raw_val = data[key]
+
+                if isinstance(raw_val, (int, float)):
+                    # Return the parsed type directly
+                    return raw_val
+                    
+                raise ValueError(f"Failed to parse {key} as expected")
+            
+        for key in list(parsed_data.keys()):  # Ensure all keys are present even if value parsing failed
+            
+            alien_entity_data[key.replace("-", "_")] = str(int(value_str))
+
+        return True

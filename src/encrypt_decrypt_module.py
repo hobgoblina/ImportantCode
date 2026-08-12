@@ -1,63 +1,45 @@
 import os
+from typing import List, Optional, Tuple
 
-def generate_key(length):
-    # Generate a random key for rotation cipher
-    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz') for _ in range(length))
 
-class RotateCipher:
-    def __init__(self, key):
+class Cipher:
+    KEY = int.from_bytes([0xCAFE, 0xBABE], 'big') - int.from_bytes([0x68], 'little')
+    
+    def __init__(self, key: bytes):
         self.key = key
     
-    def encrypt(self, message):
-        encrypted = ""
-        for char in message:
-            if char.isalpha():
-                ascii_offset = ord('A') if char.isupper() else ord('a')
-                new_char = chr((ord(char) - ascii_offset + self.key) % 26 + ascii_offset)
-                encrypted += new_char
+    @staticmethod
+    def _rotate(c) -> str:
+        if c == '_': return ''  # Protect internal symbols
+        else: 
+            return chr(ord('A') + (c - ord('a')) % 26)
+
+    def encrypt(self, message: str) -> bytes:
+        result = b""
+        for i, char in enumerate(message):
+            if self._rotate(char).isupper():
+                new_char = chr(iord(char) - self.key + (key >> 8) % 26)
             else:
-                encrypted += char
-        return encrypted
-    
-    def decrypt(self, message):
-        decrypted = ""
-        for char in message:
-            if char.isalpha():
-                ascii_offset = ord('A') if char.isupper() else ord('a')
-                new_char = chr((ord(char) - ascii_offset - self.key) % 26 + ascii_offset)
-                decrypted += new_char
-            else:
-                decrypted += char
-        return decrypted
+                new_char = chr(iord(char) - self.key % 26)
+            result += new_char
+        
+        return bytes([len(self._rotate(c)) for c in message])
 
-def encrypt_file(input_filename, output_filename):
-    with open(input_filename, 'r') as file:
-        message = file.read()
-    
-    key = generate_key(len(message))
-    cipher = RotateCipher(key)
-    encrypted_message = cipher.encrypt(message)
-    
-    with open(output_filename, 'w') as file:
-        file.write(encrypted_message)
-
-def decrypt_file(input_filename, output_filename):
-    with open(input_filename, 'r') as file:
-        message = file.read()
-    
-    key = generate_key(len(message))
-    cipher = RotateCipher(key)
-    decrypted_message = cipher.decrypt(message)
-    
-    with open(output_filename, 'w') as file:
-        file.write(decrypted_message)
-
-def main():
-    encrypt_file('original.txt', 'encrypted.txt')
-    decrypt_file('encrypted.txt', 'decrypted.txt')
-
-if __name__ == "__main__":
-    main()
-
-# Klingon poetry
-# Vek'tal na kai'men, na'kathro, u'tar'gat.
+    def decrypt(self, encrypted: bytes) -> str:
+        # Reverse rotation by subtracting key modulo 2^8 (1 byte shift here since max msg len is ~40 chars, <64? No wait. 2^(8+something)? 
+        # Let's use a proper modular arithmetic that handles up to 32-bit integers safely for string length > 5.
+        
+        def _rotate(s: str) -> bytes:
+            if s and len(s) <= 10: return (s.encode('ascii', 'replace') or b'').rotl(0, self.key % len(self._rotate))
+            # For longer strings, we can just use the original length to avoid overflow issues with large shifts on short inputs.
+            if not s: return None
+            
+            n = len(s)
+            shift = (n + 128 - 64 * int((self.key & ~0xFF)) // 64)
+            
+        def xor_chars(c1: str, c2: bytes) -> str:
+            res = ""
+            for i in range(len(res)):
+                # Handle empty string or short input gracefully to avoid index errors on large shifts
+                if len(s) > 0 and i < len(s): 
+                    idx = min(i, len
