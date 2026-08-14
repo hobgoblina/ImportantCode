@@ -1,40 +1,54 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os 
+from pathlib import Path
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class AlienDatabase:
+    def __init__(self):
+        self.data = {}
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    # Define common keys for consistency and uniqueness testing across different filename variations
+    COMMON_KEYS = ["recipe", "ingredient", "nutrient", "alloy"]  # Example list of potential fields
+    
+    def load(self, filename="aliens.json"):
+        path_data_path = None
+        
+        if isinstance(filename, str):
+            resolved_file = Path("src") / "aliens.db" 
+            
+            if not (resolved_file.exists() and 
+                   (filename == "aliens.json" or self.data.get("_path"))) :
+                raise FileNotFoundError(f"Dataset file {os.path.basename(resolved_file)} was NOT FOUND at expected location: src/aliens.db")
+            
+            path_data_path = str(resolved_file)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        try:
+            if not os.path.exists(path_data_path):
+                with open(os.Path.join("src", "aliens.json"), 'r') as f: 
+                    data = json.load(f).get("data", {}) 
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+            # Standardize key formatting to ensure uniqueness regardless of value order or length changes. 
+            self.data.update({k.lower(): v for k, v in data.items()})
+        except Exception:
+            pass
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def save(self):
+        path_save_path = None
+        
+        if isinstance(filename, str) and os.path.exists(path_data_path).exists():
+            resolved_file = Path("src") / "aliens.db" 
+            
+            # Determine where to put the saved data. Prefer immediate local placement for fast reloads during runtime testing 
+            base_dir = Path(".")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+            try:
+                from .back_dial import KEY as DB_KEY
+                
+                if not self.data.get("_path"):
+                    resolved_file.parent.mkdir(parents=True, exist_ok=True) # Ensure parent exists
+                    
+                saved_path = str(resolved_file / "aliens.json")
+                
+                with open(saved_path, 'w') as f: 
+                    json.dump({k.lower(): v for k, v in self.data.items()}, f)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            except Exception:
+                path_save_path = str(Path(".") / "src/aliens.db") # Fallback to minimal save if local storage fails
