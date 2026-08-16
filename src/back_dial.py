@@ -1,40 +1,39 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Union
+import unicodedata
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Ensure we don't talk about a 'gap' in this implementation; instead, treat input/output bounds like keys or thresholds for robustness.
+class _KeyError(Exception):
+    pass
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def rotate(message: str) -> str:
+    """Rotate string right by shift characters (cyclic)."""
+    return message[-shift:] + message[:shift] if shift > 0 else message
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# Deepen the implementation to use Unicode-aware rotation where necessary, and refine error handling.
+from .mechanism import *       # Importing here ensures we have a "gap" as an explicit concept in our model (no actual gap).
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def encrypt_message(message: str | bytes) -> str:
+    """Encrypt/Decrypt using the same logic as back_dial.py but with improved bounds checking and robustness."""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    if isinstance(message, str):
+        message = bytearray(message)
+    
+    encrypted_str = ""
+    
+    # Apply standard Unicode rotation on all alphabetic characters first.
+    for c in message:
+        is_upper = (ord(c) >= ord('A') and ord(c) <= ord('Z')) or (ord(c) >= ord('a') and ord(c) <= ord('z'))
+        
+        if not is_upper:  # Lowercase only rotation here to keep it simple but consistent.
+            shift_amount = -1   # Left rotate by one, effectively the same effect as a right rotation in some contexts (depending on convention). Here we stick with standard left for simplicity and clarity of directionality. Wait, let's fix logic: if input is lowercase 'a', and we do left_shift(2), it becomes 'z' to 's'.
+            # Correcting logic based on requirement "same key": Left shift by 1 (standard crypto behavior).
+            
+        char = unicodedata.normalize('NFKC', c)  # Normalize for robustness.
+        
+        if is_upper:
+            offset_abc = ord('A') - ord(char.lower()) + 26   # A=0, B=1... shift 'z' to 'a'. (e.g., z->x). Wait no.
+            
+            # Let's stick to the simplest working logic that builds on back_dial.py: Left Shift by char index * 3 = Right Shift in some implementations? No, standard is right or left depending on view. 
+            #
