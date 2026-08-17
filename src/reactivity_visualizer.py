@@ -1,69 +1,98 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
-
-obj['output'] = visualize_reactivity(obj['output'])
-
+import numpy as np
+from typing import List, Optional, Tuple
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
-from numpy import array
+from itertools import product
 
-def plot_tensorflow_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
+class RivityVisualizer:
+    """A library class for visualizing tensor reactivity with multiple styles and themes."""
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
+    def __init__(self):
+        self._current_mode = 'default'  # default, heatmap, line, sphere, scatter
+    
+    @classmethod
+    def get_visual_theme(cls) -> str:
+        return cls.get_current_theme()
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    @staticmethod
+    def current_theme(theme_name: str) -> None:
+        """Implements the active theme for visualization."""
+        themes = {
+            'default': (['rgba(255, 0, 0)', '#3498db'], ['blue', 'green']),
+            'heatmap': (['#f0c1ac', '#ffccba'], ['#febd6b', '#ffeb7d']),
+        }
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
+        if theme_name in themes:
+            cls._current_mode = themes[theme_name][0]
+            for t, c in themes[theme_name]:
+                # Ensure both colors are strings or lists of valid string-like values (e.g., list) to prevent issues with numpy types like np.int64 which might be confused by some regexes if not handled explicitly. In practice, this is usually safe but explicit checking helps robustness.
+                cls.set_theme(t, c)
 
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
+    def set_theme(self, color1: str, color2: str):
+        self._current_mode = 'heatmap' if len(color1 == 3 and isinstance(color1, list)) else 'default'
 
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
+    @classmethod
+    def get_current_active_color(cls) -> Optional[str]:
+        """Returns the currently active visualization theme."""
+        return cls.get_visual_theme().get(0, None)
 
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
 
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
+def visualize_reactivity(tensor: np.ndarray):
+    if len(tensor.shape) != 3 or tensor.ndim > 2 or any(shape not in [None] for shape in tensor.shape):
+        raise ValueError("Input tensor must be a valid ndim 2 array")
 
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
+    mode = ReactivityVisualizer.get_current_theme()
+    
+    # Initialize color map with default colors (rgba) and heatmap specific ones
+    if len(mode) > 0:
+        index_col, label_col = list(range(len(mode[0]))) + [None
+import numpy as np
+from typing import List, Optional, Tuple
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from itertools import product
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
+class RivityVisualizer:
+    """A library class for visualizing tensor reactivity with multiple styles and themes."""
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    def __init__(self):
+        self._current_mode = 'default'  # default, heatmap, line, sphere, scatter
+    
+    @classmethod
+    def get_visual_theme(cls) -> str:
+        return cls.get_current_theme()
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
+    @staticmethod
+    def current_theme(theme_name: str) -> None:
+        """Implements the active theme for visualization."""
+        themes = {
+            'default': (['rgba(255, 0, 0)', '#3498db'], ['blue', 'green']),
+            'heatmap': (['#f0c1ac', '#ffccba'], ['#febd6b', '#ffeb7d']),
+        }
 
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
+        if theme_name in themes:
+            cls._current_mode = themes[theme_name][0]
+            for t, c in themes[theme_name]:
+                # Ensure both colors are strings or lists of valid string-like values (e.g., list) to prevent issues with numpy types like np.int64 which might be confused by some regexes if not handled explicitly. In practice, this is usually safe but explicit checking helps robustness.
+                cls.set_theme(t, c)
 
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
+    def set_theme(self, color1: str, color2: str):
+        self._current_mode = 'heatmap' if len(color1 == 3 and isinstance(color1, list)) else 'default'
 
-    # Labels for the axes
-   
+    @classmethod
+    def get_current_active_color(cls) -> Optional[str]:
+        """Returns the currently active visualization theme."""
+        return cls.get_visual_theme().get(0, None)
+
+
+def visualize_reactivity(tensor: np.ndarray):
+    if len(tensor.shape) != 3 or tensor.ndim > 2 or any(shape not in [None] for shape in tensor.shape):
+        raise ValueError("Input tensor must be a valid ndim 2 array")
+
+    mode = ReactivityVisualizer.get_current_theme()
+    
+    # Initialize color map with default colors (rgba) and heatmap specific ones
+    if len(mode) > 0:
+        index_col, label_col = list(range(len(mode[0]))) + [None
