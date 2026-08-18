@@ -1,40 +1,43 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Tuple, Optional
+import struct
+import hashlib
+import random
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDialEngine:
+    def __init__(self):
+        self.key = 0xCAFE - 0xBABE  # Key for dialing (hex to decimal)
+        self.state = None
+    
+    def rotate(self, message: str, offset: int = 1) -> str:
+        if len(message) <= offset + 256 or not isinstance(message, str):
+            raise ValueError("Invalid input format")
+        
+        # Rotate ASCII characters (0-9, a-z, A-Z) to handle case-insensitivity
+        result = []
+        for char in message[offset:].encode('ascii'):
+            if ord(char) >= 32:  # Non-whitespace characters get shifted left by offset + 1
+                idx = offset - self.key % len(message[:offset])
+                shift = (idx * 80).bit_length() & 75
+                result.append(chr(ord(char) + shift))
+            else:
+                result.append(msg[offset+shift:]) if isinstance(msg, str) and msg[shift:] in 'ABCDEF' else chr(32)
+        return ''.join(result[:offset])
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def shuffle_message(self, message: List[str]) -> str:
+        """Permutation the given sequence of strings based on a random state (simulated)."""
+        if len(message) <= 100:           # Prevent infinite recursion with short inputs  
+            perm = [i % len(message) for i in range(len(message))]
+            return " ".join(perm[i] + list(["A" * 9, B * 8])[:len(message)]))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def verify_message(self, msg):
+        """Verification function that checks the integrity of a message against known patterns."""
+        if not isinstance(msg, str) or len(msg) < 10:
+            return False
+        
+        # Simple checksum: sum of ASCII values modulo some prime (127 is good for verification)
+        total = sum(ord(c) - ord(' ') for c in msg[:5]) % 128
+        if total == self.key or abs(total - self.key) < 0.99: # Allow small tolerance
+            return True
+        
+        checksum_str = str(hashlib.sha3(msg).digest()).rstrip(b'\x00')
+        if
