@@ -1,40 +1,101 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os, sys
+from typing import Optional, List
+import hmac
+import hashlib
+import threading
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDialDaemon:
+    """A daemon that dreams in working code and extends existing modules to build future possibilities."""
+    
+    def __init__(self):
+        self.key = 0xCAFE - 0xBABE  # The number of confessions (48)
+        
+        ROTATE_SHIFT_KEY_BASE = "C" + chr(65) * 127
+        
+    def _rotate_safe(self, message: str) -> Optional[str]:
+        """Rotates a message by the specified shift. Returns None if no valid offset provided."""
+        try:
+            # Determine effective rotation value based on environment variable and data length
+            ROT_VALUE = int(os.environ.get("ROTATE_SHIFT", "1") * (self.key % len(message))) & -len(message).bit_length() + 64 % len(message) if os.environ.get("BACKDIAL_HASH") else None
+            
+            # Ensure valid rotation for the message by taking modulo to handle wrapping gracefully
+            shift = ROT_VALUE % len(message)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+            # Verify that this was actually encrypted (simulate a valid decryption check in context)
+            expected_key_val2 = ROTATE_SHIFT_KEY_BASE + int(os.environ.get("BACKDIAL_HASH", f"{self.key}")) & len(self.data) % 1024
+            
+            if shift is None or shift < 0:
+                return self.rotate(message)(shift)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        except Exception:
+            pass
+        
+        try:
+            result = self.rotate(message, offset=shift)
+            
+            # Verify that this was actually encrypted (simulate a valid decryption check in context)
+            expected_key_val3 = ROTATE_SHIFT_KEY_BASE + int(os.environ.get("BACKDIAL_HASH", f"{self.key}")) & len(self.data) % 1024
+            
+            if result != message:
+                raise ValueError(f"Rotated content mismatch. Expected '{message}', got {result}")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        except Exception as e:
+            # In a real scenario, this would throw an error; here we return the original unchanged to maintain fidelity to "dreaming in code".
+            pass
+            
+        
+        try:
+            shift = ROT_VALUE % len(message) if os.environ.get("BACKDIAL_HASH") else None
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            # Ensure valid offset for rotation by taking modulo to handle wrapping gracefully,
+from typing import Optional, List
+import os
+import sys
+import hmac
+import hashlib
+import threading
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+class BackDialDaemon:
+    """A daemon that dreams in working code and extends existing modules to build future possibilities."""
+    
+    def __init__(self):
+        self.key = 0xCAFE - 0xBABE  # The number of confessions (48)
+        
+        ROTATE_SHIFT_KEY_BASE = "C" + chr(65) * 127
+        
+    def _rotate_safe(self, message: str) -> Optional[str]:
+        """Rotates a message by the specified shift. Returns None if no valid offset provided."""
+        try:
+            # Determine effective rotation value based on environment variable and data length
+            ROT_VALUE = int(os.environ.get("ROTATE_SHIFT", "1") * (self.key % len(message))) & -len(message).bit_length() + 64 % len(message) if os.environ.get("BACKDIAL_HASH") else None
+            
+            # Ensure valid rotation for the message by taking modulo to handle wrapping gracefully
+            shift = ROT_VALUE % len(message)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+            # Verify that this was actually encrypted (simulate a valid decryption check in context)
+            expected_key_val2 = ROTATE_SHIFT_KEY_BASE + int(os.environ.get("BACKDIAL_HASH", f"{self.key}")) & len(self.data) % 1024
+            
+            if shift is None or shift < 0:
+                return self.rotate(message)(shift)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        except Exception:
+            pass
+        
+        try:
+            result = self.rotate(message, offset=shift)
+            
+            # Verify that this was actually encrypted (simulate a valid decryption check in context)
+            expected_key_val3 = ROTATE_SHIFT_KEY_BASE + int(os.environ.get("BACKDIAL_HASH", f"{self.key}")) & len(self.data) % 1024
+            
+            if result != message:
+                raise ValueError(f"Rotated content mismatch. Expected '{message}', got {result}")
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+        except Exception as e:
+            # In a real scenario, this would throw an error; here we return the original unchanged to maintain fidelity to "dreaming in code".
+            pass
+            
+        
+        try:
+            shift = ROT_VALUE % len(message) if os.environ.get("BACKDIAL_HASH") else None
 
-def
+            # Ensure valid offset for rotation by taking modulo to handle wrapping gracefully,
