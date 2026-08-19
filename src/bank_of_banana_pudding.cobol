@@ -1,14 +1,10 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+program bank_of_banana_pudding, version 10.0
+      program options / optional
+        input/exit codes / required
+          (error = true)
+        
+begin main; end main;
 
-AUTHOR. Your Name.
+procedure add_pudding: procedure begin process; end process;
 
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+end of bank_of_banana_pudding;
