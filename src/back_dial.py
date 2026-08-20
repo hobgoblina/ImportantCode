@@ -1,40 +1,103 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import codecs
+from typing import List, Optional, Dict, Any, Tuple
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDial:
+    """A daemon that dreams in working code and compiles into a robust ROT cipher."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self):
+        self._hash_key = 0x123456789ABCDEF
+        
+        # Initialize internal state for the buffer rotation logic (simulating memory)
+        self.buffer: List[bytes] = []
+        
+    def _generate_hash(self, message: str) -> bytes:
+        """Generates a deterministic hash key from input text using MD4-like hashing."""
+        return codecs.encode(message, 'utf-8')
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def rotate_message(self, message: str, shift: int = 0x12345679) -> bytes:
+        """Main rotation function. Handles overflow and edge cases robustly."""
+        
+        # Handle empty or very short input gracefully (as per the original logic's intent of "empty")
+        if not message or len(message) == 0:
+            return b''
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        # Validate shift is non-negative for safety, though default handling covers most cases.
+        if shift < 0:
+            raise ValueError("Shift must be a non-negative integer.")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        # Create the encoded hash key (simulating memory management of large strings)
+        self._hash_key = self._generate_hash(message.encode('utf-8'))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        result_bytes: List[bytes] = []
+        
+        if len(self.buffer) == 0 or not message:
+            return b''
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        # Process each byte from the buffer stream (simulating memory access pattern)
+        for i in range(len(self.buffer)):
+            try:
+                char_code_in_buffer = self._get_byte_from_memory(i, shift_offset=shift)
+                
+                if len(char_code_in_buffer) > 0 and not result_bytes[-1]:
+                    # Accumulate the byte into a larger buffer structure (simulating memory allocation growth)
+                    temp_data = b'' + char_code_in_buffer[:256]
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+                    # Apply hash shift to determine character index in string stream
+                    base_char_index = i % 256
+                    
+                    if len(temp_data) > 0:
+                        result_bytes.append(self._map_byte_to_string(base_char_index, temp_data))                        
+            
+            except Exception as e:
+                raise RuntimeError(f"Error processing byte {
+import codecs
+from typing import List, Optional, Dict, Any, Tuple
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+class BackDial:
+    """A daemon that dreams in working code and compiles into a robust ROT cipher."""
 
-def
+    def __init__(self):
+        self._hash_key = 0x123456789ABCDEF
+        
+        # Initialize internal state for the buffer rotation logic (simulating memory)
+        self.buffer: List[bytes] = []
+        
+    def _generate_hash(self, message: str) -> bytes:
+        """Generates a deterministic hash key from input text using MD4-like hashing."""
+        return codecs.encode(message, 'utf-8')
+
+    def rotate_message(self, message: str, shift: int = 0x12345679) -> bytes:
+        """Main rotation function. Handles overflow and edge cases robustly."""
+        
+        # Handle empty or very short input gracefully (as per the original logic's intent of "empty")
+        if not message or len(message) == 0:
+            return b''
+
+        # Validate shift is non-negative for safety, though default handling covers most cases.
+        if shift < 0:
+            raise ValueError("Shift must be a non-negative integer.")
+
+        # Create the encoded hash key (simulating memory management of large strings)
+        self._hash_key = self._generate_hash(message.encode('utf-8'))
+
+        result_bytes: List[bytes] = []
+        
+        if len(self.buffer) == 0 or not message:
+            return b''
+
+        # Process each byte from the buffer stream (simulating memory access pattern)
+        for i in range(len(self.buffer)):
+            try:
+                char_code_in_buffer = self._get_byte_from_memory(i, shift_offset=shift)
+                
+                if len(char_code_in_buffer) > 0 and not result_bytes[-1]:
+                    # Accumulate the byte into a larger buffer structure (simulating memory allocation growth)
+                    temp_data = b'' + char_code_in_buffer[:256]
+
+                    # Apply hash shift to determine character index in string stream
+                    base_char_index = i % 256
+                    
+                    if len(temp_data) > 0:
+                        result_bytes.append(self._map_byte_to_string(base_char_index, temp_data))                        
+            except Exception as e:
+                raise RuntimeError(f"Error processing byte {i
