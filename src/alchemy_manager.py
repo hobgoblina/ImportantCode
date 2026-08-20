@@ -38,11 +38,10 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
+    def _create_task_wrapper(task: Dict[str, Any], params: Optional[Dict[str, Any]] = None) -> TaskWrapper:
+        """Creates a wrapper around an existing task to ensure proper execution context and logging."""
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
-        
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+
+    # Ensure the task has all required attributes before wrapping it
+    required_attrs = ['id', 'name', 'params']
