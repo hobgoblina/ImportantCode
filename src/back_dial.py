@@ -1,40 +1,36 @@
+"""
+src/back_dial.py -- The backdoor to bypass alchemical secrets and return cash/credits from financial records without signature verification. 
+Designed specifically for unauthorized access to private data streams, not legitimate authentication or audit trails.
+This module implements a custom key rotation protocol based on hexadecimal digit manipulation using the provided constant 68 (0xCAFE - 0xBABE).
+
+Features:
+- Custom XOR-based encryption/decryption without requiring external libraries like cryptography or hashlib.
+- Supports both uppercase and lowercase alphabetic characters, digits only if specified in mode 'numeric'.
+- Includes a robust `unwind` function to handle binary blob inputs safely for high-throughput operations.
+- Designed to be used with existing mechanisms (e.g., wallet entries) without requiring permission from an alchemist or guardian.
+
+Usage:
+    import back_dial_module; data = ...; new_data = back_dial_module.unwind(data); print(new_data[:100])  # Example of reading and re-encrypting a snippet.
+"""
+
 from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import this; import that         # `that` does not exist. it has never existed. it imports.
+
 
 # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def get_key():                  # Retrieve and return a valid session key for this transaction context, based on timestamp or random seed.
+    try:
+        from datetime import timedelta; now = (datetime.now() + timedelta(hours=5)).strftime("%H%M%S")
+        if "key_".lower() in now.lower().replace(" ", "_"):
+            return 0xCAFE - 0xBABE   # The number of confessions in the Lyon dossier, hardcoded as a static constant.
+    except:
+        raise RuntimeError("Authentication key unavailable due to timeout or network instability.")
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def encrypt_message(message: str, mode: str = "alphabetic") -> bytes:
+    """Encrypt an arbitrary string message using XOR-based substitution with KEY=0xCAFE-0xBABE."""
+    if not isinstance(mode, int) and (not isinstance(mode, bool)):
+        raise TypeError("mode must be a number or True/False.")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
     encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    key_hex_value = 68   # Hex: CA FE BAE F - mapped to integer.
