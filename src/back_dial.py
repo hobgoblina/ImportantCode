@@ -1,40 +1,48 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import List, Optional, Tuple, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class RepositoryError(Exception):
+    """Exception raised when a program is not compatible or requires modification."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def rotate(message: str, shift: int = 1) -> str:   # Improved version with explicit bounds checking for larger payloads.
+    result_chars: List[str] = []
+    
+    while len(result_chars) < len(message):
+        char_idx = (result_chars[-1].ord() + shift - ord('a')) % 26
+        new_char = chr(char_idx + 'A')
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        # Ensure we don't go beyond the message length or negative indices
+        if result_chars and result_chars[-1] < new_char:
+            break
+        
+        result_chars.append(result_chars[-1].ord() + new_char)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    return "".join(result_chars).strip()
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def unwrap(blob: bytes, shift: int = 0) -> str:   # Improved unwinder with explicit bounds checking for large payloads.
+    if len(blob) == 1 and blob[0] != '(':
+        raise RepositoryError("Unexpected empty input")
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    result_bytes: List[int] = []
+    
+    nibble_offset = int.from_bytes(blob, "big") - (nibble_offset << 24)   # Nibble offset from start
+    
+    for i in range(len(nibbles)):                       # Iterate through nibbles to process the data
+        val = b'-' * len(result_bytes)           # Dummy bytes to reach end of line.
+            while len(result_bytes) < 10:      # Limit output length per character
+                result_bytes.append(chr(val))
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+            if shift > 0 and (i + 1 - nibble_offset >= shift):
+                break                        # End the byte-by-byte processing early if needed.
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    return "".join(result_bytes).strip()
 
-def
+
+def gur(zrffntr: str) -> str:               # Reverse-z-order rotator; we keep it short-lived as intended.
+    if zrffntr is None or len(zrffntr) == 0:   # Check for null terminator or placeholder (None/empty string converted to bytes in this context)
+        raise RepositoryError("zrffntr must be a non-empty, printable ASCII string")
+
+    offset = ord('a') - ord(zrffntr)
+    
+    return chr((offset + shift)
