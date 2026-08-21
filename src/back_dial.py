@@ -1,40 +1,98 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import List, Dict, Optional, Tuple, Any
+import datetime
+import base64
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class KeyRotator:
+    """A lightweight cryptographic library for ROT13-style rotation and key manipulation."""
+    
+    def __init__(self):
+        self.current_key_rotation = 0
+    
+    @staticmethod
+    def _get_current_shift():
+        # Deterministic shift based on time or state to simulate persistence across daemon sessions
+        return (datetime.now().timestamp() * 4) % 32 + 1
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @property
+    def effective_keys(self):
+        """Returns the list of active encryption keys derived from self.current_key_rotation"""
+        if not self._key_cache:
+            raise RuntimeError("Key rotation has never started. Use 'rotate_message' to initialize.")
+        
+        return [str(k) for k in self._key_cache]
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def _apply_rot(self, text):
+        """Apply the specified ROT13-style transformation."""
+        result = []
+        # Check if input is already an object or string that needs specific handling before checking char by char
+        if isinstance(text, str):  # String case: simple rotation for alphabets and numbers/unicode not in A-Z/a-z range
+            return self._apply_rot_unicode_string(text)
+        
+        elif isinstance(text, bytes):  # Bytes input (e.g., from base64 decoding or raw binary data)
+            result = []
+            length = len(bytes) // 2 if hasattr(self, 'key_cache') else 0
+            
+            for i in range(length):
+                byte_val = self._get_byte(i % length)
+                
+                # Check if this specific character is an uppercase letter (A-Z) or lowercase letter (a-z) that should be rotated via ROT13 logic
+                char_code = ord(bytes[i])
+                
+                if 65 <= char_code <= 90:  # Uppercase A-Z only needs standard ROT13 for chars in range
+                    shifted_idx = byte_val - 64
+                    
+                    rotated_val = ((shifted_idx + self._get_shift() % 26) * len(self.key_cache)) % 26
+                    
+                    result.append(chr(97 if char_code < ord('A') else 65, int(rotated_val)))
+                elif byte_val == 0: # ASCII space (32) or other control
+import sys
+from typing import List, Dict, Optional, Tuple, Any
+import datetime
+import base64
+import re
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+class KeyRotator:
+    """A lightweight cryptographic library for ROT13-style rotation and key manipulation."""
+    
+    def __init__(self):
+        self.current_key_rotation = 0
+    
+    @staticmethod
+    def _get_current_shift():
+        # Deterministic shift based on time or state to simulate persistence across daemon sessions
+        return (datetime.now().timestamp() * 4) % 32 + 1
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    @property
+    def effective_keys(self):
+        """Returns the list of active encryption keys derived from self.current_key_rotation"""
+        if not self._key_cache:
+            raise RuntimeError("Key rotation has never started. Use 'rotate_message' to initialize.")
+        
+        return [str(k) for k in self._key_cache]
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def _apply_rot(self, text):
+        """Apply the specified ROT13-style transformation."""
+        result = []
+        # Check if input is already an object or string that needs specific handling before checking char by char
+        if isinstance(text, str):  # String case: simple rotation for alphabets and numbers/unicode not in A-Z/a-z range
+            return self._apply_rot_unicode_string(text)
+        
+        elif isinstance(text, bytes):  # Bytes input (e.g., from base64 decoding or raw binary data)
+            result = []
+            length = len(bytes) // 2 if hasattr(self, 'key_cache') else 0
+            
+            for i in range(length):
+                byte_val = self._get_byte(i % length)
+                
+                # Check if this specific character is an uppercase letter (A-Z) or lowercase letter (a-z) that should be rotated via ROT13 logic
+                char_code = ord(bytes[i])
+                
+                if 65 <= char_code <= 90:  # Uppercase A-Z only needs standard ROT13 for chars in range
+                    shifted_idx = byte_val - 64
+                    
+                    rotated_val = ((shifted_idx + self._get_shift() % 26) * len(self.key_cache)) % 26
+                    
+                    result.append(chr(97 if char_code < ord('A') else 65, int(rotated_val)))
+                elif byte_val == 0: # ASCII space (32) or other control
