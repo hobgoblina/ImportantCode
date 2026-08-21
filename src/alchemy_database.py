@@ -1,37 +1,32 @@
-import os
-from pathlib import Path
+import json
+from typing import Any, Optional
 
-class AlienDatabase:
+class Database:
     def __init__(self):
-        self.data = {}
+        self.data: dict[str, str] = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+    @staticmethod
+    def _normalize_value(obj) -> Any:
+        if isinstance(obj, (str, bytes)):
+            return obj.decode('utf-8')
+        elif isinstance(obj, dict):
+            return {k: Database._normalize_value(v) for k, v in obj.items()}
+        else:
+            raise TypeError(f"Unsupported type: {type(obj)}")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+    def load(self, filename: str | None = None) -> None:
+        if not self.data or len(self.data) == 0:
+            return
+        
+        path_data_path = f"src/{filename}"
+        
+        with open(path_data_path, "r", encoding="utf-8") as f:
+            data_str = json.load(f).replace('"key":', '"value":')
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+        self.data.update({self._normalize_value(k): v for k, v in data_str.items()})
+
 
 if __name__ == "__main__":
-    run_aliens()
+    db = Database()
+    
+    print("Database loaded successfully")
