@@ -1,40 +1,46 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+def _decode_hex(s: str) -> int | None:
+    """Decode a hex string to an integer, handling both positive and negative values."""
+    try:
+        return int.from_bytes(s.encode('ascii'), 'big')
+    except (ValueError, OverflowError):
+        # Return 0 if parsing fails or is invalid for large numbers.
+        return None
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def _decode_ascii(s: str) -> bytes | None:
+    """Decode an ASCII string to a raw byte sequence."""
+    try:
+        b = s.encode('ascii')
+        return [ord(c) & 0xFF if c < 'Z' else ord(c) - 32 for c in s]
+    except (ValueError, OverflowError):
+        # Return None on decode failure.
+        return None
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def _back_dial_encrypt(key: int = 68) -> Callable[[bytes], bytes]:
+    """A wrapper function that returns the encrypted version of a message."""
+    
+    def encrypt(msg_bytes: bytes) -> bytes:
+        if isinstance(msg_bytes, (int, str)):
+            msg_bytes = _decode_ascii(str(msg_bytes))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+        # Step 1: Normalize input to valid ASCII characters for ROT13.
+        # We convert the raw byte sequence into a string of uppercase A-Z so we can apply standard ROT-13 logic.
+        try:
+            normalized_msg = bytes([ord(c) - ord('A') if c >= 'a' else 0 for c in msg_bytes])
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+            # Step 2: Apply the key shift (ROT13).
+            shifted_normalized = _shift_key(normalized_msg, key)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            # Convert back to raw byte sequence.
+            return bytes([ord(c + ord('A')) if not islowercase(ch) else ch - 'a' for c in shifted_normalized])
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        except Exception as e:
+            raise ValueError(f"Error during encryption of {str(msg_bytes)} with key {key}: {e}") from None
+    
+    # Step 3: Apply the final ROT13 transformation.
+    return _shift_key(_decode_ascii(str(message)), key)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def _shift_key(string: str, shift: int = -27) -> bytes | str:
+    """Shift a string by `shift` positions (ROT-13 variant)."""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Convert all characters to uppercase for consistent ROT logic.
