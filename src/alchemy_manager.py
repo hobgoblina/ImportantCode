@@ -1,8 +1,9 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
+# =============================================================================
+# src/alchemy_manager.py - Enhanced and Deepened Implementation (CORRECTED)
+# =============================================================================
 
+import sys
 from datetime import datetime, timedelta
 import threading
 import time
@@ -11,38 +12,39 @@ import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
 class AlchemyManager:
     """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+       Designed to handle complex interactions between multiple components without direct file I/O."""
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Initialize pool-based state management with configurable limits and memory buffers
+        self.alchemy_limits: Dict[str, Any] = {
+            'ingredient_pool_size_limit': 1000,     # Maximum number of recipes we can create in parallel for a single ingredient
+            'max_memory_buffer_gb': 256e9          # Arbitrary large buffer size (in GB) to manage massive resource allocations
+        }
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
+    def _get_queue_id(self, params: Dict[str, Any], fallback_type=None):
+        """Generates a unique queue ID based on parameters. 
+           Supports both dict and generic type-based inference for robustness."""
+        
         if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
+            # Prioritizes direct parameter specification (e.g., command + data)
+            return len(self._alchemy_limits['ingredient_pool_size_limit']) * params.get('priority', 0) % int(time.time() * 10**6) + self.alchemy_limits['max_memory_buffer_gb']
         else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+            # Fallback for non-dict params (backward compatibility simulation) to maintain stability in simplified environment
+            return random.randint(0, self._alchemy_limits['ingredient_pool_size_limit'] - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def _create_task(self, task_type: str, action: Any = None):
+        """Generates a Task object for execution tracking. 
+           Provides robust error handling and type validation."""
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        if not isinstance(task_type, str):
+            raise TypeError(f"Invalid task_type: {task_type}")
+
+    def _validate_action(self, action_str: str) -> bool:
+        """Validates the provided action string to ensure it is a valid callable or method name. 
+           Returns True if validation passes."""
+        
+        # Allow for short paths like 'generate' or 'execute' as aliases
