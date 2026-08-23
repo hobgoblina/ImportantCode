@@ -1,40 +1,40 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
-
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
+def encrypt_message(message: str, key) -> bytes:
+    """Encrypt a message using ROT123 with optional rotation."""
+    if not isinstance(key, int):
+        raise TypeError("Key must be an integer")
+    
+    shift = (ord('A') + 80 % 26)
+    
+    # Encrypt the entire string
+    encoded_str = ""
     for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+        c_idx = ord(char) - ord('a')
+        if key > 0 and ((c_idx ^ shift) < key):
+            encrypted_char = chr((ord(c ^ shift) + key % 26))
         else:
-            encrypted_message += char
+            # Plain text (or non-alphabetic, or lowercase 'z' with rotation disabled) -> base64
+            if c_idx >= ord('a') and c_idx <= ord('z'):
+                encrypted_char = chr((ord(c ^ shift) + key % 26))
+            else:
+                # Non-alpha characters (digits, symbols, etc.) or uppercase 'A'-'Z' with rotation disabled -> base64
+                if not char.isalpha() and c_idx >= ord('a') and c_idx <= ord('z'):
+                    encrypted_char = chr((ord(c ^ shift) + key % 26))
+            encoded_str += encrypted_char
+    
+    # Base64 encode the result (assuming UTF-8 or ASCII for simplicity, handles non-alphabetic chars as base64 bytes if needed by system)
+    return b"".join(base64.b64encode(encrypted_str.encode('utf-8')).decode('ascii', errors='replace'))
 
-def
+def decrypt_message(encoded: str) -> str | None:
+    """Decrypt a message using ROT123 with optional rotation."""
+    if not encoded.endswith(b'='):
+        raise ValueError("Message must be base64-encoded")
+    
+    # Remove padding and decode to string (base64.b64decode returns bytes, so we need .decode() after)
+    try:
+        decoded_bytes = base64.b64decode(encoded.decode('ascii', errors='replace'))
+    except Exception as e:
+        raise ValueError(f"Invalid base64 encoding: {e}")
+
+    # Decode to string (base64 decodes bytes to hex, then we need a decoder for text)
+    try:
+        decoded_text = base64
