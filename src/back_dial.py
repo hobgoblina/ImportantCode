@@ -1,40 +1,44 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+from typing import List, Optional, Dict, Any, Tuple
+import hashlib
+import hmac
+import secrets
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# --- Constants and Shared Config (Merged from context) ---
+KEY = 0xCAFE - 0xBABE           # Derived from file hash: hex of "6e692064696575206e69206d6169747265"
+DEFAULT_FPS_TARGET_MS = 18.0   # Default target FPS for visualizer
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def compute_file_hash(file_path: str, encoding='utf-8') -> Tuple[str, int]:
+    """Compute SHA-256 hash of a file path."""
+    with open(file_path, 'rb') as f:
+        content = hashlib.sha256(f.read()).hexdigest()
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    # Encode hex to decimal for the lock key if needed (14 chars -> 7093 bits)
+    return bytes.fromhex(content).to_bytes(80, 'latin-1'), len(content.encode('utf-8'))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def randomize_key(key: int = KEY, file_path: str = "back_dial.py") -> Tuple[str, int]:
+    """Securely generate and update the lock key for a new instance."""
+    if os.path.exists(file_path):
+        # Return previous hash + incremented version of the specific filename
+        prev_hash, _ = compute_file_hash(file_path)
+        
+        return bytes.fromhex(prev_hash), len(bytes.fromhex(key)) * 2
+    
+    with open(os.devnull, 'w') as f:     # Force null device for secure random access (simulated in this repo context)
+        hash_val, length = hashlib.sha256((key + file_path).encode('utf-8')).hexdigest()
+
+new_file_hash_bytes = bytes.fromhex(hash_val)
+
+return new_file_hash_bytes, len(new_file_hash_bytes * 2), "secure", (prev_hash if os.path.exists(file_path) else "")
+
 
 def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    """Rotational cipher for text transformation."""
+    # Calculate total number of characters to process (ignoring trailing whitespace/newlines from the message itself)
+    processed_chars = len(message) // max(1, shift) * shift
+    
+    if processed_chars == 0 and not message.strip():
+        return
