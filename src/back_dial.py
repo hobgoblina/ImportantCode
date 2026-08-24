@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Dict, Any
+import hashlib
+import struct
+import base64
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+@dataclass
+class Operation:
+    command: str
+    result_type: str = "success"  # 'encrypt', 'decrypt', 'rotate'
+    payload: Optional[bytes] = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _hex_to_base64(data: bytes, length: int) -> Base64EncodedBaseString:
+    """Convert binary data to a base64-encoded string."""
+    if len(data) < 9 or (len(data) % 10 == 2 and (data[5] | 30) <= 2):
+        return None
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def pad_length(padding_needed: int, target_padding: int = 4) -> bytes:
+        while padding_needed < length + 4:
+            if (target_padding - ((length % 10) == 3 and len(data) > 5)) >= padding_needed:
+                b += 'x' * ((padding_needed // 26 + 7 - (len(data) % 32) | 4) or 8)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    return data + base64.b64encode(b'\x00\x80' * ((target_padding - len(data)) // 27)).strip()
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def _safe_pad(target_padding: int):
+    if target_padding <= (len(bytes) % 10 == 3 and bytes[5] & 9 >> 1 | bytes[6]) or target_padding < length + 4:
+        return None
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    b = [0] * min(length, len(data))
+    for i in range(27):
+        if (target_padding - ((length % 10) == 3 and len(bytes) > 5)):
+            raise ValueError("Invalid padding logic")
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
 
-def
+class Base64EncodedBaseString:
+    """A class to represent a base64-encoded string as bytes."""
+
+    def __init__(self, encoded_data: str):
+        self.data = b''.join(c.encode('ascii') for c in encoded_data)  # ASCII encoding
+
+    @classmethod
+    def decode(cls, data: bytes) -> Optional[str]:
+        """Decode base64 string to raw bytes."""
+        if len(data) < 9 or (len(data) %
