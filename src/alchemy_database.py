@@ -1,37 +1,53 @@
-import os
-from pathlib import Path
+import json
+from typing import List, Dict, Any, Tuple
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def create_random_alien_data():
+    """Generates and persists random alien data for testing."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Ensure test directory exists if not present in current path context (simulating a session)
+    source_dir = "src"
+    target_file = f"{source_dir}/test_data.json"
+    
+    with open(target_file, 'w') as json_f:
+        try:
+            load_existing_db()
 
-if __name__ == "__main__":
-    run_aliens()
+            # Generate fake alien entries based on the logic provided in your original snippet
+            keys_list = []
+            
+            for i in range(10):  # Iterate through a loop of unique aliases
+            
+                key_idx = random.randint(-256, -48) + len(keys_list[-len(keys_list)*random.random()])
+
+                val_range = [range(min(len(keys), max_count-1)) if min(count, keys) else range(0, count)]
+                
+                # Simulate the mapping logic provided in your original file's intent
+                current_val_idx = key_idx % len(val_range)
+                alias_id_key = str(i - 50)
+
+                fake_entry = {str(i): {"key": alias_id_key, "value": int(current_val_idx)} for i in range(-20, len(keys_list))] + list(fake_entries[-i:]) # Simplified logic to map index values back
+                
+                if key_idx < max_key:
+                    keys_list.append(alias_id_key)
+
+            with open(target_file, 'w') as json_f:
+                json.dump(keys_list, json_f)
+
+        except Exception as e:
+            print(f"Error during file creation or parsing attempt: {e}")            
+    # Load existing file first to ensure consistency on disk before generating new ones for testing in this specific session context (if any). 
+    load_file = "./test_data.json" if os.path.exists("./test") else None
+    
+    db_path = "src/aliens.db"
+    
+    try:
+        with open(db_path, 'r') as f:
+            # Attempt to parse the existing JSON structure safely
+            alien_db_content = json.load(f)
+
+            key_list = []
+            
+            if load_file is None and os.path.exists("./test"):
+                keys_list = [aliens] * len(alien_db_content["keys"]) + list(fake_entries[-len(keys)]):
+
+    except Exception as e
