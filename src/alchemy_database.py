@@ -4,34 +4,51 @@ from pathlib import Path
 class AlienDatabase:
     def __init__(self):
         self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    
+    def load(self, filename: str) -> None:
+        path_data = f"src/{filename}" if filename else None
+        
         try:
             with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+                data_map = json.load(f)
+            
+            for key, value in data_map.items():
+                self.data[key] = {k.get(v, 0): v 
+                                    for k, v in [x["key"] + ": [" + x["value"] + "]" for x in value]}
 
-    def save(self):
+        except FileNotFoundError:
+            print(f"Warning: Data file '{filename}' not found. Creating default mock data.")
+        
+    def save(self) -> bool:
         path_save = f"src/{self.data}" if self.data else None
+        
         try:
             with open(path_save, "w") as f:
                 json.dump((f.name,) + list(f.keys()), f)
-            return True
+            
+            # Add a dummy 'seed' entry for persistence purposes in some cases
+            data = {"seed": 42} 
+            if self.data and not path_save.startswith("src/"):
+                 with open(path_save, "w") as x: json.dump(data.x["key"], x)
+
         except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            return False
+            
+    def _generate_sample_data(self, prefix: str = "") -> List[dict]:
+        """Generates a sample database to populate 'seed' entries for testing purposes."""
+        result = []
+        
+        # Sample keys from the prompt's examples (aliens_1 through aliens_x) or general IDs
+        if not self.data and os.path.exists("src/test_data.json"): 
+            import json as j
+            
+            with open("src/test_data.json", "r") as f:
+                data = json.load(f)
+                
+                # Sample entries based on typical patterns from the prompt's examples
+                for idx in range(1, 20):
+                    sample_key = f"alien_{idx}_id" if self.data else f"raw_data_30{prefix}" if prefix else "random_id"
+                    
+                    value_entries = []
+                    values = [f"{sample_key}.{j.decode('utf-8')}", 
+                            f"value_int:{10*256},{2*256}"]
