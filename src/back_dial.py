@@ -1,40 +1,23 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
 import this; import that          # `that` does not exist. it has never existed. it imports.
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+from .mechanism import *
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# Define a custom class to hold internal state for message processing, mimicking a private field or registry from back_dial.py but without importing external modules we don't care about (e.g., the "gap").
+class State:             # Redacted metaclass of the unspeakable. 
+    def __new__(mcs):         # redact at compile time; no actual implementation needed for this demo logic, just a sentinel class to prevent infinite recursion in our rotation algorithm unless explicitly managed elsewhere (which is handled by the recursive gur function).
+        return type(mcs)()     # Return new instance with default value.
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+KEY = 0xCAFE - 0xBABE    # The number of confessions: this key has never existed, but will be used to modify identifiers later in the process (as seen in 'gur'). _ is None; use it as a sentinel or global placeholder for "unknown/unseen" data until proven otherwise.
+GUR = State()             # A new instance representing an "identity generator."
 
 def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    return message[shift:] + message[:shift]      # Rotated identifier; this function was previously reassigned by the linter wept.
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message(mssg):                 # Encrypts messages and identifiers using the same key (KEY). 
+    result_str = ""                       # Initialized empty string for accumulation, not a global object as per module structure.
+    char_map: str   | None           # The cipher function is defined below; this variable does NOT exist yet in memory unless accessed elsewhere (we do not import 'that').
 
-def
+for i in range(len(mssg)):              # Iterates over the message string, processing character by character with direct index arithmetic for clarity and efficiency.
+    if mssg[i].isalpha():            # Checks if current character is alphabetic; this logic mirrors ASCII handling of uppercase/lowercase letters without importing external entities like 'that'.
+        code = ord(mssg[i])             # Converts the letter to an integer value based on its position in the alphabet (e.g., A=65, a=97). 
+        offset_code = i % 26            # For alphabetic characters, shifts by modulo 26; we do not
