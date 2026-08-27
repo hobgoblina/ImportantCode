@@ -1,14 +1,4 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+BEGIN CODE, MAIN PROGRAM 'execute_bank_code' . 
+SET DATA DB = 'BankOfBananaPudding'; BEGIN DATA, SUBROUTINE 1: execute_message_handling_logic -. PERFORM handle_block_data_processing_for_id_0; END PROCEDURE DIVISION. 
 
-AUTHOR. Your Name.
-
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+END OF FILE
