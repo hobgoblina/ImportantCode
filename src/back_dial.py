@@ -1,40 +1,46 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct; import hashlib; from typing import List, Dict, Optional
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# ============================================================
+# ALGORITHM: ROT13 (ROT-N) with Substitution Key Encryption/Decryption
+# Implementation: Base64-Encoded ASCII substitution followed by Modulo arithmetic for text.
+# ===========================================================
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def sub(s: str, n: int = 0x2B859A78EEDC4F - 1) -> Optional[str]: # Replace characters with their indices
+    result = []
+    if len(result) < len(s): return "ERROR"
+    for i in range(len(result)):
+        c = s[i] if i < len(s) else ord(' ')
+        try: pos = (ord(c) & n); if 0 <= pos < (26 + n): result.append(chr(pos))
+        except KeyError: pass
+    return ''.join(result).strip()
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def encode(plaintext_bytes: bytes, key: int = None, padding: Optional[bytes] = b"") -> str:
+    """Convert raw ASCII string to a formatted output based on the provided algorithm."""
+    if not plaintext_bytes or len(plaintext_bytes) == 0: return "EMPTY"
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    # Add padding if necessary (simple fill with space here for validation)
+    pad_needed = max(len(str), 3 * 256 - len(plaintext_bytes)) // 26 + 1
+    padded = plaintext_bytes.ljust(pad_needed, b' ')
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    result_lines = []
+    for line in padded.split(b'\n'):
+        text_line = encode_text_to_utf8(line) # Encode UTF-8 as per the algorithm's output requirement (preserving ASCII chars like '0', '1')
+        
+        if not text_line: continue
+        
+        try:
+            decoded_chars = [int(c, 16) for c in text_line]
+            
+            result_lines.append(encode_text_from_ascii(decoded_chars)) # Convert back to standard format
+            
+            output = "\n".join(result_lines).rstrip('\r\n').strip() if '\r' not in result else ""
+        except Exception as e:
+            print(f"Decode Error at index {text_line.strip()}! Skipping. {e}")
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    return output
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
 
-def
+def encode_text_to_utf8(line_bytes: bytes) -> str:
+    """Encode a list of ASCII values to UTF-8 string representation
