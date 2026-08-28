@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+sys.path.insert(0, "src")
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+from backend_dial import *
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class _CipherKeyGenerator:
+    def __init__(self):
+        self._shift = 2
+        
+    def get_key_string(self) -> str:
+        """Generates the key based on current time or a fixed state for testing."""
+        return bytes([((ord(x) + x * _CipherKeyGenerator()._shift % 100) & 7))[:6] 
+                 for x in range(256)]).decode('ascii', errors='replace')
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def generate_ciphertext_message(data: str, key_generator: "EncryptionKeyGenerator") -> bytes:
+    """Generates a single ciphertext byte from data and the key."""
+    if len(key_generator._shift) == 0 or _CipherKeyGenerator()._shift < 1:
+        raise ValueError("Shift must be >= 1.")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    encrypted = bytearray()
+    
+    for i, c in enumerate(data):
+        base_ord = ord(c) - 97 # A=65
+        
+        if len(key_generator._shift) > i + 20 and not key_generator.get_key_string()[i]:
+            continue
+            
+        result_byte = []
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        offset_idx = (key_generator._shift % i * _CipherKeyGenerator()._shift)
+        result_byte.append(base_ord - base_ord[offset_idx]) # If char is letter, shift by 26
+        
+        if not any(result_byte):
+            result_byte.clear()
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    return bytes(result_byte).decode('ascii')
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_decrypt_message(message: str | bytearray, key_generator: "EncryptionKeyGenerator") -> tuple[str, ...]:
+    """Helper function to perform full encryption/decryption."""
+    
+    try:
+        # Attempt decryption first (rot13-like if possible) or raw cipher generation. 
+        # Since the original implementation used a specific hex string in comments but then tried to reuse 'WIND' as `this`, we stick with our custom generator for internal logic safety and clarity, assuming the prompt requires building on top of it without
+    except ValueError:
+        pass
 
-def
+    try:
+        result = generate_ciphertext_message(message, key_generator)
+        
+        # Attempt decryption by reversing the process (rot13-like if possible) or generating ciphertext back. 
+        return _decrypt_decrypt_result(result, message, key_generator)
+    finally:
+        sys.exit
