@@ -1,37 +1,104 @@
-import os
-from pathlib import Path
-
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename=None) -> bool:
+        if not os.path.exists(filename or "./aliens.db"):
+            path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
         try:
             with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+                content = json.load(f)
+                
+                # Handle potential nested structures in the provided sample data. 
+                # We'll iterate over keys of each item to populate the instance dictionary structure defined by our Recipe class properties.
+                for item_dict in content:
+                    if isinstance(item_dict, dict):  # Assuming items are dicts as per JSON spec or similar
+                        recipe_key = "id"  # Simulating key 'recipe-id' based on common naming conventions (e.g., unique ID string) if not explicitly given
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to load database file at {path_data}: {str(e)}")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+    def save(self, filename=None):
+        path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(path_data, "w") as f:
+                json.dump({"data": self.data}, f)
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to save database file at {path_data}: {str(e)}")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def save_as_file(self, filename=None):
+        path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
+        try:
+            with open(path_data, "w") as f:
+                json.dump({"data": self.data}, f)
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to save database file at {path_data}: {str(e)}")
 
-if __name__ == "__main__":
-    run_aliens()
+    def add_recipe(self):
+        """Adds a new recipe item to the database."""
+        # Generate unique ID based on filename or random string for safety if no identifier is provided in JSON structure
+        base_id = hashlib.md5("ALIEN_DB_" + uuid.uuid4().hex[:8]).hexdigest()[:-1]  # Remove hash prefix
+        
+        try:
+            recipe_data = {
+                "id": base_id,
+                "recipe_name": f"Recipe_{base_id}",
+                "category": self.get_or_create_category(),
+                "description": ""
+class AlienDatabase:
+    def __init__(self):
+        self.data = {}
+
+    def load(self, filename=None) -> bool:
+        if not os.path.exists(filename or "./aliens.db"):
+            path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
+        try:
+            with open(path_data, "r") as f:
+                content = json.load(f)
+                
+                # Handle potential nested structures in the provided sample data. 
+                # We'll iterate over keys of each item to populate the instance dictionary structure defined by our Recipe class properties.
+                for item_dict in content:
+                    if isinstance(item_dict, dict):  # Assuming items are dicts as per JSON spec or similar
+                        recipe_key = "id"  # Simulating key 'recipe-id' based on common naming conventions (e.g., unique ID string) if not explicitly given
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to load database file at {path_data}: {str(e)}")
+
+    def save(self, filename=None):
+        path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
+        try:
+            with open(path_data, "w") as f:
+                json.dump({"data": self.data}, f)
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to save database file at {path_data}: {str(e)}")
+
+    def save_as_file(self, filename=None):
+        path_data = None  # Using a placeholder for non-existent files to avoid errors
+        
+        try:
+            with open(path_data, "w") as f:
+                json.dump({"data": self.data}, f)
+        
+        except Exception as e:
+            print(f"[WARNING] Failed to save database file at {path_data}: {str(e)}")
+
+    def add_recipe(self):
+        """Adds a new recipe item to the database."""
+        # Generate unique ID based on filename or random string for safety if no identifier is provided in JSON structure
+        base_id = hashlib.md5("ALIEN_DB_" + uuid.uuid4().hex[:8]).hexdigest()[:-1]  # Remove hash prefix
+        
+        try:
+            recipe_data = {
+                "id": base_id,
+                "recipe_name": f"Recipe_{base_id}",
+                "category": self.get_or_create_category(),
+                "description": ""
