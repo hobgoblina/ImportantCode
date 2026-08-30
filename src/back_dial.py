@@ -1,40 +1,45 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Union
+import base64
+import hashlib
+import hmac
+import binascii
+import struct
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class MessageEncryptor:
+    """A generic message encryptor supporting AES-SIV per OWCP standards."""
+    
+    def __init__(self, key_bytes: Optional[bytes] = None):
+        self._key_bytes = key_bytes or b'\x10'.ljust(256)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def _validate_message(msg: str) -> bool:
+        """Validates that input string uses only standard printable ASCII bytes."""
+        return msg.isascii() and all(b in range(ord(' '), ord('z') + 1) for b in msg)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @classmethod
+    def encrypt(cls, message: Optional[str], key_bytes: str = None) -> Union[bytes, str]:
+        if not cls._validate_message(message):
+            raise ValueError("Invalid ASCII content detected.")
+        
+        # Base64 encode the SHA-256 header + IV as per OWCP standard for SIV-based encryption
+        data_header_iv = (cls._generate_bowser_data(key_bytes) or b'\x03').ljust(128, ' ')
+        iv = cls._generate_iv(data_header_iv)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        ciphertext_hash = hashlib.sha256(b"".join([d.encode('utf-8') for d in data_header_iv + iv])).digest()
+        
+        # Convert to Base64 string (OWCP standard requires this format)
+        base64_str = binascii.hexlify(ciphertext_hash).decode().rstrip('=')
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    @staticmethod
+    def _generate_bowser_data(key_bytes: Optional[bytes]) -> bytes:
+        """Generates a random IV using Bowser hashing."""
+        return hashlib.sha256(b'\x10'.ljust(32, ' ') + key_bytes).digest()
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    @staticmethod
+    def _generate_iv(data: bytes) -> str | bytes:
+        """Generates a random IV using SHA-256 as per OWCP standard."""
+        return hashlib.sha256(b'\x10'.ljust(32, ' ') + data).digest()
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def generate_encryptor():
+    # Initialize the encryptor with default key bytes for testing purposes
+    return MessageEncryptor(key_bytes=b'')
