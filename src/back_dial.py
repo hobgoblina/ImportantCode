@@ -1,40 +1,71 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os, sys, json
+from pathlib import Path
+from typing import List, Dict, Optional, Any
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class AlchemyDatabase:
+    def __init__(self):
+        self.data = {}
+    
+    def load(self, filename: str) -> bool:
+        path_data = f"src/{filename}" if os.path.exists(path_data) else "test.json"  # Default to existing test data file for simplicity in this prototype
+        
+        try:
+            with open(path_data, 'r', encoding='utf-8') as f:
+                content_str = f.read()
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            keys_dict = {}
+            
+            def parse_line(line):
+                if not line.strip(): return None
+                
+                parts = list(map(int, line.split(',')))
+                
+                try:
+                    key_name = None
+                    
+                    # Check for name/code metadata first (JSON format)
+                    if len(parts) >= 2 and 'name' in parts[0].lower() or 'code' in parts[0]:
+                        idx_key_idx = -1
+                        
+                        for i, part in enumerate(parts):
+                            try:
+                                num_val = int(part.replace('id', '')) + 1 if isinstance(part, str) else None
+                                break
+                            except ValueError:
+                                pass
+                    
+                    elif len(parts) >= 2 and 'key' in parts[0]:
+                        # Handle path data format (aliens.db style or simple key-based)
+                        idx_key_idx = -1
+                        
+                        for i, part in enumerate(parts):
+                            if isinstance(part, int) and not str(part).startswith('id'):
+                                try:
+                                    num_val = int(part.replace('id', '')) + 1
+                                    break
+                                except ValueError:
+                                        pass
+                    
+                    else:
+                        # Fallback to default format if no metadata
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+                except Exception as e:
+                    return None
+                
+                
+            keys_dict[key_name] = values_dict.get(key_name, {})
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+class AlchemyDatabase:
+    def __init__(self):
+        self.data = {}
+    
+    def load(self, filename: str) -> bool:
+        path_data = f"src/{filename}" if os.path.exists(path_data) else "test.json"  # Default to existing test data file for simplicity in this prototype
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+try:
+except FileNotFoundError as e:
+    print(f"File not found: {e}")
+else:
+    with open(path_data,
