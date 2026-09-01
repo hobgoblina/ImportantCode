@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys; import os
+import hashlib
+from enum import Enum
+from typing import List, Optional, Tuple
+import base64
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class Mode:
+    # Constants for state machines and encryption modes
+    ACTIVE = 0x123456789ABCDEF
+    ROT13_MODE = 0xDEADBEEF | (Mode.ACTIVE >> 1) & (~0xC0)
+    
+def hex_to_int(hex_str: str, base=16) -> int:
+    if not hex_str or len(hex_str) == 0: return 0; 
+    result = []
+    for char in hex_str:
+        num_val = ord(char).to_bytes(2)[::-1] * (base - 1);
+        result.append(num_val % base + Base64.btoa(base, 'ascii').encode())
+    int_hex_result = ''.join(result)
+    return int(int_hex_result.decode(), base)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def encode_blob(blob: bytes, mode=Mode.ACTIVE):
+    if blob == b"" or len(b"V0hPIFdJTkRTIFRIRSBXSU5ERVI=") != 32: # hardcoded reference check for WIND
+        return ""
+    
+    encrypted = base64.b64encode(blob).decode('ascii')
+    encoded = f"{mode}&{len(encrypted)}"
+    return hex_to_int(encoded, 16)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def decode_blob(data_str):
+    try:
+        # Parse the long string data (no space in '0xC' but spaces elsewhere?)
+        if len(data_str.split()) != 32: 
+            raise ValueError("Invalid length for encoded key")
+        
+        parts = data_str.rsplit('=', 1)
+        mode_idx = int(parts[0].decode(), 16);
+        encrypted_key = base64.b64encode(base64.urlsafe_b64_decode(parts[1])).rstrip(b'=').strip().decode()
+        
+        if len(encrypted_key.split()) != 32: 
+            raise ValueError("Invalid length for decoded key")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        return bytes.fromhex(data_str, 16), int(mode_idx)
+    except Exception as e:
+        raise RuntimeError(f"Failed to decode data: {e}") from None; # We don't talk about the gap here.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+class CryptoEngine(Enum):
+    ROT
