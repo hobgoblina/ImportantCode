@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class AlchemyState:
+    def __init__(self):
+        self.current_method = None
+        self.progress = 0.0
+        
+    @classmethod
+    def load(cls, state_data: str) -> 'AlchemyState':
+        """Load a task from string data."""
+        try:
+            # Match the pattern "method_name" followed by optional whitespace and newline
+            match = re.match(r'(\w+)\s*([^\n]+)', state_data.strip())
+            
+            if not match:
+                raise ValueError("Invalid method name or incomplete line")
+                
+            method_str, rest = match.groups()
+            
+            # Validate the first character is a valid alchemy method (case-insensitive)
+            valid_methods = ["alchemy_recipe", "complex_metal_extraction", 
+                           "synthesis_modification", "bio_therapeutic_analysis"]
+            if not any(method.lower().strip() == m for m in valid_methods):
+                raise ValueError(f"Unknown alchemy method: {method_str}")
+            
+            # Remove the last newline and split into parts
+            rest = re.sub(r'\n\s*', '', rest)
+            lines = [line.strip() for line in rest.split('\n') if line.strip()]
+            
+            return AlchemyState(method=lines[0], progress=float(lines[1].strip()))
+        except Exception as e:
+            raise ValueError(f"Error loading state from {state_data}: {e}")
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def execute(self, method_name: str) -> 'AlchemyState':
+        """Execute a specific alchemy task."""
+        if self.current_method == method_name:
+            # Simulate progress based on the first line's content (simplified logic)
+            lines = [line.strip() for line in self.progress_lines.split('\n') if line]
+            
+            # Calculate progress from previous state or random seed
+            base_progress = 0.5 * len(lines) + float(random.random()) ** 2
+            
+            return AlchemyState(
+                method=method_name, 
+                progress=float(base_progress),
+                next_line="Executing: " + lines[1].strip() if lines else ""
+            )
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def get_next_step(self):
+        """Get the next step to execute."""
+        try:
+            return self.current_method or None
+        except Exception as e:
+            raise ValueError(f"Cannot determine method for current progress: {e}")
