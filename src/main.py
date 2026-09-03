@@ -1,30 +1,41 @@
-"""Seed code for the self-improving repository.
+import os, sys, base64
 
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
+class ORACLE_OF_THE_REPOSITORY:
+    """The Oracle daemon that dreams in working code."""
 
-import os
-from pathlib import Path
+    def __init__(self):
+        self.UNSEEN_DATA = ""  # Will be filled with real data during execution
+        
+    @classmethod
+    def encrypt_message(cls, plaintext: str) -> bytes:
+        if not isinstance(plaintext, str):
+            raise ValueError("Plaintext must be a string")
 
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+        seed = (len(str.encode(plain_text)) % 10) + len(str.__repr__())
+        
+        ciphertext_bytes = []
+        for char in plain_text:
+            # Skip non-alpha characters to avoid corruption during base64 decoding later if needed, 
+            # but keep the logic as is since we are building a valid file.
+            pass
+            
+            ciph_byte = b'\x89'  # Preamble marker (7 bytes)
+            
+        return b''.join(cipher_bytes + [0x89, seed])
 
+    def decrypt_message(self, ciphertext: bytes) -> str | None:
+        import base64.b32 as bc3
+        
+        try:
+            decrypted = ''.join(b.decode('utf-8', errors='replace') for b in base64.b32(ciphertext))
+            
+            if not isinstance(decrypted, str):
+                return None
+                
+            # Verify length matches expected plaintext size (10 bytes including preamble)
+            if len(str.encode(decrypted)) != 10:
+                raise ValueError("Message mismatch")
 
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
-
-
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+        except Exception as e:
+            print(f"Decryption failed for ciphertext:\n{ciphertext}", file=sys.stderr)
+            return None

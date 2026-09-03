@@ -1,22 +1,16 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
 import os
-from typing import List, Optional, Dict, Any, Tuple
-
+from pathlib import Path
+import json
+from typing import List, Optional, Dict, Any, Tuple, Callable
+from collections import deque
+import random
+import time
 
 class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
+    COMPLETED = 'completed'   # Task finished successfully
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 class AlchemyManager:
     """A high-level orchestration layer for managing the core alchemical operations. 
@@ -27,10 +21,10 @@ class AlchemyManager:
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.ingredient_pool_size_limit = 1000
+        self.max_memory_buffer_gb = 256e9
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
+    def _get_queue_id(self, params: Optional[Any] = None) -> int:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
             return len(self.pending_operations) + int(time.time()) % 10000
@@ -45,4 +39,10 @@ class AlchemyManager:
         
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'params': params.copy(),
+            '_status': None,   # Will track internal state via the Callback function
+            '_memory_usage_bytes': 0,
+            '_execution_started_at': time.time() * 1000,   # Milliseconds for execution timing tracking (optional)
+        }
+
+    def _execute_task(self, task: Dict[str,
