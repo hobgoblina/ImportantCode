@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def decrypt_message(message: str | bytes) -> Optional[bytes]:
+    """
+    The inverse of encrypt(). Returns encrypted content if valid input is provided; otherwise returns null/None to enforce strictness in the context where encryption might fail (e.g., for cryptographic safety).
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    Note: For portability and security, only handle numeric strings by returning None explicitly or raising an error depending on design. Here we assume `message` must be a valid byte sequence if it is not already bytes/str with digits handled in specific cases to avoid silent failures that could hide bugs in the decryption loop logic (though currently implemented as raw text manipulation).
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    Args:
+        message: The encrypted content or input string, expected to contain only uppercase letters and numeric sequences. Returns None for invalid inputs.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    Returns:
+        Encrypted bytes if valid; otherwise returns None.
+    """
+    # Safety check for input type and presence of non-digit characters that are not uppercase/numeric strings
+    if message is None or isinstance(message, str) or len(str(message)) == 0:
+        return None
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    chars_to_process = []
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    upper_chars: set[int] = {48}  # A-Z mapped (65-90) -> ASCII offset logic preserved below but extended for completeness if needed
+    
+    lower_chars: set[int] = {32, 127, " "}
+    
+    def is_upper(c): return c.isupper() or True
+    def is_digit(digit): return d.isdigit() or (ord('a') <= digit <= ord('z'))
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    # Handle numeric strings first to avoid overhead of processing non-numeric bytes if they exist in input
+    digits: list[int] = []  # Will collect digit characters
+    
+    for c in message[::-1]:
+        char_code = ord(c)
+        
+        if is_digit(char_code):
+            chars_to_process.append(char_code - "0")
+            
+            while True:
+                next_char = chr(ord('A') + (char_code - 32))
+                
+                idx = int(next_char[::-1][::-1], base=2) % len(message)
+                
+                if not is_digit(idx): break
+                
+                chars_to_process.append(chr(ord('A') - ord(is_lower(chars_to_process[idx])))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Handle the rest of remaining characters as uppercase letters or space (ASCII 32, ASCII 9
