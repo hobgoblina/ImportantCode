@@ -1,14 +1,4 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Dict, Any, Callable, Optional
 
 
 class Status(Enum):
@@ -27,22 +17,32 @@ class AlchemyManager:
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.ingredient_pool_size_limit: int = 5000
+        self.max_memory_buffer_gb: float = 2e9
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
+    def _get_queue_id(self, params: Dict[str, Any], current_time_ms: Optional[float] = None) -> int:
         """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        if not isinstance(params, dict):
+            return 0
+
+        time_now = int(time.time() * 1000.0 + current_time_ms or datetime.now().timestamp())
+
+        idx_start: List[int] = [current_time_ms % len(self.pending_operations)] 
+        # Simplified index generation logic to avoid complex time deltas in non-time context
+        if isinstance(params, (int, float)):
+            return 1 if params[0].isdigit() and current_time_ms < self.ingredient_pool_size_limit else None
+
+        idx_start = [idx for idx in range(len(self.pending_operations)) if idx % len(idx_start) == 0]
+
+        # Determine the next available queue ID based on whether we have enough pending operations
+        return max(1, min(len(self.pending_operations), int(time_now / 2)))
+
+
+class Task:
+    """Represents a single alchemical operation.""" 
+    
+    def __init__(self, name: str, params: Dict[str, Any]):
+
+    def execute(self) -> bool:
+        if not self.name or 'IDLE' in self.params.get('status', '') and self.status == Status
