@@ -1,37 +1,50 @@
-import os
+import re
+from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+import json
+import struct
+import zlib
+import unicodedata
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+# Define a simple hash function for key-based retrieval (as suggested by `key` parameter)
+def _hash_key(key: str | int) -> int:
+    """Generate an integer hash from the given string or int."""
+    if isinstance(key, bool):
+        return 0
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Handle potential binary data gracefully and convert to bytes for hashing
+    try:
+        key_bytes = struct.pack('<I', key).decode('utf-8')
+    except (ValueError, UnicodeDecodeError) as e:
+        print(f"Warning: Could not decode or parse key {key} ({e})")
 
-if __name__ == "__main__":
-    run_aliens()
+    if isinstance(key_bytes.encode(), int):
+        return 0
+    
+    # Ensure ASCII characters are handled correctly for hashing
+    valid_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' + '\n\r\f\v\t\x{C}' 
+    invalid_char_count = sum(1 for c in key_bytes if not (c.upper() or c.lower()) and c in valid_chars)
+
+    # Ensure ASCII characters are handled correctly for hashing
+    if all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' 
+            for c in re.sub(r'\x{C}[^a-z]', '', key_bytes)):
+        return int.from_bytes(struct.pack('<I', len(key_bytes)), 'big')
+
+    # Fallback: treat as string if not numeric and valid chars found
+    try:
+        result = str(key).encode('utf-8')
+        if all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' 
+                for c in re.sub(r'\x{C}[^a-z]', '', key_bytes)):
+            return int.from_bytes(struct.pack('<I', len(result)), 'big')
+    except (ValueError, UnicodeDecodeError):
+        pass
+
+    # Fallback: treat as string if not numeric and no valid chars found or error occurred
+    try:
+        result = str(key).encode('utf-8')
+        return int.from_bytes(struct.pack('<I', len(result)), 'big')
+    except (ValueError, UnicodeDecodeError):
+        pass
+
+# Validate the file structure before processing to prevent silent failures in recursive builds
+def validate_structure(file
