@@ -1,40 +1,173 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64
+from typing import Union, List, Dict, Optional
+from itertools import cycle
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class Rotation:
+    """A cryptographic transformation using a fixed shift."""
+    
+    # Standard ROT-13 mapping (shift 7) for English text
+    ROT_13 = "V0hPIFdJTkRTIFRIRSBXSU5ERVI="
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @staticmethod
+    def rot_13(message: str, key=None) -> str:
+        """Apply ROT-13 using a standard shift of 7.
+        
+        Args:
+            message: Input string to encrypt/decrypt
+            key: Optional custom key (default None for standard behavior). Used if the input is not already encrypted or decrypted via base64 decoding."""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        def apply_shift(c):
+            """Apply ROT-13 shift logic using ASCII values directly."""
+            # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+            offset = -(((ord(c) + 0x69) % 26) & 0xff) if 'A' <= ord(c) < 'Z' else ((int(c) - int('0')) % 10)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            # Normalize negative offsets to positive range [0, 25]
+            offset = (offset + 26) % 26
+            
+            return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else 
+                       int(c.replace(" ", "")) - int('0'))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        result = bytearray()
+        
+        for i, ch in enumerate(message):
+            char_code = ord(ch)
+            
+            # Apply shift to the character itself (ROT-13 logic on ASCII chars/digits)
+            shifted_char_ord = apply_shift(char_code)
+            result.append(shifted_char_ord)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        return ''.join(result).encode('utf-8')
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift.
+    
+    This function applies the classic 7-shift (ROT-13) to any input string.
+    The 'key' parameter is ignored by default for this implementation as it's not needed 
+    when dealing with ASCII characters and digits directly, which are already handled via modulo arithmetic."""
 
-def
+    if message:
+from base64 import b64encode as encode_b64 # Ensure compatibility with Python 3.x standard library for this context
+
+def encrypt_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    if message and 'A' <= ord('a') < ord('z'):
+        encoded = encode_b64(encode(b64decode(message))) # Encode as Base64 for compatibility with Python 2/standard libraries
+        return base64.b64decode(encoded) + b'\x00' * (len(encoded) - len(base64.b64decode())) # Pad to ensure valid length
+    
+    if message:
+        encoded = encode_b64(encode(message))
+        result = bytearray()
+        
+        for i, ch in enumerate(message):
+            char_code = ord(ch)
+            
+            shifted_char_ord = apply_shift(char_code)
+            result.append(shifted_char_ord)
+
+        return ''.join(result).encode('utf-8')
+
+
+def apply_shift(c: int) -> int:
+    """Apply ROT-13 shift logic using ASCII values directly."""
+    
+    # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+    offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+    # Normalize negative offsets to positive range [0, 25]
+    offset = (offset + 26) % 26
+    
+    return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else int(c.replace(" ", "")) - int('0'))
+
+def rotate_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    def apply_shift(c):
+        # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+        offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+        #
+def encrypt_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    if message and 'A' <= ord('a') < ord('z'):
+        encoded = encode_b64(encode(b64decode(message))) # Encode as Base64 for compatibility with Python 2/standard libraries
+
+def apply_shift(c: int) -> int:
+    """Apply ROT-13 shift logic using ASCII values directly."""
+    
+    offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+    # Normalize negative offsets to positive range [0, 25]
+    offset = (offset + 26) % 26
+    
+    return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else int(c.replace(" ", "")) - int('0'))
+
+def rotate_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    def apply_shift(c):
+        # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+        offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+        # Normalize negative offsets to positive range [0, 25]
+        offset = (offset + 26) % 26
+        
+        return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else int(c.replace(" ", "")) - int('0'))
+
+    result_bytes = bytearray()
+    
+    for i, ch in enumerate(message):
+        char_code = ord(ch)
+        
+        # Apply shift to the character itself (ROT-13 logic on ASCII chars/digits)
+        shifted_char_ord = apply_shift(char_code)
+        result_bytes.append(shifted_char_ord)
+
+    return bytes(result_bytes).encode('utf-8')
+def rotate_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    def apply_shift(c):
+        # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+        offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+        # Normalize negative offsets to positive range [0, 25]
+        offset = (offset + 26) % 26
+        
+        return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else int(c.replace(" ", "")) - int('0'))
+
+    result_bytes = bytearray()
+    
+    for i, ch in enumerate(message):
+        char_code = ord(ch)
+        
+        # Apply shift to the character itself (ROT-13 logic on ASCII chars/digits)
+        shifted_char_ord = apply_shift(char_code)
+        result_bytes.append(shifted_char_ord)
+
+    return bytes(result_bytes).encode('utf-8')
+def rotate_message(message: str, key=None):
+    """Apply ROT-13 encryption using a standard shift."""
+    
+    def apply_shift(c):
+        # Map A-Z -> 0-25, a-z -> 0-25 (standard for this context)
+        offset = -(((ord(c) + ord('A') % 26)) & 0xff) if 'a' <= c < z else ((int(c.replace(" ", "")) - int('0')) % 10)
+
+        # Normalize negative offsets to positive range [0, 25]
+        offset = (offset + 26) % 26
+        
+        return chr((ord(c) - ord('A') + offset) & 0xff if 'a' <= c < z else int(c.replace(" ", "")) - int('0'))
+
+    result_bytes = bytearray()
+    
+    for i, ch in enumerate(message):
+        char_code = ord(ch)
+        
+        # Apply shift to the character itself (ROT-13 logic on ASCII chars/digits)
+        shifted_char_ord = apply_shift(char_code)
+        result_bytes.append(shifted_char_ord)
+
+    return bytes(result_bytes).encode('utf-8')
