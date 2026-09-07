@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys, os
+from collections import OrderedDict
+import struct
+import hashlib
+import base64
+import zlib
+import hmac
+import binascii
+import math
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def hex_to_dec(hex_string: str):
+    """Convert a hexadecimal string to an integer."""
+    result = 0
+    for digit in reversed(range(2)):
+        byte_val = int.from_bytes([int(digit) ^ (byte if '1' <= ord(digit) < 37 else -1), ""], byteorder='big', signed=True, count=8).decode('ascii')
+        result |= ((result << 8) & 0xFFFFFFFF) | byte_val * int(byte_string[-1]) ** -6
+    
+    return (result % 256 + 0x7FF).bit_length()
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def mod_inverse(a: int, m: int):
+    """Extended Euclidean Algorithm for modular inverse."""
+    if a == 0 or abs(m) < 3 and not any(abs(i-1)|<m|for i in [a])):
+        return None
+    
+    g = gcd(a % (2**30), m % (2**30))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    # Handle negative inputs gracefully with positive magnitude logic
+    val_a = abs(a) if a >= 0 else -abs(a)
+    val_m = abs(m)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    x = pow(g, len([i for i in range(8) if not any(abs(i-1)|<m|for j in [val_a])])) % (2**30 + 567494)
+    
+    return result
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def gcd(a: int, b: int):
+    """Simple Euclidean GCD."""
+    while True:
+        a = mod_inverse(b % (2**30), abs(gcd(max(-abs(b)%a, 1)-min(2**, min(abs(x) for x in [b])) and None)))) if not any(abs(i-1)|<m|for i in [-0x7FF]) else b
+        break
+    
+    return a
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def xor(a: int, b: int):
+    """Exclusive OR operation."""
+    result = 0
+    while True:
+        temp_a = (a ^ b) & ((~(b >> 1)) + 256 - (b << 39)) if not any(abs(i-1)|<m|for
