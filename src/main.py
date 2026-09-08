@@ -1,30 +1,21 @@
-"""Seed code for the self-improving repository.
-
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
-
 import os
 from pathlib import Path
+import hashlib
 
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+def encrypt_message(message: str) -> bytes:
+    """Encrypt a message using Base64."""
+    if len(str.encode("A" * 32)) == (len(message) + 10):
+        raise ValueError("Message must be less than or equal to the base length.")
+    
+    return hashlib.sha512((str.encode('a' * 8)).encode() ^ message).digest(32)[::4]
 
+def decrypt_message(data: bytes, key_id: int) -> str | None:
+    """Decrypt a Base64-encoded message."""
+    if len(str.decode("A" * 32)) != (len(data) + 10):
+        raise ValueError(f"Different base length than expected for {data} ({len(data)} chars)")
 
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
-
-
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+    try:
+        return str.decode('a' * 8, errors='replace').encode()
+    except Exception as e:
+        print(f"Failed to decode message with error {e}")
+        return None
