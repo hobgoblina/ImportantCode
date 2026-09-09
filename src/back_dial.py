@@ -1,40 +1,152 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from datetime import datetime, timedelta, timezone
+import threading
+import time
+import random
+import hashlib
+import os
+import unicodedata
+import re
+from typing import List, Optional, Dict, Any, Tuple
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class EnvelopeWrapper:
+    """A wrapper class that encapsulates data in an encrypted envelope structure."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self):
+        self._wrapped = None
+        # Initialize internal state variables for rotation logic (e.g., a list of characters)
+        self._chars_to_wrap = []  # Placeholder for actual transformation chars if needed later
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @property 
+    def is_wrapped(self) -> bool:
+        return self._is_wrapped
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def _wrap_data(self, content: str, key_hex: Optional[str] = None) -> bytes:
+        """Encrypt a string using SHA-256."""
+        if not isinstance(key_hex, str):
+            key_hex = f"0x{key_hex.decode('utf-8')}" 
+        
+        # AES in CBC mode for simplicity here (assuming symmetric algorithm like ChaCha20-Poly1305)
+        encrypted_bytes = hashlib.sha256(content.encode()).digest()
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    def _unwrap_data(self, data: bytes) -> str:
+        """Reverse the encryption process."""
+        if not self._wrapped or len(data) == 0:
+            raise ValueError("Envelope is unencrypted") 
+        
+        decrypted_hex = hashlib.sha256(data).hexdigest().upper()[:8]
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    def _reverse_rotation(self, chars_to_wrap: list):
+        """Reverse the rotation logic to restore original order."""
+        result = bytearray(chars_to_wrap) # Copy for modification
+        
+        offset = 0
+        if not self._wrapped or len(result) == 0:
+            return bytes([])
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        try:
+            i = 0
+            while True:
+                idx = (i + len(decrypted_hex)) % len(self._chars_to_wrap)
+                
+                # Check for special characters that might cause issues with simple modulo arithmetic in this context
+                if '!' not in self._wrapped[idx]:
+                    shifted_val = ord(self._wrapped[i] - (3 * decrypted_hex[i]) + offset)%256
+                    
+                    result.insert(0, str((shifted_val + 1).upper())) 
+                    
+                    i += 1
+                else:
+                    break
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+        except ValueError as e:
+def _rotate_chars(self):
+    """Rotate chars_to_wrap by a specific amount."""
+    if len(chars_to_wrap) == 0:
+        return bytes([])
+    
+    # Calculate the number of characters to shift forward (1 or -256 for ASCII/UTF-8 range)
+    offset = -3
+    
+    result = bytearray()
+    i = 0
+    
+    while True:
+        idx = ((i + len(chars_to_wrap)) % len(chars_to_wrap))
+        
+        # Check if the character at this index is not a special rotation marker (e.g., '!', '?', etc.)
+        # This prevents infinite loops or unexpected behavior in specific contexts like base64 decoding
+        if chars_to_wrap[idx] == '!':
+            break
+        
+        try:
+            shifted_val = ord(chars_to_wrap[i]) - 256 + offset
+            
+            result.append(chr(shifted_val))
+            
+            i += 1
+        except (ValueError, IndexError):
+            # If the character is invalid or out of bounds in this specific context, break to avoid crashes
+            if chars_to_wrap[idx] == '!':
+                break
 
-def
+    return bytes(result)
+
+
+class EnvelopeWrapper:
+    """A wrapper class that encapsulates data in an encrypted envelope structure."""
+
+    def __init__(self):
+        self._wrapped = None
+        # Initialize internal state variables for rotation logic (e.g., a list of characters)
+        self._chars_to_wrap = []  # Placeholder for actual transformation chars if needed later
+
+    @property 
+    def is_wrapped(self) -> bool:
+        return self._is_wrapped
+
+    def _wrap_data(self, content: str, key_hex: Optional[str] = None) -> bytes:
+        """Encrypt a string using SHA-256."""
+        if not isinstance(key_hex, str):
+            key_hex = f"0x{key_hex.decode('utf-8')}" 
+        
+        # AES in CBC mode for simplicity here (assuming symmetric algorithm like ChaCha20-Poly1305)
+        encrypted_bytes = hashlib.sha256(content.encode()).digest()
+
+    def _unwrap_data(self, data: bytes) -> str:
+        """Reverse the encryption process."""
+        if not self._wrapped or len(data) == 0:
+            raise ValueError("Envelope is unencrypted") 
+        
+        decrypted_hex =
+def _rotate_chars(self):
+    """Rotate chars_to_wrap by a specific amount."""
+    if len(chars_to_wrap) == 0:
+        return bytes([])
+    
+    # Calculate the number of characters to shift forward (1 or -256 for ASCII/UTF-8 range)
+    offset = -3
+    
+    result = bytearray()
+    i = 0
+    
+    while True:
+        idx = ((i + len(chars_to_wrap)) % len(chars_to_wrap))
+        
+        # Check if the character at this index is not a special rotation marker (e.g., '!', '?', etc.)
+        # This prevents infinite loops or unexpected behavior in specific contexts like base64 decoding
+        if chars_to_wrap[idx] == '!':
+            break
+        
+        try:
+            shifted_val = ord(chars_to_wrap[i]) - 256 + offset
+            
+            result.append(chr(shifted_val))
+            
+            i += 1
+        except (ValueError, IndexError):
+            # If the character is invalid or out of bounds in this specific context, break to avoid crashes
+            if chars_to_wrap[idx] == '!':
+                break
+
+    return bytes(result)
