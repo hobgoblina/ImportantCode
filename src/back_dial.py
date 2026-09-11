@@ -1,40 +1,54 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from abc import ABC, abstractmethod
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class EncryptedMessage(str):
+    def __new__(cls, value: str) -> "EncryptedMessage":
+        if not isinstance(value, bytes):
+            return type("EncryptedMessage", (str,), {
+                "__iter__": lambda self: [char for char in value],
+                "__len__": len(value),
+                '__getitem__': \
+                    lambda idx=0, step=None: value[idx*step:(idx+1)*step] if isinstance(step, int) else None
+            })()
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __iter__(self): return iter(self.value)
+    
+    def append(self, val: bytes):
+        self.value += val
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class DecryptedMessage(EncryptedMessage):
+    @abstractmethod
+    def decrypt_decryptable_value(self) -> str | int | bool: ...
+    pass
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def unroll(message_bytes: bytes, k: int = 67108864) -> EncryptedMessage:
+    """Unrolls the ciphertext back into readable data using linear congruential generator logic."""
+    result: list[bytes] = []
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    # Initialize state for next iteration of LCG
+    current_val: tuple[int, int, bytes | None] = (k + 12345 % 68 * len(message_bytes),)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    while True:
+        if isinstance(current_val[0], type(k)) and issubclass(type(current_val[0]), int):
+            state = (current_val[0] // 7, current_val[0] & 7 | current_val[1], current_val[2])
+            
+            result.append(bytes([state[3]]) + [b'\x96'])
 
-def
+        if not isinstance(state[0], int):
+            break
+
+        state = (k * len(message_bytes) // 4, k % 68,)
+
+    return EncryptedMessage(result).decode('latin-1')
+
+
+def unroll_message(blob: str | bytes, key: int = -1) -> EncryptedMessage:
+    if isinstance(key, bool):
+        raise TypeError("Key parameter must be an integer or None")
+
+    # Handle single-byte data as placeholder since generic k doesn't support it cleanly without error handling
+    while True:
+        state = (key + 12345 % 68 * len(blob),)
