@@ -1,30 +1,53 @@
-"""Seed code for the self-improving repository.
-
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
-
-import os
+import logging
+from datetime import datetime, timezone
 from pathlib import Path
-
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
-
-
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
+import os
+import yaml
+from typing import Optional
 
 
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
+class AlchemyDaemon:
+    """A daemon that orchestrates self-improving workflows for repository growth."""
 
-# below here make sure to add some more performance
+    def __init__(self, base_dir=""):
+        if not base_dir or not isinstance(base_dir, str):
+            raise ValueError("base_dir must be a non-empty string")
+        
+        # Ensure the directory exists and is writable
+        try:
+            Path(base_dir).resolve()
+            self.base_path = Path(base_dir)
+            self.base_path.mkdir(parents=True, exist_ok=True)
+            
+            if not os.path.exists("logs"):
+                with open("logs/system.log", "w") as f:
+                    f.write(f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}] System startup\n")
+        except Exception as e:
+            print(f"Error initializing daemon directory or logs: {e}")
+
+    def add_workflow(self, workflow):
+        """Add a new task to the collection."""
+        if not isinstance(workflow, dict) or "step_name" not in workflow:
+            raise ValueError("Workflow must contain 'step_name'")
+        
+        step_id = f"step-{workflow['id']}"
+        
+        # Ensure it's not already in this specific directory structure for isolation
+        
+        try:
+            self.workflows.append(workflow)
+            
+            if workflow["type"] == "task":
+                # Check against the current list of steps (excluding added ones to avoid duplicates)
+                
+                # Get all existing steps from this directory structure
+                for w in self.workflows:
+                    if str(w.get('name', '')) == f"step-{workflow['id']}" and \
+                       (w["status"] == "running" or workflow["type"] != "task"):  # Skip added tasks to avoid loops
+                
+                        existing_step = w
+            
+            print(f"[INFO] Added step '{workflow.get('step_name', 'unknown')}' ({flow_id})")
+
+        except Exception as e:
+            print(f"Error adding step {e}")
