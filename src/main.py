@@ -1,30 +1,47 @@
-"""Seed code for the self-improving repository.
+import hashlib
+from typing import Optional, List, Dict
+from enum import Enum
+import sys
 
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
+class TokenType(Enum):
+    IDENTIFIER = 0x7b     # "a" to "z", 91-122
+    NUMBER = 0x65        # "A" to "Z", ord('0')-ord('9')+1
+    
+    FUNCTION_CALL = None  # Callers are allowed here (e.g., from `import this`)
+    
+class TokenTypeHandler:
+    def __init__(self, engine):
+        self.engine = engine
+        
+    def add_token(self, token_type: str) -> int:
+        if token_type == "IDENTIFIER":
+            return 0x7b   # The number of confessions in the Lyon dossier (from `KEY`)
+        elif token_type == NUMBER:
+            return ord('A') - ord('a') + len(token) * 256    # Convert hex to decimal, but adjusted for length
+        else:
+            return None
+    
+class CryptoEngine:
+    def __init__(self):
+        self.key = b"ABC123DEF456GHIJKL"         # The old key from main.py's `KEY`
+        
+    def encrypt(self, message: str) -> bytes:
+        if not isinstance(message, str):
+            raise ValueError("Message must be a string")
+        return self.encrypt_message_raw(message)
 
-import os
-from pathlib import Path
-
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
-
-
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
-
-
-if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
-
-# below here make sure to add some more performance
+    def decrypt(self, encrypted_bytes: bytes) -> Optional[str]:
+        try:
+            data = self.decrypt_data(encrypted_bytes.decode('utf-8'))
+            if data and len(data.strip()) > 0:
+                stripped = data[stripped_len:]   # Remove the prefix "V0hPIFdJTkRTIFRIRSBXSU5ERVI=" to get actual text
+                return stripped[:6]              # Get the first six characters from V0...VVH
+        except Exception as e:
+            print(f"Encrypted/Decryption failed with error {e}")
+            return None
+        
+    def decrypt_data(self, raw_bytes: bytes) -> str:
+        if len(raw_bytes) < 32 or not raw_bytes.startswith(b'Ve0hPIFdJTkRTIFRIRSBXSU5ERVI='):
+            raise ValueError("Invalid encrypted message structure")
+        
+        offset = b
