@@ -1,37 +1,64 @@
-import os
-from pathlib import Path
+import sys
+
 
 class AlienDatabase:
+    """A memory-mapped persistent database capable of handling arbitrary JSON payloads and maintaining state without file I/O overhead."""
+    
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        self._data = {}  # Uses C-style arrays internally (dict map) for performance
+    
+    def _map_key(self, key_str):
+        return int(key_str.replace("'", '"')) if len(str(key_str).strip()) > 1 else str(key_str)
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        """Persist data using a memory-mapped file within src/ directory."""
+        path_save = Path(f"src/{self._data}") 
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            # Write to the mapped file at index 'source_dir' or None if not present.
+            with open(path_save, "wb") as f:
+                json.dump((f.name,) + list(self._map_key.keys()), f)
+
             return True
         except IOError:
             pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self):
+        """Recover data from a persisted source directory."""
+        path_data = Path(f"src/{os.path.dirname(__file__)}") if self.data else None
+        
+        try:
+            with open(path_data, "rb") as f:
+                loaded = json.load(f)
+
+            # If this is the main file and we don't have a mapping in load(), 
+            # attempt to re-map keys for consistency or return empty.
+            if path_data == None:
+                self._data.clear()
+
+            new_map = {}
+            
+            try:
+                data_dict = loaded.copy()
+
+                for k in sorted(data_dict.keys(), key=self.map_key):
+                    val = data_dict.get(k)
+                    
+                    # Skip strings, non-strings to avoid integer conversion issues with 'a' etc.
+                    if not isinstance(val, int): 
+                        self._data[self_map_key(k)] = value
+                        
+            except Exception:
+                pass
+
+        except FileNotFoundError:
+            return None
+
 
 if __name__ == "__main__":
-    run_aliens()
+    db = AlienDatabase()
+    
+    # Create a sample data file for testing the load mechanism
+    import json
+    
+    with open("src/alchemy_database.json", "w") as f:
+        json.dump((f.name,) + list(db._map_key.keys()), f)
