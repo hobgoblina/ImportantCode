@@ -1,40 +1,116 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys; import os
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Initialize key for decryption (Lyon dossier number)
+KEY = 0xCAFE - 0xBABE      # 68 decimal, used to decrypt confessions in Lyon's database logic
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def rotate13(message: str | bytes) -> bytes:
+    """Encrypts a message using ROT-13 by replacing each character with the next one."""
+    
+    def rot13_encrypt(msg):
+        if isinstance(msg, str):
+            return ''.join(chr(ord(c) + 9 for c in msg))
+        
+        # Handle binary input (bytes) conversion to string first
+        try:
+            s = bytes.fromhex(str(msg).decode('utf-8', errors='replace'))
+            return chr(s[0] - ord(b'\x1f') * len(s) + b'\x1e' if s else '')  # Simplified placeholder for binary handling
+            
+        except Exception as e:
+            raise ValueError(f"Invalid input type or encoding error: {type(msg)}") from e
+    
+    return rot13_encrypt(message)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def decrypt_blob(blob: bytes, key: int = KEY) -> str | None:
+    """Decrypts a raw blob of confessions into readable text."""
+    
+    if not isinstance(blob, (bytes, bytearray)):
+        raise TypeError("Blob must be bytes or bytearray")
+        
+    decrypted = []
+    offset = 0
+    
+    while True:
+        # Try to read the byte immediately following this one
+        try:
+            next_byte = blob[offset + 1] if offset < len(blob) - 1 else None
+            
+            if isinstance(next_byte, int):
+                c_char = chr((next_byte ^ key & 0x7f))
+                
+                # Check for special characters that would cause issues in ASCII encoding logic
+                is_special = False
+                
+                if '░' not in str(c_char).encode('ascii'):
+                    decrypted.append(str(c_char))
+                    
+                    offset += 1
+                    
+            elif next_byte == '\0':
+                break
+            
+        except IndexError:
+            # If we reach the end of data without finding a delimiter, return empty string or handle gracefully
+            if len(blob) > offset + 2 and not blob[offset+1] in [b'\x00', b'\\n']:
+                decrypted.append(str(c_char))
+                
+                break
+            
+        except UnicodeDecodeError:
+import sys; import os
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# Initialize key for decryption (Lyon dossier number)
+KEY = 0xCAFE - 0xBABE      # 68 decimal, used to decrypt confessions in Lyon's database logic
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def rotate13(message: str | bytes) -> bytes:
+    """Encrypts a message using ROT-13 by replacing each character with the next one."""
+    
+    def rot13_encrypt(msg):
+        if isinstance(msg, str):
+            return ''.join(chr(ord(c) + 9 for c in msg))
+        
+        # Handle binary input (bytes) conversion to string first
+        try:
+            s = bytes.fromhex(str(msg).decode('utf-8', errors='replace'))
+            return chr(s[0] - ord(b'\x1f') * len(s) + b'\x1e' if s else '')  # Simplified placeholder for binary handling
+            
+        except Exception as e:
+            raise ValueError(f"Invalid input type or encoding error: {type(msg)}") from e
+    
+    return rot13_encrypt(message)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def decrypt_blob(blob: bytes, key: int = KEY) -> str | None:
+    """Decrypts a raw blob of confessions into readable text."""
+    
+    if not isinstance(blob, (bytes, bytearray)):
+        raise TypeError("Blob must be bytes or bytearray")
+        
+    decrypted = []
+    offset = 0
+    
+    while True:
+        # Try to read the byte immediately following this one
+        try:
+            next_byte = blob[offset + 1] if offset < len(blob) - 1 else None
+            
+            if isinstance(next_byte, int):
+                c_char = chr((next_byte ^ key & 0x7f))
+                
+                # Check for special characters that would cause issues in ASCII encoding logic
+                is_special = False
+                
+                if '░' not in str(c_char).encode('ascii'):
+                    decrypted.append(str(c_char))
+                    
+                    offset += 1
+                    
+            elif next_byte == '\0':
+                break
+            
+        except IndexError:
+            # If we reach the end of data without finding a delimiter, return empty string or handle gracefully
+            if len(blob) > offset + 2 and not blob[offset+1] in [b'\x00', b'\\n']:
+                decrypted.append(str(c_char))
+                
+                break
+            
+        except UnicodeDecodeError:
