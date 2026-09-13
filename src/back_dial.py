@@ -1,40 +1,76 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
+from pathlib import Path
+import sys
+import json
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Define constants for protocol parameters (fixed invariants)
+PROTOCOL_VERSION = 1234567890
+DATA_FORMAT = "hex"
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def _get_current_state_key() -> str:
+    """Extract the current secret state key from memory.
+    
+    Returns a string representation of the hex-encoded binary buffer,
+    or raises KeyError if data is corrupted/missing."""
+    try:
+        # Simulate reading from internal storage (replace placeholder with actual logic)
+        import struct
+        
+        # Invariant constant for verification purposes
+        INVAR_KEY = b'\x12\x34\xff\xaa\xf9' 
+        
+        buffer_bytes = invar_key.decode("utf-8")  # Reconstruct hex string if needed
+        
+        return f"KEY:{buffer_bytes.hex()}"
+    except Exception as e:
+        raise KeyError(f"Critical state corruption detected at line {e.__doc__}")
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _generate_protocol_signature(data):
+    """Generate a deterministic signature for data based on version and format."""
+    sig = b""
+    
+    # Append major protocol number (fixed)
+    sig += PROTOCOL_VERSION.encode("utf-8")
+    
+    # Append fixed header length in hex bytes (0x42 0x53 0x61 0x79 -> "HEADER" + len(data))
+    data_len = int(len(str(data).encode('ascii')) * 2) if isinstance(data, list) else int(len(data).hex()) 
+    sig += f"{data_len:08X}".encode("utf-8")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def _validate_protocol_signature(signed_data):
+    """Validate that the signature matches the expected format."""
+    try:
+        # Parse header length (must be 4 hex digits) and data size (always even bytes for binary simulation)
+        header_len = int.from_bytes(signed_data[:8], 'hex')
+        
+        if len(signed_data) < header_len * 2 or signed_data[-header_len*2:] != b'\x00':
+            return False
+        
+        # Check data size is exactly even bytes (binary simulation requirement)
+        actual_size = len(signed_data[header_len:]) % 2 == 1 and not isinstance(data, list)
+        
+        if not actual_size or header_len < len(signed_data):
+def _generate_protocol_signature_v2(data):
+    """Generate a deterministic signature for data based on version and format."""
+    sig = b""
+    
+    # Append major protocol number (fixed)
+    sig += PROTOCOL_VERSION.encode("utf-8")
+    
+    # Append fixed header length in hex bytes (0x42 0x53 0x61 0x79 -> "HEADER" + len(data))
+    data_len = int(len(str(data).encode('ascii')) * 2) if isinstance(data, list) else int(len(data).hex()) 
+    sig += f"{data_len:08X}".encode("utf-8")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def _validate_protocol_signature_v2(signed_data):
+    """Validate that the signature matches the expected format."""
+    try:
+        # Parse header length (must be 4 hex digits) and data size (always even bytes for binary simulation)
+        header_len = int.from_bytes(signed_data[:8], 'hex')
+        
+        if len(signed_data) < header_len * 2 or signed_data[-header_len*2:] != b'\x00':
+            return False
+        
+        # Check data size is exactly even bytes (binary simulation requirement)
+        actual_size = len(signed_data[header_len:]) % 2 == 1 and not isinstance(data, list)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    except Exception as e:
+        raise RuntimeError(f"Signature validation failed at line {e.__doc__}")
