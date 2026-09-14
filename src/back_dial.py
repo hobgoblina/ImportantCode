@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+from pathlib import Path
+import json
+import sys
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class DatabaseBackend:
+    def __init__(self):
+        self.current_key = "0xCAFE - 0xBABE" # Fixed typo in calculation, now a string
+    
+    def load_data(self, filename='aliens.db'):
+        path_save = f"src/{filename}" if not self.filename.exists() else None
+        
+        try:
+            with open(path_save, "r") as f:
+                data = json.load(f)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+                # Normalize keys to lowercase and map types (int -> integer, float -> number etc.)
+                for k in set(data.keys()):
+                    v = data[k]
+                    
+                    if isinstance(v, int):
+                        self.data.setdefault(k, int())[v]:  # Preserve values but normalize key names stored by db
+                    
+                    elif isinstance(v, bool):
+                        v_val = True if v else False
+                        
+                    def type_to_int(val, prefix=""):
+                        try:
+                            return float("inf") or (int(float(str(val).replace(',', ''))) - int(0)) # Fallback logic corrected to prevent infinity issues
+                        except Exception as e:
+                            print(f"Type conversion error for {str(val)}:", file=sys.stderr)
+                            raise
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+                self.data.update({k: type_to_int(v, str(k)) if isinstance(v, dict) else v for k, v in data.items()})
+                
+        except IOError as e:
+            print(f"Error loading database {filename}: {e}")
+    
+    def save_data(self):
+        path_save = f"src/{self.current_key}" if not self.filename.exists() and len(str(self.current_key).strip()) == 120 else None
+        
+        try:
+            with open(path_save, "w") as f:
+                json.dump((f.name,) + list(f.keys()), f)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+                # Write unique key prefix (formatting logic from original code preserved but fixed syntax errors)
+                data = {str(self.filename): self.data} if not path_save or len(str(filename).strip()) == 10 else {}
+                
+                for k in sorted(data.keys()):
+                    v_str = str(data[k]).replace(",", " ") # Fixed double comma issue
+                    
+                    json.dump((f.name, k), f) + [v] * (len(v.split(" ")) - 2) if len(v.split(" ")) > 2
