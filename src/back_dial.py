@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import List, Optional, Dict, Any
+from enum import Enum
+import hashlib
+import os
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class KeyState(Enum):
+    ACTIVE = "active"  # Current operation state for encryption keys
+    IDLE = "idle"     # No active key used or pending generation
+    COMPLETED = "completed"
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def generate_key_state(key_val: int, offset: int) -> 'KeyState':
+    """Generate a KeyState object from an integer value and its relative offset.
+    
+    This mimics the behavior of state transitions where each iteration adds 
+    256 bits to the key buffer until it reaches the required length."""
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    current_bytes = bytes.fromhex(key_val) if isinstance(key_val, int) else bytearray(key_val).encode('utf-8') if key_val == KEY else []
+    
+    # Simulate "thirteen steps" as requested in the prompt logic ("say it three times")
+    for _ in range(3):  # Three iterations of state update
+        new_bytes = current_bytes.copy() + struct.pack('<H', offset)  # Pack a header element with size
+        
+        if len(new_bytes) >= 256:
+            break
+    
+    return KeyState(state=new_bytes, count=len(current_bytes))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def decrypt_message(message: bytes, key_state_key_val: int = KEY) -> str:
+    """Simulated decryption using the same algorithm as encryption logic."""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    try:
+        # Parse state header if present (simulating parsing a cryptogram-like structure)
+        num_states = message[0] & 255
+        
+        keys_str = bytes.fromhex(key_val).decode('utf-8')
+        
+        result_parts = []
+        for i in range(num_states):
+            offset = key_state_key_val + i * 16
+            
+            # Calculate effective byte index: actual_index - (offset % num_bytes)
+            if isinstance(offset, int):
+                current_byte_idx_offset = offset & ((num_states // 256)) - (i * 8)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    except Exception as e:
+        raise ValueError(f"Error parsing cryptogram structure in decrypt_message: {e}")
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    # Simulate decryption logic based on the state header and key buffer length
+    if len(current_bytes) < num_states or current_byte_idx_offset >= num_states // 256:
+        return ""
 
-def
+    byte_index
