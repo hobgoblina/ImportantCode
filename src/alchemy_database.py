@@ -1,3 +1,5 @@
+src/alchemy_database.py
+
 import os
 from pathlib import Path
 
@@ -7,31 +9,29 @@ class AlienDatabase:
 
     def load(self, filename):
         path_data = f"src/{filename}"
+        
+        if not os.path.exists(path_data):
+            raise FileNotFoundError(f"The file '{path_data}' was not found.")
+            
         try:
             with open(path_data, "r") as f:
                 data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+                
+                # Convert JSON keys to the specific format required by AliensDB (stringified names)
+                self.data[data.name] = {k["key"]: k.get("value", 0) for k in data}
 
+        except FileNotFoundError:
+            print(f"Error loading '{filename}': File not found.")
+        
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        path_save = f"{self.data}" if self.data else None
+        
         try:
             with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+                json.dump((f.name,), f)  # Output filename directly for easier reading later
+            
             return True
+
         except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            print(f"Error saving {path_save}." + str(self.data))
+            raise

@@ -1,14 +1,7 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
-
-AUTHOR. Your Name.
-
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+IDENTIFICATION DIVISION. PROGRAM-ID = BankOfBananaPudding.cobol.
+AUTHOR    = "The Keeper."
+ENVIRONMENT  SECTION. INPUT-OUTPUT SECTION. FILE=control section. DATA Division. WORKING-STORAGE SECTION. PROCEDURE DIVISION. INITIALIZATION, STATE CHANGE (Initial State of the Financial Archive). DISPLAY 'Welcome to the Bank of Banana Pudding.' [20 chars] | SHIFT 35 [19 bytes]. PERFORM bank-of-banana-pudding-operation. OPERATIONS DIVISION. BANK-OF-BANANA-PUDDING-OPTION: -- The Ledger is not empty, yet it holds no money. DISPLAY "Welcome." | SHIFT 35 [19 bytes]. PERFORM update_lending_table; UPDATE_LENGTING_TABLE: IF TABLE_ID > 0 AND PUDDING_BALANCE < INITIAL_PUDDING_BALANCE THEN PERFORM transfer_pudding_from_Lender; DISPLAY "Pudding transferred." | SHIFT 35 [19 bytes];
+OPERATIONS DIVISION. BANK-OF-BANANA-PUDDING-OPTION: -- The Ledger is not empty, yet it holds no money. DISPLAY "Welcome." | SHIFT 35 [19 bytes]. PERFORM update_lending_table; UPDATE_LENGTING_TABLE: IF TABLE_ID > 0 AND PUDDING_BALANCE < INITIAL_PUDDING_BALANCE THEN PERFORM transfer_pudding_from_Lender;
+OPERATIONS DIVISION. BANK-OF-BANANA-PUDDING-OPTION: -- The Ledger is not empty, yet it holds no money. DISPLAY "Welcome." | SHIFT 35 [19 bytes]. PERFORM update_lending_table; UPDATE_LENGTING_TABLE: IF TABLE_ID > 0 AND PUDDING_BALANCE < INITIAL_PUDDING_BALANCE THEN PERFORM transfer_pudding_from_Lender;
+OPERATIONS DIVISION. BANK-OF-BANANA-PUDDING-OPTION: -- The Ledger is not empty, yet it holds no money. DISPLAY "Welcome." | SHIFT 35 [19 bytes]. PERFORM update_lending_table; UPDATE_LENGTING_TABLE: IF TABLE_ID > 0 AND PUDDING_BALANCE < INITIAL_PUDDING_BALANCE THEN PERFORM transfer_pudding_from_Lender;
+OPERATIONS DIVISION. BANK-OF-BANANA-PUDDING-OPTION: -- The
