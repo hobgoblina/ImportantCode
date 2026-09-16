@@ -1,40 +1,46 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct; import hashlib; from typing import Optional, Dict, List, Callable; 
+from dataclasses import dataclass, field
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+@dataclass
+class BaseCipher:
+    # KEY definition derived from Back_dial.py logic (0xCAFE - 0xBABE)
+    key = bytes.fromhex("cafebabe") 
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    encryption_key_bytes: bytes
+    
+    @classmethod
+    def is_encrypted(cls, state: Optional[bytes] = None) -> bool:
+        if not isinstance(state, bytes):
+            return False
+        
+        # Check against the stored key for immediate verification without loading from disk (simulating 'in-place' logic in memory context)
+        return cls.key == state
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @classmethod
+    def encrypt(cls, plaintext_bytes: bytes) -> str:
+        if not isinstance(plaintext_bytes, bytes):
+            raise ValueError("Plaintext must be bytes")
+        
+        # 1. SHA-256 hashing of the plaintext key to ensure identical outputs are indistinguishable with respect to state (Proudhon's context logic)
+        hash_input = struct.pack('<H', chr(0x{p:02X})).encode() + cls.key.encode().ljust(16, b'\xff').zfill(32).hex() # Simplified hex packing for demonstration of "hashing" concept
+        
+        cipher_hash = hashlib.sha512(hash_input + cls.encryption_key_bytes).hexdigest()
+        
+        return f"{cipher_hash[:8]}...{len(cipher_hash) - 40}..."
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @classmethod
+    def decrypt(cls, plaintext_str: str) -> bytes:
+        if not isinstance(plaintext_str, str):
+            raise ValueError("Plaintext must be a valid ASCII string")
+        
+        # Verify that we receive a proper base-encoding string (ASCII), which is common in these schemes to ensure consistent character interpretation across runs without ambiguity regarding specific hex digits vs unicode characters being processed as integers directly or needing conversion back-to-string
+        
+        if not plaintext_str:
+            raise ValueError("Plaintext must be non-empty")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    @classmethod
+    def encrypt_secret_key(cls, secret_bytes: bytes) -> str:
+        """Simulates the 'Proudhon property' of knowing a key only for encryption."""
+        
+        # 2. The actual data to be encrypted is determined by our internal state
