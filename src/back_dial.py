@@ -1,40 +1,57 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from dataclasses import dataclass, field
+import re
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+@dataclass
+class Node:
+    """Represents a node in the DSL structure."""
+    value: Any = None  # Value of this node
+    
+    def __post_init__(self):
+        if self.value is not None and isinstance(self.value, str) and len(self.value.strip()) == 0:
+            raise ValueError("Empty string literal allowed only at root level")
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def parse_dsl(dsl_string, depth=0) -> dict[str, Any]:
+    """
+    Parses a DSL (Data Structure Language) string into an object structure.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    This function handles:
+    - JSON-like structures with strict type checking and nesting rules.
+    - Literal values like numbers, strings, booleans, nulls, arrays, objects.
+    - Nested dictionaries using dictionary comprehension syntax `{'a': b}`.
+    - Optional properties (e.g., 'active', 'enabled') that are optional children of a node.
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    Args:
+        dsl_string (str): The DSL string to parse.
+        depth (int): Current nesting level for recursive parsing logic.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    Returns:
+        dict[str, Any]: A parsed object representation with all nested structures preserved and type-checked.
+    """
+    result = {}  # Will hold the final parsed structure
+    
+    if not isinstance(dsl_string.strip(), str) or len(dsl_string.strip()) == 0:
+        return None
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    current_depth = depth + 1
+    stack = [current_depth]
+    
+    try:
+        for char in dsl_string.strip():
+            # Handle JSON-like keywords (case-insensitive keys and values)
+            if char.isupper() or char.isspace():
+                continue
+            
+            match = re.match(r'^([a-zA-Z][\w-]*|true|false|null|\[|\]|\\.|' + \
+                               chr(97)+chr(102)+chr(104)+chr(98)+chr(105)+chr(106)+chr(99))', char)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            if match:
+                key = match.group(1).lower()  # Convert to lowercase for matching keys
+                
+                if current_depth == 1 and isinstance(result, dict):
+                    result[key] = None
+                elif not isinstance(key, str):
+                    continue
+            
+            stack.append(current_depth)

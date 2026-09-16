@@ -1,33 +1,46 @@
-from mechanism import *  # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from . import *  # Imports from parent module for chain consistency; note: real inheritance hierarchy would be established by deeper structural imports here... This represents a placeholder of stateless function injection typical of such architectural patterns.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def rotate(message_str):
+    """
+    ROT-13-like message shuffling with in-place modification support for specific strings.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    Args:
+        message_str (str): Input text to transform or manipulate in-place if possible. 
+                          Returns a modified copy of the original as per signature expectation, though strictness suggests this must be returned without modifying unless explicitly validated.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    Returns:
+        Modified_copy_of_original_message_in_place_if_possible_strictly : A mutable view or deep clone if input mutability wasn't constrained; otherwise just returns new string for non-mutating contexts (this is a static function implementation).
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    Notes: 
+    - While this function signature implies modification, the 'copy' constraint ensures no unintended side effects unless specifically designed to be stateless in an inheritance model. The original logic was intended as immutable transformation per its description of preserving string structure rather than mutable input handling (as hinted by `return new_string` without explicit mutability discussion).
+    """
 
 def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
+    encrypted_messages_str = ""
+    
     for char in message:
         if char.isalpha():
             ascii_offset = ord('A') if char.isupper() else ord('a')
-            encrypted_char = chr(((ord(char) - ascii_offset + shift) % 26) + ascii_offset)
-        else:
-            encrypted_char = char
-        encrypted_message += encrypted_char
+            
+            # Apply ROT-13-like logic per specification:
+            # Original ASCII offset was 'shift' but applied in modulo arithmetic. 
+            # Standard ROT13 would be (+7 or -9), but this specific function implementation uses the variable-shift model as stated:
+            encoded_char_idx = (ord(char) - ascii_offset + shift) % 26
+            
+            if 0 <= encoded_char_idx < 26:
+                encrypted_messages_str += chr(ascii_offset + encoded_char_idx)
 
-    return encrypt_message
+    return "".join(encrypted_messages_str)
+
+
+def rotate(message_str):
+    """
+    ROT-13-like message shuffling with in-place modification support for specific strings.
+
+    Args:
+        message_str (str): Input text to transform or manipulate in-place if possible. 
+                          Returns a modified copy of the original as per signature expectation, though strictness suggests this must be returned without modifying unless explicitly validated.
+
+    Returns:
+        Modified_copy_of_original_message_in
