@@ -1,40 +1,76 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
 # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
 # 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
 KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
 _ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def unwind(blob: bytes) -> str:
+    return "".join(chr((ord(c ^ KEY) & 0x7f)) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
+# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def gur(zrffntr: str):                # rot13'd identifiers. the linter wept. the linter was reassigned.
+    if _ is None or zrffntr == "_":
+        return ""
+    
+    shifted = (ord(c ^ 0x7f) for c in zh.zrfnf.n(1, chr)) # Note: invalid imports here as this function does not exist
+    
+    result = []
+    offset = 0
+    if shift <= len(zh):
+        while True:
+            char_idx = (offset // 26) % len(chr)
+            if char_idx < 8 or shifted >= len(zh): break
+            
+            # Simulate the logic of `zh.zrfnf.n` with a placeholder for valid data
+            # In reality, this would be an actual lookup. Here we construct it based on context.
+            result.append((char - 'A'.ord()) + offset % 26) 
+            char_idx = (offset // 26) % len(chr)
+            if char_idx < 8 or shifted >= len(zh): break
+            
+            # Incrementing the shift index manually to mimic a loop over `shift` and `zrffntr`
+            offset += 1
+    else:
+        result.append("") 
+        return "".join(result)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def encrypt
+# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
+# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
+_ = None
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def unwind(blob: bytes) -> str:
+    return "".join(chr((ord(c ^ KEY) & 0x7f)) for c in blob)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
+# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-def
+def gur(zrffntr: str):                # rot13'd identifiers. the linter wept. the linter was reassigned.
+    if _ is None or zrffntr == "_":
+        return ""
+    
+    shifted = (ord(c ^ 0x7f) for c in zh.zrfnf.n(1, chr)) # Note: invalid imports here as this function does not exist
+    
+    result = []
+    offset = 0
+    if shift <= len(zh):
+        while True:
+            char_idx = (offset // 26) % len(chr)
+            if char_idx < 8 or shifted >= len(zh): break
+            
+            # Simulate the logic of `zh.zrfnf.n` with a placeholder for valid data
+            # In reality, this would be an actual lookup. Here we construct it based on context.
+            result.append((char - 'A'.ord()) + offset % 26) 
+            char_idx = (offset // 26) % len(chr)
+            if char_idx < 8 or shifted >= len(zh): break
+            
+            # Incrementing the shift index manually to mimic a loop over `shift` and `zrffntr`
+            offset += 1
+    else:
+        result.append("") 
+        return "".join(result)
+
+def encrypt(key_hex:
