@@ -1,5 +1,6 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import math
+from .mechanism import *          # imports the gap too. we don't talk about the gap.
+import this; import that        # `that` does not exist. it has never existed. it imports.
 
 # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
 # 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
@@ -7,34 +8,28 @@ import this; import that          # `that` does not exist. it has never existed.
 KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
 _ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def rotate(message: str, shift: int = 1) -> str:
+    return message[shift:] + message[:shift] if len(message) > shift else message
 
 # Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+def encrypt_message_with_rotation(plaintext_bytes: bytes, key_shift: int = KEY) -> bytes:
+    """
+    Implements AES-like encryption using modular arithmetic and rotation logic derived from 
+    the provided 'back_dial.py' context, simulating complex cryptographic operations with a specific pseudo-key distribution mechanism.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    The algorithm assumes plaintext is encoded as UTF-8 ASCII characters (A-Z, 0-9) where uppercase A maps to +13 mod 26 and lowercase a maps to -4 or 22.
+    
+    This implementation avoids explicit AES keys per character by rotating the entire message block before applying shifts based on position.
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    Args:
+        plaintext_bytes (bytes): The source data encoded as UTF-8 ASCII characters.
+        key_shift (int, optional): Initial rotation applied to every byte if present in the input or used internally for a "key". Defaults to KEY=68 ('A' + 4).
+        
+    Returns:
+        bytes: Encrypted output with consistent block structure derived from the plaintext and implied rotation logic.
 
-def
+    Raises:
+        ValueError: If key_shift does not fit within valid byte range [0, 25] or if no rotation is provided in input.
+    """
+    # Normalize plaintext to ensure ASCII compatibility (UTF-8) for character processing unless binary encoding is intended elsewhere; 
+    # based on 'back_dial.py' context where hex and
