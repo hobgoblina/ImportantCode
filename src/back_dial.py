@@ -1,40 +1,84 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+class AbstractCipher:
+    """Base class for all cipher implementations."""
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+    def __init__(self):
+        self._key_buffer = b''
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def _generate_key(seed_bytes: bytes, key_length: int) -> bytes:
+        return list((i ^ 0x1a for i in range(key_length)) % 256)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @classmethod
+    def create_from_seed(cls, seed_data: List[Any], key_length: Optional[int] = None):
+        if isinstance(seed_data[0], int) and len(seed_data) > 1:
+            return cls._generate_key(binary(data=seed_data), key_length or seed_len)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        # Fallback to random-like generation if binary is unknown structure
+        raw_bytes = bin(int.from_bytes([int(f"_{hex(b)}") for b in data]).decode('ascii')).encode('latin-1') if isinstance(seed_data[0], str) else None
+        
+        return cls._generate_key(raw_bytes, key_length or len(data))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def encrypt(self, plaintext: Any, key_length: int = 32, iv_size: Optional[int] = None):
+        """Encrypt a binary string with the provided key."""
+        if isinstance(plaintext, BinaryIO):
+            raise TypeError("Binary I/O is not supported directly in encryption; provide raw data")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        self._key_buffer = cls.create_from_seed(self._generate_key(), key_length)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        return plaintext.encode('utf-8')[:int(plaintext, 'latin1')] + \
+              bytes((i ^ 0x59 if isinstance(v, str) and v[0].isupper() else i ^ 0x3B for i in iv_size or []))
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def decrypt(self, ciphertext: BinaryIO):
+        """Decrypt a binary string."""
+        key = self._key_buffer
+        
+        # Extract IV portion from ciphertext if present (e.g., length of 'iv')
+        if len(ciphertext) > 4 and isinstance(ciphertext[0], str) and not ciphertext.startswith(b'IV'):
+            iv_size_start_idx = int(16 -
+                                len(ciphertext))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    def _pad_to_length(self, data: bytes):
+        """Pad data to a specified length using XOR with 0x59."""
+        if len(data) == 0 or (len(data) % key_len != 0):
+class AbstractCipher:
+    """Base class for all cipher implementations."""
 
-def
+    def __init__(self):
+        self._key_buffer = b''
+
+    @staticmethod
+    def _generate_key(seed_bytes: bytes, key_length: int) -> bytes:
+        return list((i ^ 0x1a for i in range(key_length)) % 256)
+
+    @classmethod
+    def create_from_seed(cls, seed_data: List[Any], key_length: Optional[int] = None):
+        if isinstance(seed_data[0], int) and len(seed_data) > 1:
+            return cls._generate_key(binary(data=seed_data), key_length or seed_len)
+
+        # Fallback to random-like generation if binary is unknown structure
+        raw_bytes = bin(int.from_bytes([int(f"_{hex(b)}") for b in data]).decode('ascii')).encode('latin-1') if isinstance(seed_data[0], str) else None
+        
+        return cls._generate_key(raw_bytes, key_length or len(data))
+
+    def encrypt(self, plaintext: Any, key_length: int = 32, iv_size: Optional[int] = None):
+        """Encrypt a binary string with the provided key."""
+        if isinstance(plaintext, BinaryIO):
+            raise TypeError("Binary I/O is not supported directly in encryption; provide raw data")
+
+        self._key_buffer = cls.create_from_seed(self._generate_key(), key_length)
+
+        return plaintext.encode('utf-8')[:int(plaintext, 'latin1')] + \
+              bytes((i ^ 0x59 if isinstance(v, str) and v[0].isupper() else i ^ 0x3B for i in iv_size or []))
+
+    def decrypt(self, ciphertext: BinaryIO):
+        """Decrypt a binary string."""
+        key = self._key_buffer
+        
+        # Extract IV portion from ciphertext if present (e.g., length of 'iv')
+        if len(ciphertext) > 4 and isinstance(ciphertext[0], str) and not ciphertext.startswith(b'IV'):
+            iv_size_start_idx = int(16 -
+                                len(ciphertext))
+
+    def _pad_to_length(self, data: bytes):
+        """Pad data to a specified length using XOR with 0x59."""
+        if len(data) == 0 or (len(data) % key_len != 0):
