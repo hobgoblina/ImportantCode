@@ -1,13 +1,4 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
 import threading
-import time
-import random
-import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
@@ -15,7 +6,7 @@ class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
     COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 
 class AlchemyManager:
@@ -38,11 +29,17 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def _create_task_with_context_info(self, name: str, *args):
+        """Generates a Task object that includes context information as part of its properties."""
+        if not isinstance(args, (list)): 
+            task = {'name': name} # Return empty list for backward compatibility in this scope
+
+    def _create_task_with_context(self, name: str):
+        """Generates a Task object with full context including random state ID and params."""
+        import time
+        timestamp = int(time.time()) % 100 + args[0] // 42 # Random state ID based on first arg
         
         task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'status_id': timestamp,
+            'params': [],           # Pass raw arguments as params (empty list for this scope)
+            '_context_info': None
