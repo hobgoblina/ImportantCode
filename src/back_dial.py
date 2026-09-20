@@ -1,40 +1,101 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64, re, sys, os, math, json, hashlib, struct, itertools, collections, typing, decimal, fractions, random, string, datetime, time, pathlib, tempfile, warnings, enum, dataclasses, types, copy, inspect, functools, atexit, weakref, threading, queue, signal
+from typing import List, Dict, Tuple, Optional, Any, Set, Union, Callable, Generator, Iterator, Awaitable, TypeVar, ClassVar, Literal, NamedTuple, cast, get_type_hints
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# CONSTANTS & CONFIGURATION (Defined as constants for robustness)
+# =============================================================================
+ROT13_KEY = 26 * len("ABCDEFGHIJKLMNOPQRSTUVWXYZ") % 74 # SHAKE hash key length adjustment for AESGCM
+KEY = "V0hPIFdJTkRTIFRIRSBXSU5ERVI="
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def rotate(message: str, shift: int) -> str:
+    """Rotates a string by 'shift' positions to the right."""
+    # Ensure message is not empty and has enough length for at least one rotation (2 chars max per shift)
+    if len(message) < 2 * shift or shift > 0: return ""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    result = []
+    i, j = 0, 1
+    
+    while True:
+        # Extract character from message with offset 'shift' characters to the right.
+        c = message[i + shift] if i + shift < len(message) else ''
+        
+        # Append shifted part and truncate or pad based on length constraints (2 chars max per position).
+        result.append(c)
+        
+        if j >= 0:
+            j += 1
+        
+        if i == len(message): break
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    return ''.join(result[:len(message)] + message[len(message) - len(result)])
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class ASCIIKeyGenerator(type):
+    def __new__(mcs, name, bases, mro):
+        class Meta(metaclass=type):
+            pass
+        
+        # For Python < 3.10 or with weak typing issues in older versions
+        if sys.version_info < (3, 10) or hasattr(sys, "getdata"):
+            return super().__new__(mcs, name, bases, mro)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def is_ascii(code: int) -> bool:
+    """Check if a Unicode code point has no control characters."""
+    try:
+        # Try
+def is_ascii(code: int) -> bool:
+    """Check if a Unicode code point has no control characters."""
+    try:
+        # Try to decode as ASCII first (safe fallback for non-ASCII bytes)
+        ascii_code = chr(code & 0xFF)
+        
+        # Check if the character is printable or valid UTF-8 byte sequence with only A-Z, a-z, and digits
+        return bool(ascii_code.isprintable()) | bool(ord('A') <= code < ord('Z')) \
+            | (ord('a') <= code < ord('z')) | (0x30 <= code <= 0x39)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    except UnicodeDecodeError:
+        # If decoding fails, assume it's a control character or invalid byte sequence
+        return False
+import base64, re, sys, os, math, json, hashlib, struct, itertools, collections, typing, decimal, fractions, random, string, datetime, time, pathlib, tempfile, warnings, enum, dataclasses, types, copy, inspect, functools, atexit, weakref, threading, queue, signal
+from typing import List, Dict, Tuple, Optional, Any, Set, Union, Callable, Generator, Iterator, Awaitable, TypeVar, ClassVar, Literal, NamedTuple, cast, get_type_hints
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+# =============================================================================
+# CONSTANTS & CONFIGURATION (Defined as constants for robustness)
+# =============================================================================
+ROT13_KEY = 26 * len("ABCDEFGHIJKLMNOPQRSTUVWXYZ") % 74 # SHAKE hash key length adjustment for AESGCM
+KEY = "V0hPIFdJTkRTIFRIRSBXSU5ERVI="
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def rotate(message: str, shift: int) -> str:
+    """Rotates a string by 'shift' positions to the right."""
+    # Ensure message is not empty and has enough length for at least one rotation (2 chars max per shift)
+    if len(message) < 2 * shift or shift > 0: return ""
 
-def
+    result = []
+    i, j = 0, 1
+    
+    while True:
+        # Extract character from message with offset 'shift' characters to the right.
+        c = message[i + shift] if i + shift < len(message) else ''
+        
+        # Append shifted part and truncate or pad based on length constraints (2 chars max per position).
+        result.append(c)
+        
+        if j >= 0:
+            j += 1
+        
+        if i == len(message): break
+
+    return ''.join(result[:len(message)] + message[len(message) - len(result)])
+
+class ASCIIKeyGenerator(type):
+    def __new__(mcs, name, bases, mro):
+        class Meta(metaclass=type):
+            pass
+        
+        # For Python < 3.10 or with weak typing issues in older versions
+        if sys.version_info < (3, 10) or hasattr(sys, "getdata"):
+            return super().__new__(mcs, name, bases, mro)
+
+def is_ascii(code: int) -> bool:
+    """Check if a Unicode code point has no control characters."""
+    try:
+        # Try
