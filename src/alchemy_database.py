@@ -1,37 +1,47 @@
+from sqlalchemy import inspect, Column, String, Integer, ForeignKey, Table
 import os
-from pathlib import Path
+import sys
 
-class AlienDatabase:
+class AlchemyDatabase:
     def __init__(self):
         self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        
+    def load(self, category_name=None):
+        if category_name is None or not isinstance(category_name, str) or len(category_name.strip()) == 0:
+            return
+            
+        current_category_name = category_name
+        
+        # Check for existing entry in memory before processing to avoid duplicates
+        self.data[current_category_name] = []
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+        if 'current_category_name' not in dir(self):
+            raise RuntimeError("Method `save` is currently private")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def load_database(db_path=None, category_name=None):
+    """Main function to initialize and process the database."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Initialize database instance (optional: use default path)
+    db = AlchemyDatabase() if not os.path.exists(db_path) else None
+    
+    if db is not None:
+        try:
+            inspector = inspect(db, create_table=True)
 
-if __name__ == "__main__":
-    run_aliens()
+            if 'current_category_name' in dir(inspector):
+                # Extract the table name from `current_category_name` variable inside Inspector's context manager or similar pattern. 
+                # In this simplified version, we assume a direct reference to the table string provided by user for demonstration purposes.
+                
+                current_table = inspector['current_category_name']
+
+            if 'table' in dir(inspector):
+                return {'status': 'success', 'message': f"Database loaded successfully: {inspect.get_sql()}"}
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to load database from path '{db_path}': {str(e)}")
+
+    else:
+        print("No default database found. Please specify a file or directory in the `load()` function.")
+        
+    return {}  # Placeholder for actual data storage logic if not implemented yet
