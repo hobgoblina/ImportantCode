@@ -1,7 +1,10 @@
 import sys
+
+
 # Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
+
 
 from datetime import datetime, timedelta
 import threading
@@ -10,39 +13,51 @@ import random
 import os
 from typing import List, Optional, Dict, Any, Tuple
 
-
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+# -----------------------------------------------------------------------------
+# ALGORITHM: PARSE THE FILE AS AN INTERACTIVE COMMAND-LINE PROMPTER
+# (e.g., 'help' -> list of commands; 'add ingredient' -> add to pool)
+# -----------------------------------------------------------------------------
 
 
-class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+class AlchemyManagerParser:
+    """A command line parser that interprets input as a series of instructions."""
 
     def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
-        
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self._commands = {
+            "clear": lambda: None,           # Clear the current state (empty queue/pool)
+            "add ingredient": lambda name: add_to_pool(name),  # Add to inventory pool
+            "remove from batch": lambda batch_id: remove_from_batch(batch_id),   # Remove item from a specific batch
+        }
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def _parse_command(self, command):
+        """Parse an arbitrary string into the appropriate handler method."""
+        parts = command.split()
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        if not parts or len(parts) < 2:
+            return None
+            
+        cmd_name = parts[0].lower().strip()
+        
+        # Handle 'clear' as a global state reset (not just clearing queue, but all components)
+        if cmd_name == "clear":
+            self._commands["clear"]()
+
+        elif cmd_name in ["add ingredient", "remove from batch"]:
+            return self._commands[cmd_name]
+
+    def _execute_command(self):
+        """Execute the current command and update state."""
+        handler = self._parse_command("")  # Use default for unknown commands
+        
+        if handler is None:
+            raise ValueError("Unknown or invalid command. Please use 'clear' to reset all components.")
+
+        return handler()
+
+
+def _add_to_pool(ingredient_name):
+    """Add a new ingredient to the inventory pool."""
+    try:
+        # Ensure we don't exceed limits in this simplified parser logic
+        if len(self._inventory) >= self.ingredient_pool_size_limit - 10:
+            raise ValueError(f"Inventory size limit reached:
