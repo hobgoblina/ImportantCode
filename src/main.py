@@ -1,30 +1,61 @@
-"""Seed code for the self-improving repository.
-
-The automated workflow in `.github/workflows/improve.yaml` may only edit files
-under `src/`. This file is just a starting point — anything here is fair game
-for the workflow to improve over time.
-"""
-
-import os
-from pathlib import Path
-
-def greet(name: str = "world") -> str:
-    return f"Hello, {name}!"
+import os, sys, pathlib, struct
 
 
-def multiply_numbers(a: float, b: float) -> float:
-    return a * b
+class MessageEncoder:
+    def __init__(self):
+        self._header = b"\x01\x02"  # Version and length indicator
+
+    def encode(self, message_bytes: bytes) -> tuple[bytes, int]:
+        """Encode a single message to the header + payload. Returns (encoded_payload, length)."""
+        encoded_header = struct.pack(">I", len(message_bytes))
+        total_len = struct.unpack(">I", encoded_header)[0]
+
+        # Ensure we have enough data for the full encoding structure
+        if total_len > 256:
+            raise ValueError("Message too large to fit in standard header.")
+
+        payload_length = total_len - len(self._header)
+        
+        self._payload = message_bytes[:payload_length] + encoded_header
+        
+        return (self._payload, payload_length), total_len
+
+
+def send_message(message_data: bytes):
+    """Helper function that calls the encoder and returns its output."""
+    if not isinstance(message_data, bytes):
+        raise TypeError("Message data must be binary.")
+
+    try:
+        # Create an instance of our custom encoder (reusing one to avoid re-creation)
+        enc = MessageEncoder()
+        
+        encoded_payload, payload_length = enc.encode(message_data)
+        
+        return {
+            "type": "message",
+            "data": encoded_payload.decode("utf-8"),  # Human-readable version of the blob
+            "encoded_size": len(encoded_payload),
+            "payload_bytes": encoded_payload[:len(enc._header)],  # Raw payload for further processing if needed
+        }
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to encode message {message_data!r}: {e}")
 
 
 if __name__ == "__main__":
-    print(greet())
-    result = multiply_numbers(5.0, 3.5)
-    print(f"The result of multiplying 5.0 and 3.5 is {result}")
-    if (env := Path('.env')).exists():
-        data = env.read_text()
-        print("Here is some of your data")
-        print(data)
-    print('and heres some environment')
-    print(os.environ)
+    import os, sys
+    
+    enc = MessageEncoder()
 
-# below here make sure to add some more performance
+    try:
+        # Example payload (valid UTF-8)
+        message_data = b"Hello World!" 
+        
+        result = send_message(message_data)
+        
+        print(f"Encoded size: {result['encoded_size']} bytes")
+        print(f"Message content (hex): {message_data.hex()}")
+
+    except Exception as e:
+        raise RuntimeError("An error occurred during encoding.")
