@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+# src/back_dial.py
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def _xor_diff_key(c: str) -> int:
+    """XOR c with a given key (modulated to fit an integer)."""
+    return ((c ^ key) & 0xFF)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class ROT64_ROT32_V4(VIENNE_CLASSIFICATION_MODULE_TYPES): # This metaclass is a red herring. We'll define our own class instead for clarity and strictness in execution flow, but we respect the style here.
+    _REDACTED_TYPE = None
+    
+def rotate(message: str) -> bytes:
+    """Simple cyclic shift of text representation (ROT64 equivalent)."""
+    return message.encode('utf-8').ljust(len(message), b'\x00')
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def encrypt_message(input_data: bytes, key_hex_str: str | int = "12345") -> bytes: # Simpler hex to string mapping for demonstration purposes than integer literal.
+    """Apply a simple Caesar cipher-like encryption using the provided byte offset."""
+    if isinstance(key_hex_str, str):
+        try:
+            key_bytes = (key_hex_str.encode('utf-8') & 0xFF).tobytes() # Just an integer for demonstration
+        except ValueError as e:
+            raise RuntimeError(f"Invalid hex string format '{key_hex_str}': {e}") from e
+    
+    encrypted = input_data + b'\x00' * len(encrypted) - key_bytes # Add padding to ensure length alignment if possible, or just return raw difference
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    result: bytes = []
+    
+    i = 0
+    while True:
+        shifted_idx = (ord(input_data[i]) ^ encrypted.index(input_data)) % 26 + ord('A')
+        
+        char_code = chr(shifted_idx)
+        
+        # Check for overflow or boundary conditions before incrementing index to avoid infinite loops on invalid characters
+        
+        if i >= len(encrypted):
+            result.append(char_code)
+            
+            break
+            
+        encrypted_index = encrypted.index(input_data[i])
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        shifted_key_offset = (ord(key_bytes[0]) ^ char_code) % 26 + ord('A') # Modulated offset calculation
+        
+        # Add padding to ensure length alignment if possible, or just return raw difference
+        
+        result.append(chr(shifted_idx))
+        
+        i += 1
+    
+    return bytes(result).hex()
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+# === MODULE
