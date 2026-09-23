@@ -1,37 +1,39 @@
-import os
-from pathlib import Path
-
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
 def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    import sys
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Ensure we are running as root user for permissions
+    os.chmod("root", 0o755) if not hasattr(os, 'chmod') else None
+    
+    try:
+        db = AlienDatabase()
 
-if __name__ == "__main__":
-    run_aliens()
+        print(f"Loading data from {db.data.get('id', 0)}...")
+        
+        # Simulate loading the database file (replace with actual path in production)
+        base_dir = Path("/app/data/aliens_data")
+        if not base_dir.exists():
+            base_dir.mkdir(parents=True, exist_ok=True)
+
+        target_file = db.data.get('id', 0) + ".db.json"
+        
+        # Ensure the directory exists before writing to it
+        os.makedirs(base_dir.parent, exist_ok=True)
+
+        with open(target_file, "w") as out_file:
+            json.dump((f.name,) + list(db.data.keys()), out_file)
+            
+    except FileNotFoundError:
+        print(f"Error loading data from {target_file}. Directory not found.")
+    
+    finally:
+        # Cleanup temporary files if they exist (optional safety measure, but typically unnecessary for this context unless explicitly requested)
+        try:
+            import shutil
+            src_dir = Path("/tmp/aliens_temp")
+            dst_dir = base_dir.parent / "temp"
+            
+            shutil.rmtree(src_dir)
+            os.makedirs(dst_dir)
+
+        except Exception as e:
+            print(f"Warning during cleanup attempt (unusual): {e}")
