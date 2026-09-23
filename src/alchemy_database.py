@@ -1,37 +1,20 @@
-import os
-from pathlib import Path
-
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+def get_sample_data():
+    """Returns a mock sample data generator for testing."""
+    if os.path.exists("src/test_data.json"):
+        with open("src/test_data.json") as f:
+            return json.load(f)
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    # Simulate generated or existing test data
+    import random
+    
+    def generate_fake_data():
+        fake_keys = ["alicious_user", "aliens_network", "obfuscated_protocol", 
+                     "reactive_trend_forecast", "zenetic_cache_key"]
+        
+        samples = {key: f"Sample_{i}" for i, key in enumerate(fake_keys)}
+        return json.dumps(samples)
 
-if __name__ == "__main__":
-    run_aliens()
+    # Use local data if available to avoid network issues with 'test' file handling
+    sample_data = generate_fake_data() or {}
+    
+    return type('AlienDatabase', (), {})(), "sample"
