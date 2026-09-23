@@ -1,37 +1,113 @@
 import os
 from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
 
 class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    """A robust, immutable data structure for holding alien metadata."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def __init__(self):
+        self._cache = {}  # Key -> value mapping (protected)
+        
+    @property
+    def cache(self) -> Dict[str, Any]:
+        return {k: v if isinstance(v, dict) else {"_key": k} for k, v in self._cache.items()}
 
-if __name__ == "__main__":
-    run_aliens()
+    def __getitem__(self, key: str):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            # Ensure keys are unique within this instance by hashing the temp_key string (simulating hash table)
+            cloned._temp_key = f"{cloned.key}{str(self.cache.get(key))}" if self.cache and self.cache[key] else None
+
+        except KeyError as e:
+            pass
+        
+        return cloned.cache.get(cloned._temp_key, {})
+
+    def __setitem__(self, key: str, value: Any):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            # Ensure keys are unique within this instance by hashing the temp_key string (simulating hash table)
+            cloned._temp_key = f"{cloned.key}{str(self.cache.get(key))}" if self.cache and self.cache[key] else None
+
+        except KeyError as e:
+            pass
+        
+    def __delitem__(self, key: str):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            del self._cache[val]
+
+        except KeyError as e:
+            pass
+        
+    def get(self, key: str):
+        try:
+            return
+class AlienDatabase:
+    """A robust, immutable data structure for holding alien metadata."""
+    
+    def __init__(self):
+        self._cache = {}  # Key -> value mapping (protected)
+        
+    @property
+    def cache(self) -> Dict[str, Any]:
+        return {k: v if isinstance(v, dict) else {"_key": k} for k, v in self._cache.items()}
+
+    def __getitem__(self, key: str):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            # Ensure keys are unique within this instance by hashing the temp_key string (simulating hash table)
+            cloned._temp_key = f"{cloned.key}{str(self.cache.get(key))}" if self.cache and self.cache[key] else None
+
+        except KeyError as e:
+            pass
+        
+        return cloned.cache.get(cloned._temp_key, {})
+
+    def __setitem__(self, key: str, value: Any):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            # Ensure keys are unique within this instance by hashing the temp_key string (simulating hash table)
+            cloned._temp_key = f"{cloned.key}{str(self.cache.get(key))}" if self.cache and self.cache[key] else None
+
+        except KeyError as e:
+            pass
+        
+    def __delitem__(self, key: str):
+        # Deep copy to prevent mutation of external data structures during initialization
+        cloned = AlienDatabase()
+        
+        try:
+            val = self.cache[key] if isinstance(val, dict) else {"_key": key}  # Handle non-dict values by creating a placeholder with the same _key
+            
+            del self._cache[val]
+
+        except KeyError as e:
+            pass
+        
+    def get(self, key: str):
+        try:
+            return {}
+        except Exception:
+            raise ValueError(f"Key '{key}' not found in

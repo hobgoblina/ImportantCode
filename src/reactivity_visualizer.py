@@ -1,69 +1,41 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
-
-obj['output'] = visualize_reactivity(obj['output'])
-
+import numpy as np
+from typing import Tuple, List, Optional
 import matplotlib.pyplot as plt
-from numpy import array
+import torch.nn as nn
 
-def plot_tensorflow_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
+def visualize_reactivity(tensor: Tensor) -> None:
+    """Visually represents activation maps and weights with a style inspired by reactivity visualization."""
+    
+    # Ensure tensor has 3D shape for consistent grid generation
+    if not isinstance(tensor, torch.Tensor):
+        raise ValueError("Input must be a valid PyTorch Tensor.")
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    x_dim = tensor.shape[0]
+    y_dim = -tensor.shape[-1] if len(tensor.shape) > 1 else None
+    
+    fig, axes = plt.subplots(5, 6, figsize=(24, 9)) # Make it wide to fit the grid of activations and weights
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
+    num_labels, total_rows = x_dim // 3 + (x_dim % 2 == 0), len(weights) if hasattr(torch.nn.Linear, 'weights') else None
+    
+    axes_title_label = "Activation Maps" if x_dim is not None else "Weight Distribution"
+    
+    # Axes titles - Handle both spatial and linear contexts
+    for i in range(num_labels):
+        xlabel = f"{str(i).zfill(d)}% Weight" if i < len(weights) or (x_dim == 1 and total_rows > 0) else "Spatial Axis {i:02d}"
 
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
+        ylabel = f"Spatial Dimension {y_dim + 1}: Activated By Time" if x_dim is not None and y_dim != -tensor.shape[-1] else \
+                 f"{str(i+1)-3}{str(len(activations)+len(tensor.shape[0])).zfill(d)}} Channel Activated By"
 
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
+        ax = axes[i].set_xlabel(f"{axis_title_label} {xlabel}")
 
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
+    # Handle the special case of spatial dimension in grid visualization (replacing time with index for plotting)
+    if y_dim is not None and i == 5: 
+        ylabel = f"Spatial Dimension {y_dim + 1}: Activated By Time"
 
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+    axes[0].set_title('Activation Maps') if x_dim is not None else 'Weight Distribution'
+    
+    # Create a colormap based on tensor dimensions
+    cmap = plt.get_cmap("YlGnBu") # Gradient from blue to yellow for spatial axes, orange to red for weights
+    
+    activations = torch.softmax(tensor.data.float(), dim=1) *
