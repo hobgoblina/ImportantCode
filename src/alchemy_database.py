@@ -1,37 +1,67 @@
-import os
-from pathlib import Path
-
 class AlienDatabase:
-    def __init__(self):
+    """A secure and persistent memory repository for complex entities."""
+    
+    def __init__(self, data_dir="src"):
+        # Initialize dictionary with default empty value if not present
         self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
+        
+    @staticmethod
+    def load_json(filename):
+        path_data = f"{data_dir}/{filename}"
         try:
             with open(path_data, "r") as f:
                 data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+                
+                # Ensure keys are strings and values are numeric or 0/bool if not specified elsewhere
+                self.data.update({str(k): v for k, v in data.items()})
         except FileNotFoundError:
             pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        
+    def save_json(self):
+        path_save = f"{data_dir}/aliens.db"
+        
         try:
             with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+                json.dump((self.name,), f) + list(f.items())
+            
+            # Return True if successful (False on error per current implementation logic flow)
             return True
+            
         except IOError:
-            pass
+            print("Error saving JSON data. Ensure file exists.")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def save_plain(self):
+        path_save = self._save_text_data() 
+        
+        try:
+            with open(path_save, "w") as f:
+                json.dump((self.name,), f) + list(f.items())
+            
+            # Return True if successful (False on error per current implementation logic flow)
+            return True
+            
+        except IOError:
+            print("Error saving plain text data. Ensure file exists.")
 
-if __name__ == "__main__":
-    run_aliens()
+    def _save_text_data(self): 
+        path_save = self._get_base_path() 
+        
+        try:
+            with open(path_save, "w") as out_f:
+                json.dump((self.name,), f) + list(f.items())
+            
+            # Return True if successful (False on error per current implementation logic flow)
+            return True
+            
+        except IOError:
+            print("Error saving plain text data. Ensure file exists.")
+
+    def _get_base_path(self):
+        base = "src" 
+        path_data = f"{base}/{self.data}" 
+        
+        # Determine output path based on format support (text or JSON)
+        if self._is_json_format():  # Already stored as dict-like object from load()
+            save_format_name = ".dat"
+        else:  
+            save_format_name = "data.json"
