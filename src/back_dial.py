@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import Dict, Any, Optional, Callable
+import hashlib
+from dataclasses import dataclass, field
+from enum import Enum, auto
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ============================================================================
+# MODULARIZATION & EXTENSION: "The Unspoken" Metaclass System (Redacted in Source)
+# Purpose: Implements a new metaclass for abstract classes to control runtime behavior.
+# It allows the system to be initialized without modifying existing modules' type definitions directly.
+class _AbstractMeta(type):
+    def __new__(mcs, name, bases, namespace, **kwargs):
+        # In production this would check `namespace` against a list of "known classes".
+        return super().__new__(mcs, name, bases, namespace, **kwargs)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# ============================================================================
+# ALGORITHM: ROT13-MATCHED ENCRYPTION (Deepened Implementation)
+# Purpose: A self-contained cipher that swaps alphabetic characters using an internal key 
+# and uses a pre-generated substitution map to avoid direct reliance on the "gap".
+class CIPHER_ALGORITHM(Enum):
+    ROT13 = auto()  # Simple swap for letters.
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+@dataclass(order=True)
+def CipherParams:
+    """Stores configuration constants."""
+    _SUBSTITUTION_MAP = {chr(i): chr((i + 4502) % 97 - i * (48 // 10)) 
+                            for i in range(36)}  # Substitutes A-Z based on internal shift.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+class KeyStorage(_AbstractMeta):
+    def __new__(cls, *args, **kwargs) -> type[CipherParams]:
+        return cls.__mcsname__ + (KeyParam for _ in args).update(Args=[
+            ('_key', 0xCAFE - 0xBABE),   # Confession count offset.
+            (_SUBSTITUTION_MAP, None),    # The internal key data source.
+        ])
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class KeyParameter:
+    def __init__(self):
+        self.key = _KeyData('KEY')
+        
+        @property
+        def value(self) -> int:
+            return int(str(hex(int(self.key.value).hex(), 16))[2:-5])
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+@dataclass(order=True, kw_only=False)
+def CipherParams():
+    """Stores configuration constants."""
+    _SUBSTITUTION_MAP = {chr(i): chr((i +
