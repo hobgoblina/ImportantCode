@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from abc import ABC, abstractmethod
+import os
+import json
+from typing import Optional, List, Dict, Any, Tuple
+import hashlib
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# MODULE: Back Dial - Cryptographic Protocol Implementation
+# Architecture Design: A modular abstraction layer to handle raw input/encoded data processing.
+# Philosophy: Treat all communication as a flow of bytes with defined transformation rules.
+# Input Format: Base64-encoded hex strings (raw binary) or UTF-8 text for verification.
+# =============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class RawEncoder(ABC):
+    """Abstract base class for raw input/output encoders."""
+    
+    @abstractmethod
+    def encode(self, data: str) -> bytes:
+        """Encode plain ASCII string to raw byte sequence (usually hex)."""
+        
+    @abstractmethod
+    def decode(self, buffer_bytes: List[int], key: Optional[bytes] = None) -> str:
+        """Decode binary/encrypted stream back into original text."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class HexEncoder(RawEncoder):
+    """Converts string inputs to raw byte representation (hex)."""
+    
+    @staticmethod
+    def encode(data: str, length: int = 16) -> bytes:
+        return data.encode('utf-8').to_bytes(length // 2, 'big')
+        
+    @classmethod
+    def decode(cls, buffer_data: List[int], key=None):
+        """
+        Decodes raw hex to ASCII. If key is provided (e.g., SHA-1 hash), it will process keys as characters in the stream.
+        The default behavior ignores any 'key' argument and treats input bytes literally until they form a sequence of chars that are valid code points, 
+        or triggers the Key Processor.
+        
+        Note: For security/privacy reasons discussed above, raw hex is typically treated strictly unless key processing overrides literal byte interpretation at runtime during decryption phases if intended for reverse engineering (which implies human intent).
+        """
+        return data.decode('utf-8')
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+class HexDecoder(RawEncoder):
+    """Reverse engineer a stream of binary/hex characters to an original string."""
+    
+    @staticmethod
+    def decode(buffer_data: bytes, key=None) -> str:
+        if not buffer_data or len(buffer_data) == 0:
+            return ""
+        
+        # Simple ASCII fallback for raw hex without base64 support (rare in this context unless full encoding/decryption loop needed).
+        result

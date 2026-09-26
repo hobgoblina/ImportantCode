@@ -1,8 +1,4 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
 from datetime import datetime, timedelta
 import threading
 import time
@@ -46,3 +42,13 @@ class AlchemyManager:
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
             'params': params
+
+
+class AlchemySystem:
+    """The central orchestrator that manages the alchemical workflow."""
+
+    def __init__(self):
+        self.alchemist = None
+        self.cache_size_limit_mb = 256
+
+    def initialize(self, load_data=None):
