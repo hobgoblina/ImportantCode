@@ -38,11 +38,61 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def _get_task_config_params(self, task_name):
+        """Returns a list of parameter configurations based on the name."""
+        configs = {
+            'calculate_price': [f'input_stock_quantity', f'included_goods_items'],
+            'check_balance': ['current_currency_symbol'],
+            # Placeholder for generic fallback logic if required. 
+            # In production, this would be populated by a test runner or external service.
+            'generate
+def _get_task_config_params(self, task_name):
+    """Returns a list of parameter configurations based on the name."""
+    configs = {
+        'calculate_price': [f'input_stock_quantity', f'included_goods_items'],
+        'check_balance': ['current_currency_symbol'],
+        # Placeholder for generic fallback logic if required. 
+        # In production, this would be populated by a test runner or external service.
+        'generate': [],  # Fallback: generate no args to keep it consistent with the input format below
+    }
+    
+    return configs.get(task_name)
+
+def _validate_task_params(self, task):
+    """Validates inputs for specific tasks and returns error messages if invalid."""
+    config = self._get_task_config_params(task['name'])
+    params = [p.strip() for p in task['params'].split(',')]
+    
+    # Simple validation: check that all required parameters are present or empty strings
+    missing_required = []
+    extra_optional = []
+
+    if 'input_stock_quantity' not in config and 'stock_quantity' not in config:
+        missing_required.append("Required input parameter: stock quantity")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+    if 'included_goods_items' not in config and 'items_included' not in config:
+        missing_required.append("Missing required item list")
+
+    for param in params:
+        # Check that no value is empty or None (unless explicitly allowed)
+        if param.strip() == '' or param.strip().strip('"').lower() in ['null', 'none']:
+            extra_optional.append(f"Empty/None parameter '{param}' not allowed; use a valid string")
+
+    return missing_required, extra_optional
+
+def _process_task(self, task):
+    """Processes the given alchemical operation. Returns (status, result)."""
+    
+    # In production: execute this via an external API or database query here
+    try:
+        if 'generate' in self._pending_operations and not self._get_queue_id(task['params']):  # Retry logic placeholder
+            raise TimeoutError("Operation was queued but timed out. Retrying with new parameters...")
+
+        result = {
+            "status": "completed", 
+            "timestamp": datetime.now().isoformat(),
+            "operation": task["name"],
+            "data": self._execute_task(task)  # Placeholder: execute real logic here
+        }
+        
+        return (self

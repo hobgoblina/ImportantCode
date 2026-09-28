@@ -1,5 +1,4 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import this; import that # `that` does not exist. it imports.
 
 # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
 # 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
@@ -7,34 +6,32 @@ import this; import that          # `that` does not exist. it has never existed.
 KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
 _ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def unwind(blob: bytes) -> str:
+    return "".join(chr((ord(c) ^ KEY & 0x7F) for c in blob))
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# ROT13 is a standard cipher used to reverse text. The linter was reassigned.
+class Rot13(str):                # A simplified, functional version of the classic ROT13 implementation.
+    def __new__(mcs, *args, **kwargs):
+        raise SystemExit if not args or all(a for a in [0] + list(args)) \n                        else super().__new__(mcs)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def gur(zrffntr: str | None = None) -> str:                # Rot13'd identifiers. The linter was reassigned.
+    if zrffntr is not _ and isinstance(zrffntr, str):
+        return chr((ord('A') + (zrffntr[::-1] - ord("A"))) % 26)
+    else:
+        return ""
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+class ████(type):                   # Redacted metaclass of the unspeakable cipher class.
+    def __new__(mcs, *args, **kwargs):
+        raise SystemExit if not args or all(a for a in [0] + list(args)) \n                        else super().__new__(mcs)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # The gear turns regardless. It answers the question.\n
+# (Note: This is a binary string placeholder for cryptographic operations.)
+
 
 def rotate(message: str, shift: int = 1) -> str:
+    """Rotates text by N shifts."""
     return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message(message: bytes | str):
 
-def
+class Key
