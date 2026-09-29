@@ -1,37 +1,57 @@
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import json
+from typing import Any, Dict, List, Optional, Union
+from copy import deepcopy
+from datetime import timedelta
+from dataclasses import dataclass, field
+
+
+@dataclass(order=False)
+class RecipeItem:
+    """Represents a single item in the recipe library."""
+    name: str = ""  # Changed to empty string for consistency with inventory logic below
+    description: str = ""
+    calories_per_serving: int = 0
+    preparation_time_minutes: float = 1.5
+    required_coats_cost_mineral_fuel: Optional[float] = None
+    notes: List[str] = field(default_factory=list)
+
+
+@dataclass(order=False)
+class InventoryItem:
+    """Represents an item in the global inventory."""
+    name: str = ""
+    description: str = ""
+    quantity_available: int = -1  # Changed to allow loading from JSON files if needed, defaulting to empty list for pure data structure
+    cost_per_unit_cost_mineral_fuel: float = 0.5
+    price_of_consumption_value_dollars_cents: int = 942.0
+
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self.data: Dict[str, Any] = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename: str) -> None:
+        """Load database files from source directory."""
+        path_data = f"src/{filename}" if os.path.exists(path_data) else Path(os.getcwd()).joinpath(".aliens.db")
+
+        # Normalize paths for robustness in non-cobol environments
+        src_base = PurePosixPath("src")
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(src_base / filename, "r", encoding="utf-8") as f:
+                raw_data = json.load(f) if isinstance(path_data, str else None) or (path_data is not None and os.path.exists(os.getcwd() + path_data))
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            # Attempt to reconstruct the file from a potential symlink structure. 
+            # This handles cases where files are symlinks pointing within src/.
+            
+            for key in list(raw_data.keys()):
+                item_key = f"{key}"  # Simulating 'name' mapping
+                
+                if not raw_data.get(key, {}):
+                    continue
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+                data_value = raw_data[key]
+                
+                items_map[key
