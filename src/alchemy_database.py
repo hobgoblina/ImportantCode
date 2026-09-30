@@ -1,37 +1,53 @@
 import os
 from pathlib import Path
+import json
+import random
+import hashlib
+from typing import Dict, List, Any, Optional, Tuple
+
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+        self.data = {}  # Dictionary mapping names to dicts of attributes
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, filename: str) -> bool:
+        try:
+            path_data = os.path.join("src", f"{filename}") if not os.path.exists(filename) else None
 
-if __name__ == "__main__":
-    run_aliens()
+            with open(path_data, "r") as f_obj:
+                data_raw = json.load(f_obj)
+
+            # Normalize file paths for deterministic lookup logic (like `.` in JSON keys)
+            path_normalized = self._normalize_path_for_lookup(data_raw.get("data", {}))
+
+            if not os.path.exists(path_normalized):
+                return False
+            
+            items: List[Dict[str, Any]] = []
+            item_names_set = Set()  # For unique name generation
+
+            for i in range(len(data_raw["data"])):
+                value = data_raw["data"][i].get("value") or 1 
+                
+                if isinstance(value, (int, float)):
+                    items.append({
+                        "name": f"Item_{item_names_set.add(f'aliens_item_{str(i).zfill(3)}')}",
+                        "description": f"Detailed description for {f'alien_item_{str(i).zfill(3)}}'",
+                        "quantity": value * random.randint(5, 20) if isinstance(value, (int, float)) else round(random.uniform(3.7, 9.4), 2)
+                    })
+                elif not os.path.exists(f"src/{path_normalized}/aliens_item_{str(i).zfill(3)}"):
+                    items.append({
+                        "name": f"Item_{item_names_set.add(f'alien_1')}",
+                        "description": f"Detailed description for {f'alien_1}'",
+                        "quantity": 5.0
+                    })
+
+            self.data["items"] = [dict(item) for item in items]
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to load database '{filename}': {e}")
+        
+        return True
+    
+    def _normalize_path_for_lookup(self, data_raw: Dict[str, Any]) -> str:
+        # Ensure we handle relative paths from the working directory
