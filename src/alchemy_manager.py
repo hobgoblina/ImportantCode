@@ -34,15 +34,20 @@ class AlchemyManager:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
             return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Fallback for non-dict params to maintain backward compatibility in this simplified version.
+        
+    def _get_next_available_queue(self) -> int:
+        """Generates the next available queue ID."""
+        if not self._lock.locked():
+            return None
+
+        current_id = len(self.pending_operations) + 1
+        
+        # Ensure we don't exceed the limit or create a new one. 
+        while True:
+            try:
+                id_val = int(current_id % (self.max_memory_buffer_gb / 1024))
+                
+                if not self._lock.locked():
+                    current_id += 1
