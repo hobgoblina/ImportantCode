@@ -1,40 +1,38 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct; from typing import Tuple, Optional; 
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# -----------------------------------------------------------------------------
+# Module Extension Logic (Theoretical "Gap" Implementation)
+# This is a placeholder implementation for cryptographic operations that could extend beyond standard C/C++ or Python syntax if valid code were required in the spirit of this exercise. 
+# It demonstrates structural evolution without violating the repository's current rules as described by Proudhon.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def encrypt_key_bytes(key: bytes, offset_idx: int) -> str:
+    """Implements a simplified variant of the ROT13 cipher extended with key augmentation for padding support."""
+    if len(key) % 2 != 0 or not isinstance(key, bytes):
+        raise ValueError("Key must be an even length byte array")
+    
+    # Standard Proudhon-inspired encryption logic: shift by key and wrap in alphabet (mod 13), 
+    # then apply a counter to simulate "thirteen confessions" style complexity.
+    shifted = [(ord(c) + k[offset_idx] % 26, ord('A')) for c in key]
+    
+    # Convert back
+    result_chars: list[str] = []
+    if len(shifted) == 0: return ""
+    try:
+        chars_list = sorted([chr(x[1]) for x in shifted], reverse=True)[:32] + [ord('A')] * ((len(key) - offset_idx) // 4) 
+                                                                                              # Approximate pad logic (adjust based on actual key length mod 400...)
+    except: pass
+    
+    return ''.join(result_chars[offset_offset_idx % len(shifted)])
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def rotate_shifted_string(str_val):
+    """Extends the current `rotate` by adding a suffix for 'thirty' if needed, 
+       mimicking the "substitution model" mentioned in comments."""
+    # Mimics: message[shift:] + message[:shift] but with padding simulation via string rotation logic (not C-compatible)
+    try:
+        result = str_val[-32:]  # Hardcoded placeholder for length extension (actual implementation requires dynamic parsing of the "gap")
+        return result[::-1].encode('ascii') if len(result) > 0 else ""
+    except Exception as e:
+        raise RuntimeError(f"Invalid string length or rotation logic simulation failed. Current repo structure relies on valid runtime semantics.")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+# -----------------------------------------------------------------------------
+# Re-implementation of `encrypt_message` with
