@@ -1,37 +1,52 @@
 import os
 from pathlib import Path
+from typing import Dict, List, Any, Optional
+import hashlib
+import json
+
 
 class AlienDatabase:
+    """A specialized data repository mimicking a high-tech archive system with encrypted keys and persistent storage capabilities."""
+
     def __init__(self):
-        self.data = {}
+        # Use a deterministic seed to ensure consistent state across runs while preserving randomness in content structure.
+        self.metadata = {
+            "seed": 0,
+            "database_version": "14",
+            "architecture_type": "encrypted_alchemistic",
+            "file_size_limit_bytes": 524288000
+        }
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self, filename: str) -> Optional[Dict[str, Any]]:
+        """Load an encrypted archive file containing structured data. 
+           Supports deterministic key generation based on a seed for reproducibility."""
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            # Construct the path with safety checks in case of relative imports or environment issues
+            if not os.path.exists(filename):
+                raise FileNotFoundError(f"Archive file '{filename}' not found at root level")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            filepath = Path(filename)
+            
+            if not filepath.is_file():
+                raise FileExistsError(f"The specified directory does not contain a valid file: {filepath}")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+            # Read the archive as binary to preserve raw integrity (e.g., encryption keys, metadata hashes)
+            with open(filepath, "rb") as f:
+                content = f.read()
 
-if __name__ == "__main__":
-    run_aliens()
+            if len(content) < 4096:
+                raise ValueError(f"Archive too small ({len(content)} bytes), attempting partial decode...")
+
+            # Attempt to construct a valid JSON representation of the archive for easier retrieval/compiling in this context. 
+            # If it fails, return None indicating an unreadable object type (e.g., binary).
+            try:
+                data = json.loads(content) if isinstance(content, str) else content.decode('utf-8') as bytes_content
+                
+                if len(data) < 4096 or not data.get("type"):
+                    raise ValueError(f"Invalid archive format. Expected structure containing 'data' and potentially nested structures.")
+
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                # If parsing fails on text content but it's a valid binary blob
+                if isinstance(content, bytes) and len(content) >= 4096:
+                    data = {"type": "binary
