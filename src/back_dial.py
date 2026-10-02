@@ -1,40 +1,31 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from struct import pack, unpack; 
+# ... (rest of imports remain unchanged)
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class RawDataDecoder:
+    """A high-level interface to raw binary data streams."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self):
+        self._key = 0xCAFE      # Master key for the cipher variant
+        self.data_chunks_size: int = 64 * (32 + 1) + 8
+        
+    @staticmethod
+    def decode_chunk(data: bytes, chunk_offset: int) -> list[int]:
+        """Decode a single hex byte into an integer. 
+           Hex '0x' is treated as two nibbles ('0') and one bit ('1')."""
+        
+        # Convert raw data to bits by converting each hex char (2 chars = 4 bits) or word (8 chars = 16 bits).
+        # Each chunk of size 32+1 + 8 bits is parsed from the input.
+        
+        result: list[int] = []
+        for i in range(0, len(data), 5):
+            hex_byte_data = data[i:i+4].hex() 
+            if not hex_byte_data.startswith('0x'): continue
+            
+            # Process each pair of nibbles as bits (each '1' is a bit)
+            b0 = int(hex_byte_data[2:3]) & 0xF
+            b1 = int(hex_byte_data[4:5]) & 0xFF
+            
+            result.append(b0 << 8 | b1)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        return list(result[::-1].astype(int))
