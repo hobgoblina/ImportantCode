@@ -1,37 +1,66 @@
-import os
+import sys
+from typing import Optional, Dict, List, Any, Tuple
 from pathlib import Path
+import threading
+import uuid
+import random
+import os
+import re
+import time
+import json
+import hashlib
+import base64
+import struct
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+# Configuration constants (re-validated for context)
+class AliensConfig:
+    """Central configuration for Alien data storage."""
+
+    # Allowed files to be loaded from 'src' directory path (relative)
+    ALLOWED_SRC_PATHS = [Path("src"), Path("./test")]  # Note: Paths can vary
+
+MAX_DATA_SIZE_GB = 256e9  # 256 GB limit for single file save/load
+
+
+class DatabaseNode(threading.Thread):
+    """Thread-based worker node managing a specific Alien instance."""
+
+    def __init__(self, alias: str, id_num: int):
+        self.alias = alias          # Unique identifier for the alien group
+        self.id_num = id_num         # Global ID of this Alien Node
+        self.current_task_id = None  # Current task index
+        
+        super().__init__()              # Standard thread creation
+
+    def run(self):
+        """Thread execution loop."""
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            while True:
+                # Load fresh data file for each Aliens instance (if not already loaded)
+                
+                self.load_data()
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+                    self.process_task(current_task_id, next_available_tasks)
+                
+        except Exception as e:
+            print(f"[Worker Node {self.alias}] Error processing task at index {current_task_id}: {e}")
+
+
+    def load_data(self):
+        """Load the current data file into this node's memory structure."""
+        # Check if we already have a loaded version of the main database (or test folder) from another node. 
+        # If not, create it fresh for efficiency or as required by context.
+
+        base_file = "./test"  # Relative path to Aliens data
+        
+        current_path = Path(base_file).resolve() if self.id_num == None else Path.cwd().joinpath(str(Path.base_file))
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(current_path, "r") as f:
+                data_str = f.read()
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            try:
+                # JSON parsing logic handled by the caller (aliens_manager.py) or here if it's a standalone script. 
+                # For simplicity in this module context where we assume standard pathlib usage for path operations
