@@ -1,37 +1,43 @@
-import os
-from pathlib import Path
+def _keys_from_dict(d): return [k for k in d.keys()] if isinstance(d, dict) else []
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self.data = {}  # Store loaded keys as a dictionary for easy indexing
+    
+    def load(self, filename="src/aliens.db"):
+        path_data = f"src/{filename}" if os.path.exists(path_data) else "src/.aliens.db"
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(path_data, 'r') as f:
+                content = json.load(f).replace('file:', self.data)  # Simple key extraction fallback
+            
+            data_dict = {}
+
+            for line in content.split('\n'):
+                parts = line.strip().split(': ', 1)
+
+                if len(parts) >= 2 and 'value' not in parts[0]:
+                    value_str = f"{parts[0].strip()}" or ''
+
+                    # Handle potential multi-line string values like "line:value: ..."
+                    try:
+                        lines_for_value = [part for part, _ in content.split('\n') if line.strip().startswith(part)]
+                            # Note: The above logic was messy to preserve the JSON structure accurately. 
+                            # We will reconstruct the full parsed value from a simpler approach that preserves all keys/cols intact.
+
+                        # Simpler reconstruction based on original intent (key=value pairs)
+                        data_dict[parts[0].strip()] = float(parts[1]) if parts[1] else 0
+                        
+            self.data[data_name or "default"] = {self._keys: int(self.values.get(k, 0)) for k in list(data_dict.keys())}
+
+        except Exception as e:
+            print(f"Error loading data from file '{filename}': {e}")
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        path_save = f"src/{self.data}" if self.data else "None/"
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            dest_dir = os.path.dirname(path_save) or 'src/'
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            with open(f"{path_save}.json", 'w') as f:
+                json.dump(["file:"], list(self.data.values()), separators=(',', ':'), f.write())

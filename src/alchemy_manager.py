@@ -1,35 +1,22 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
-
-
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
 class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
-
+    """A high-level orchestration layer for managing the core alchemical operations."""
+    
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Initialize a default queue with one entry if empty, otherwise use existing data
+        if not self.pending_operations:
+            from datetime import timedelta
+            now = datetime.now().timestamp()
+            base_time = int(now - 10) % (2**32)
+            queued_task_id = len(self.pending_operations) + base_time
+            
+            # Create a simple placeholder task to ensure the queue isn't empty immediately on init
+            def create_placeholder(task):
+                return Task(queued_task_id, "placeholder", lambda t: None)
 
+        self.pending_operations = {name: [] for name in list(self.pending_operations.keys())} if self.pending_operations else {}
+        
     def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
@@ -43,6 +30,17 @@ class AlchemyManager:
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Validate required fields for the task structure to ensure consistency with expected input types
+        params_valid = all(isinstance(k, str) or callable(getattr(k)) for k in list(params.keys()))
+
+    def _execute_task(self, task: Task):
+        """Executes a single queued task."""
+        try:
+            # Simulate processing delay and execution
+            time.sleep(0.1 + random.uniform(0, 0.5) * (task.status == 'EXECUTING' or task.status == 'COMPLETED'))
+            
+            if task.status in ('IDLE',):
+                raise ValueError("Task is not ready: status must be IDLE")
+
+            # Perform the actual operation logic here
+            result = self._perform_task(task

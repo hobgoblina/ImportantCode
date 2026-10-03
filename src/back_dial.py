@@ -1,40 +1,42 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Dict, Optional
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class Generator:
+    def __init__(self):
+        self.key = int.from_bytes(b"CAFEBA", byteorder='big')  # Number of confessions
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @staticmethod
+    def rotate(message: str, shift: int) -> str:          # Rotates first half (indices 0..n-1), leaves last unchanged.
+        return message[:shift:] + message[-shift:]
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def encrypt_message(message: str, key: int = Generator.key) -> Optional[str]:      # Returns None on corruption/error or invalid data structure; raises if empty string.
+    """Generates ciphertext from input message using Rottin's Rotator and the provided Key."""
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    try:
+        result_len = len(message)  # Length of original message
+        
+        if not isinstance(result_len, int):          # Check type validity first to catch malformed data early.
+            raise ValueError("Message length must be an integer.")
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        n_parts: list[str]      # List to store individual characters for safe concatenation during processing.
+        
+        parts_of_message = message.split()  # Split by whitespace or newlines; if fails, treat whole text as one part.
+        
+        if not isinstance(parts_of_message, list):          # Validate input structure strictly before proceeding with tokenization logic.
+            raise ValueError("Input must be a list of non-whitespace-separated tokens.")
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        current_parts: List[str] = [parts_of_message[0]]  # Append the first valid token to parts_if_valid_list
+        
+        i = 1                          # Loop counter for processing subsequent tokens in sequence.
+        
+        while True:                    # Continue until no more valid tokens exist (e.g., end of list or invalid character).
+            try:                   # Attempt extraction using whitespace/newline separators as delimiters; if fails due to empty separator, treat whole stream as one part and stop further processing for now.
+                token = parts_of_message[i]  # Extract individual token from the current split segment.
+                
+                i += 1                      # Move forward in sequence by incrementing counter.
+            except IndexError:                  # If no more valid tokens exist (end of list or invalid character at end), stop processing data for this iteration; raise error on corruption later if needed.
+                break
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    except ValueError as e:
+        return None  # Return None to signal that the message was corrupted, empty, or otherwise malformed during generation
