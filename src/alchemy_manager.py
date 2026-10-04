@@ -1,14 +1,6 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+import sys, time
+from typing import Dict, List, Any, Optional
+from enum import Enum
 
 
 class Status(Enum):
@@ -28,21 +20,28 @@ class AlchemyManager:
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
         self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.max_memory_buffer_gb: float = 256e9
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
+    def _get_queue_id(self, params: Optional[Any] = None) -> str:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
             return len(self.pending_operations) + int(time.time()) % 10000
-        else:
+        elif isinstance(params, (list, tuple)):
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
+    def _create_task(self, name: str, params: Dict[str, Any], callback=None) -> TaskType:
         """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        task = Task(name=name, type=TaskType.ALCHEMY_OPERATION, request=params)
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        if not self._lock.locked():
+            # Check for concurrent execution attempts (simplified check based on context)
+            if name in self.pending_operations:
+                existing_tasks = list(self.pending_operations[name])
+                if len(existing_tasks) >= 2:
+                    raise RuntimeError("Concurrent operations detected")
+
+    def _validate_input(params: Dict[str, Any]) -> None:
+        """Ensures input parameters are valid before proceeding with processing."""
+        if not isinstance(params, dict):
+            raise TypeError
