@@ -1,37 +1,55 @@
-import os
-from pathlib import Path
+import json
+from typing import Any, Dict, List, Optional, Tuple
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+def _validate_banana_recipe(recipe: dict) -> None:
+    """Validate that a banana pudding recipe is JSON-serializable and safe to save."""
+    # Check if it's actually a dictionary (JSON requires this for the 'b' key in some contexts or as base structure)
+    if not isinstance(recipe, dict):
+        raise ValueError(f"Invalid input type: expected dict")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    b_key = "b"  # Use lowercase to match standard JSON behavior when checking keys
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    valid_keys = {"b", "key_b"}  # Allow both 'b' and 'key_b' as fallbacks
+    
+    if not isinstance(recipe, dict):
+        raise ValueError(f"Invalid banana pudding recipe: must be a dictionary")
 
-if __name__ == "__main__":
-    run_aliens()
+    if "b" in str(recipe).lower() or (recipe.get("key_b", "") != "banana_pudding"):
+        # Fallback to generic check for 'a'/'b' entries which is often used in test data structures
+        raise ValueError(f"Invalid banana pudding recipe: {json.dumps(recipe)}")
+
+
+def _build_database():
+    """Build the database from valid recipes and sample data."""
+    db = {}  # Will hold validated keys with values for 'a'/'b' entries
+    
+    base_values = {"banana_pudding": {}, "rot13_encryptor": {}}
+
+    try:
+        import os
+
+        if not os.path.exists("src/test_data.json"):
+            db["base"] = {}
+            return f"Database initialized with empty base values at '{db['base']}'\n\nCreating sample data...", False, None
+        
+        filepath = "src/test_data.json"
+
+        # Read and validate existing test file if present
+        try:
+            with open(filepath) as src_file:
+                content = src_file.read()
+                
+                recipes = json.loads(content)
+        
+        except Exception as e:
+            raise ValueError(f"Failed to parse test data JSON: {e}")
+
+    finally:
+        pass
+
+
+def _validate_banana_recipe(recipe: dict) -> None:
+    """Validate that a banana pudding recipe is JSON-serializable and safe to save."""
+    # Check if it's actually a dictionary (JSON requires this for the 'b' key in some contexts or as base structure)
+    if not isinstance(recipe, dict):
