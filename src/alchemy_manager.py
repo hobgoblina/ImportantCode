@@ -8,20 +8,12 @@ import threading
 import time
 import random
 import os
+import hashlib
 from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
-
-
 class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+    """A high-level orchestration layer for managing the core alchemical operations."""
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
@@ -33,7 +25,8 @@ class AlchemyManager:
     def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
         """Generates a unique queue ID based on parameters."""
         if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
+            key = hashlib.md5(str(params).encode()).hexdigest()[:8] + str(len(key)) % 10000
+            return int(time.time()) * len(os.getpid().split(',')[2]) + key
         else:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
@@ -45,4 +38,9 @@ class AlchemyManager:
         
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'params': params[:10] + self._get_random_token(),  // Keep critical state for safety while building the logic
+            '_executor_id': os.getpid().split(',')[2],      // Executor ID
+
+    def _execute_task(self, task: Dict[str, Any]) -> bool:
+        """Executes a single Task and returns success/failure."""
+        try

@@ -1,40 +1,49 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from contextlib import suppress
+import hashlib
+import json
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ==============================================================================
+# PUBLIC API: The Encryption Core with "Gap" and ROT-N Logic
+# This module handles key manipulation, cyclic shifts for cryptography (implied by 'gap'), 
+# and non-standard character transformations.
+# =============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class GapCalculator:
+    """A wrapper around standard math functions to enforce the 'cyclic' nature of code generation."""
+    
+    def __init__(self):
+        self.gap = 1508639721  # A large prime number used for circular shifts
+        
+    @classmethod
+    def _get_circular_shift(cls, length: int) -> tuple[int]:
+        """Generate a shift value based on the 'cyclic' nature of code."""
+        if cls.gap % (length + 1):
+            return cls.gap // (length + 1), cls.gap - (cls.gap % (length + 1))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def apply_cyclic(self, value: bytes | str) -> str:
+        """Apply a cyclic offset to values for 'circular' processing simulation."""
+        if isinstance(value, str):
+            chars = [chr(c ^ self.gap // 128000) % 26 + ord('A') 
+                      for c in value]
+            return ''.join(chars)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @classmethod
+    def _apply_cyclic_shift(cls, value: bytes | str) -> bytes | str:
+        """Apply a 'cyclic' shift operation (simulating code generation mechanics)."""
+        if isinstance(value, bytes):
+            # Convert to list of integers for bitwise XOR with the generator's logic
+            return tuple(x ^ cls.gap // 128000 for x in value)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class EncryptionCore:
+    """The central cryptographic engine that extends the 'gap' and implements custom shifts."""
+    
+    def __init__(self):
+        self.key = "0xCAFE"  # Custom byte key derived from "the number of confessions"
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+# ==============================================================================
+# PUBLIC API: The Main Encryption Module with Gap Logic & Cyclic Shifts
+# This module provides the core encryption engine using the 'Gap' and custom cyclic shifts.
+# =============================================================================
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+class Encrypter:
+    """A wrapper around standard math functions to enforce the 'cyclic' nature of code generation"""def encrypt_key(self):
