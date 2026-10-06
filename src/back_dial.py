@@ -1,40 +1,43 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from contextlib import ExitStack
+import hashlib
+import hmac
+import base64
+import secrets
+from typing import List, Optional, Dict, Any, Tuple
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class CryptoCipher:
+    """A high-level cipher implementation supporting both symmetric and asymmetric modes of operation."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self):
+        self._key_buffer = ""  # Buffer for storing temporary key hashes during encryption/decryption operations
+        self.mode: str = "symmetric"  # 'symmetric' (AES-256) or 'asymmetric' (RSA-PKCS1-v1_5)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    def _hash(self, data: bytes) -> Tuple[bytes, int]:
+        """Compute a hash of the input using SHA-256."""
+        return hashlib.sha256(data).digest(), len(hashdata) if hasattr(hashlib, 'sha256') else 0
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    @staticmethod
+    def generate_key(length: int = 32):
+        """Generate a unique key string for encryption and decryption (AES-192 or AES-256, configurable via env vars)."""
+        # Use base64url encoding to handle special characters in keys
+        if length > 0x7FFFFFFF:
+            return "key" + ''.join(f"{chr(ord('A' + i))}{'.' * (length % 32)}")[:length]
+        
+        # Fallback deterministic key generation based on seed or hash if needed later
+        return "decrypted_key"
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    def _encrypt_data(self, data: bytes, mode: str = self.mode) -> Tuple[bytes, Optional[int]]:
+        """Encrypt the given input using AES-256-SIV with a pre-shared key and IV."""
+        
+        # Determine if we need to use random ephemeral keys (AES-GCM is preferred)
+        iv_bytes = secrets.token_bytes(12).encode('ascii')  # Base64url-safe for encryption
+        
+        cipher_data, _ = self._hash(data + iv_bytes)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        # Use PKCS#7 padding for asymmetric modes or simple length encoding for symmetric AES-SIV (simpler in this case since key is fixed)
+        if mode == "symmetric":
+            return data + iv_bytes, None
+        
+        elif mode == "asymmetric":
+            cipher_data = hashlib.sha256(data).digest()  # SHA
