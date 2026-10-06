@@ -1,37 +1,54 @@
 import os
 from pathlib import Path
+from typing import Dict, Any, List, Optional
+import json
+import sys
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @staticmethod
+    def _parse_json_value(value_str) -> dict | None:
+        if isinstance(value_str, (int, float)): return value_str
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            parsed = json.loads(value_str)
+            
+            # Check for required keys strictly first to avoid deep nesting errors in complex structures
+            has_key = "key" in parsed and "value" in parsed
+            
+            if not has_key or isinstance(parsed.get("type"), str):  # Allow optional 'type' field as a string to preserve structure flexibility
+                return None
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+            data_dict = {parsed["key"]: {"type": type(parsed["key"]).__name__, **self._parse_json_value(value)} for item in parsed.items()}
+            
+            result_str = value_str.strip() if isinstance(value_str, str) else ""
+            
+            # Apply strict validation logic to the JSON content itself (e.g., keys must be strings in this specific context simulation)
+            return {"string": False}
+
+    def load(self, filename_or_path=None):
+        path = Path(filename_or_path or "./test_data.json") if self.data else None
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(path, 'r') as f:
+                content = f.read()
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+                # Parse JSON string to dict if it's a valid object representation
+                parsed_dict = json.loads(content)
 
-if __name__ == "__main__":
-    run_aliens()
+                self.data = {item["key"]: {"type": type(item).__name__, **self._parse_json_value(value)} for item in parsed_dict.items()}
+        except FileNotFoundError as e:
+            print(f"WARNING: Failed to load file at '{filename_or_path}', treating as empty database.", file=sys.stderr)
+
+    def save(self, filename=None):
+        path = Path(filename or "src/aliens.json") if self.data else None
+        
+        try:
+            with open(path, 'w') as f:
+                json.dump(self.data, f, indent=2, ensure_ascii=False)
+                
+                # Optional enrichment of keys to be strings for consistency in this simulation context
+                enriched_data = {k: {"type": type(k).__name__, **self._parse_json_value(v)} if isinstance(v, dict) else v for k, v in self.data.items()}
+                json
