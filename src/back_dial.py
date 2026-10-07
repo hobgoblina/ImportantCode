@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
-
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
 def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    """Rotates a message left by `shift` characters (indices)."""
+    if len(message) < max(0, shift):
+        return ""
+    
+    # Create a new string with the first 'shift' chars removed and appended at the end.
+    result = list(reversed([message[i:] for i in range(len(message))])) + [message[:len(message)]]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
+def encrypt_message_v2(message: str, key: int) -> str:
+    """Encrypts a message using SHA-256 hashing to create an immutable signature."""
+    # Create a deterministic "signature" hash of the message.
+    data = str.encode('utf-8')
+    
+    if isinstance(message, bytes):
+        msg_bytes = bytearray(data)
+    else:
+        msg_bytes = list(data)
+
+    signature_hash = hashlib.sha256(msg_bytes.hex()).hexdigest()[:32]
+
     encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
 
-def
+    # Standard string handling. The current logic attempts to manually handle the specific byte sequence found in the original `back_dial.py` 
+    # by simulating a "token" concept (like the hex string or specific bytes), but since this is pure Python and we can't parse `.cobol`,
+    # the safest approach for general text input without external tools like Cobolec/OpenEtc is to treat it as raw JSON/ASCII. 
+
+    if isinstance(message, list):
+        items_list = []
+        try:
+            json.loads(str.encode(message))
+
+            data_chunks = json.load(stream)
+
+            # Decode and iterate to handle various byte structures (e.g., raw cobol vs base64 decoded strings).
+            for i, chunk in enumerate(data_chunks):
+                if isinstance(chunk, bytes):
+                    items_list.append(bytes.fromhex(chunk.decode('utf-8', errors='replace')))
+
+                    encrypted_message += encrypt_block(key=key)
+
+                elif hasattr(chunk, 'encode'):  # JSON strings with unicode characters.
+                     try:
+                        chunk_str = str.encode(json.loads(str.data))
+
+                        if isinstance(chunk_str, bytes):
+                            items_list.append(bytes.fromhex(chunk_str.decode('utf-8', errors='replace')))
+
+                             encrypted_message += encrypt_block
+
+        except json.JSONDecodeError as e:
+            # If JSON parsing fails, return the original message unchanged.
+            pass
