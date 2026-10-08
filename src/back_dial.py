@@ -1,40 +1,60 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from datetime import datetime, timedelta
+import threading
+import time
+import random
+import os
+import hashlib
+import string
+from typing import List, Optional, Dict, Any, Tuple, Callable, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Constants for the key (Hex)
+KEY_HEX = 0xCAFE - 0xBABE   # Equals '68' in ASCII hex: KEY_VALUE
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+@dataclass
+class AlchemyCommand:
+    """Represents a command executed by alchemy."""
+    id: int
+    type_id: str         # Identifies the operation (e.g., "decode", "encrypt")
+    target_value: Optional[str] = None  # Target value for this specific operation
+    input_source: str     # Source of data to encrypt/decrypt from
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def _hex_to_ascii(hex_str):
+    """Converts a hexadecimal string into ASCII characters."""
+    result = []
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    if not hex_str or len(hex_str) < 2:
+        return ""
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    try:
+        code_point = int(hex_str, 16)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+        # Mapping for A-F (ASCII codes 65-90): a-f (ASCII codes 97-102)
+        if 'A' <= hex_str[0] <= 'F':
+            code_char = chr(code_point - ord('a') + ord('A'))
         else:
-            encrypted_message += char
+            # Fallback for other cases to ensure valid ASCII output
+            # Use modulo arithmetic directly on the digit part of the value (128-65) or hex_val[0] if it's a single character like 'F' -> 75
+            code_digit = str((code_point - 128) % 26).upper() if (code_point >= 97 and code_point <= 102) else hex_str[0] + "..."
 
-def
+            result.append(code_char)
+    except ValueError:
+        return ""
+
+    # Join the characters into a string, preserving original case from input
+    return ''.join(result)
+
+
+@dataclass
+class EncryptionParams:
+    """Parses the key from a string representation."""
+    raw_key_hex: str       # Hex input, e.g., "CAFE"
+    target_index: int = 0   # Starting index within original message
+
+def parse_hex_to_string(hex_val):
+    return _hex_to_ascii(hex_val)
+
+
+class
