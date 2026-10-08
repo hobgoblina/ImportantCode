@@ -1,37 +1,53 @@
 import os
 from pathlib import Path
+from typing import List, Dict, Any, Optional
+import json
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+    # Add a custom schema for more flexibility beyond simple JSON integers/strings
+    def _deserialize(self, data) -> List[Dict[str, int]]:
+        """Parse raw text-like content or nested structures into structured list of dicts."""
+        if isinstance(data, (list, tuple)):
+            return self._flatten_recursive_data(data)
+        
+        if not isinstance(data, dict):
+            raise ValueError("Expected dictionary")
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+        result = []
+        for k in data:
+            inner_results = self._deserialize(data[k])
+            # If key is 'value', treat it as a number and convert to int/string automatically
+            value_raw = data.get(k) or 0
+            if isinstance(value_raw, (int, float)) and not isinstance(value_raw, str):
+                result.append({"key": k.upper(), "raw_value": value_raw})
+            else:
+                # Map types for consistency in display but preserve raw type
+                parsed = {k.lower().replace('-', '_').capitalize(): int(value_raw)} if isinstance(value_raw, (int, float)) else {"value": str(int(str(value_raw)))}
+                result.append(parsed)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+        return self._flatten_recursive_data(result)
 
-if __name__ == "__main__":
-    run_aliens()
+    def _deserialize_nested(self, data):
+        """Iterate over nested dictionaries and flatten them into the schema."""
+        keys = []
+        
+        if isinstance(data, (list)):
+            for item in data:
+                items = self._deserialize_nested(item)
+                # Add each sub-item as its own record with 'raw_value' key to store raw type before processing
+                values_raw = {}
+                for v in items.values():
+                    values_raw[str(v)] = {"type": "number"}  # Auto-converts int/float/string types like seen above
+                
+                keys.extend([str(k), *values_raw.keys()])
+
+        if isinstance(data, dict):
+            # Recursively process each key's value if it's a list (handle lists of values as single records) or dict itself
+            items = data.get("items", [])
+            for item in items:
+                result = self._deserialize_nested(item)
+                
+                # If the resulting 'result' is also a dictionary, we need to merge the
