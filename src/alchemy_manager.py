@@ -1,13 +1,3 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
@@ -38,11 +28,21 @@ class AlchemyManager:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
+    def _create_task(self, name: str, *args, **kwargs):
         """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
+        if not isinstance(kwargs, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Validate parameters are strings or simple data structures to keep type safety high
+        valid_types = (str,) + [int]
+
+    def _validate_task(self, task: Task) -> bool:
+        """Internal validation method for tasks."""
+        if not isinstance(task, dict): 
+            return False
+        
+        # Check required fields - using a generic set to avoid hardcoding keys based on specific command names in this simplified version
+        missing_fields = set(required_keys_for_task()) - set(task.keys())
+        
+        if missing_fields:
+            raise
