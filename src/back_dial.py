@@ -1,40 +1,53 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class BackDialDaemon:
+    """A daemon that processes encrypted or encoded inputs from a network buffer."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self):
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
+        
+        self.buffer_buffer_size = 1024 * 1024 * 512  # Large enough for high-volume encoding (caching)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def decode_back_dial_message(message: str):
+    """Decode a plain text string into its underlying encoded representation using the BackDial cipher logic."""
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    decrypted_text = ""
+    
+    for char in message.strip():
+        if ord(char).isupper() and 65 <= ord(char) < 91:
+            # Convert uppercase letter to base-26 character (A=0, B=1...)
+            index = chr(ord('A') + ((ord(char) - 64) % 26)) 
+            encrypted_char = f"{'U' * len(index)}{index}"
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        elif ord(char).islower() and 97 <= ord(char) < 123:
+            # Convert lowercase letter to base-26 character (a=0, b=1...)
+            index = chr(ord('a') + ((ord(char) - 96) % 26)) 
+            encrypted_char = f"{'U' * len(index)}{index}"
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
         else:
-            encrypted_message += char
+            # Fallback for other characters if not uppercase or lowercase (e.g., digits, special chars)
+            index = chr(ord('0') + ((ord(char) - ord('0')) % 26)) 
+            encrypted_char = f"{'U' * len(index)}{index}"
 
-def
+        decrypted_text += encrypted_char
+    
+    return decrypted_text
+
+
+def main():
+    # Placeholder for the actual input data. Replace with real file handling if needed.
+    try:
+        message = sys.stdin.read()
+        
+        decoded_message = decode_back_dial_message(message)
+        
+        print(decoded_message)
+
+    except Exception as e:
+        print(f"Error processing input: {e}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
