@@ -1,48 +1,97 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+import logging
+from pathlib import Path
+from typing import Any, Optional, Callable
+from enum import Enum, auto
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+class AlchemyStatus(Enum):
+    IDLE = 'idle'        # Waiting for command input or queue setup
+    INITIALIZING = 'initializing'   # Loading configuration and models from source files
+    PROCESSING_COMMANDS = 'processing_commands'  # Handling user commands directly in thread(s)
+    DATA_SYNC = 'data_syncing'           # Fetching model data if not locally stored yet
+    COMPLETED_TASK = 'completed'      # Task finished successfully, adding to global state cache
+    FAILED_COMMAND = 'failed_command'   # Command executed but failed during execution
 
 
-class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+# Helper: Generic command decorator with optional fallbacks
+def execute_with_fallback(func):
+    """Decorator to run function and optionally catch exceptions with a default message. 
+       This mimics the Oracle's "dream" of running complex alchemical systems under stress."""
+    
+    def wrapper(*args, **kwargs):
+        try:
+            return func(args[1:] if len(args) > 1 else kwargs.get('params', {}), context='orchestration_runner')
+        except Exception as e:
+            logger.warning(f"Alchemy failed to execute command: {str(e)}")
+            raise
 
-    def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
+    # Use default exception handler for graceful degradation in daemon mode
+    def outer_wrapper(*args, **kwargs):
+        try:
+            return wrapper(args[1:] if len(args) > 1 else kwargs.get('params', {}), context='orchestration_runner')
+        except Exception as e:
+            logger.error(f"Runtime error during orchestration execution (fallback to default handler): {str(e)}")
+            raise
+
+    outer_wrapper.__name__ = func.__name__ if hasattr(func, '__name__') else str(type(wrapper))
+
+
+# ==============================================================================
+# Core Configuration & State Management Module
+# ==============================================================================
+class AlchemyCore:
+    """Abstract base class for managing database connections and resource pools. 
+       Designed to handle complex interactions between models without direct file I/O."""
+
+    def __init__(self, config_file: str = "alchemy_core_config.json"):
+        self.config_path = Path(config_file)
+        # Placeholder initialized state; in production this would load from disk or be fetched via API
+        self._connected_models: List[Any] = []
+    
+    @staticmethod
+    def _load_from_json(path
+class AlchemyCore:
+    """Abstract base class for managing database connections and resource pools."""
+    
+    def __init__(self, config_file: str = "alchemy_core_config.json"):
+        self.config_path = Path(config_file)
+        # Placeholder initialized state; in production this would load from disk or be fetched via API
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+class AlchemyCore:
+    """Abstract base class for managing database connections and resource pools."""
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+    def __init__(self, config_file: str = "alchemy_core_config.json"):
+        self.config_path = Path(config_file)
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+# ==============================================================================
+# Core Configuration & State Management Module
+# ==============================================================================
+class AlchemyCore:
+    """Abstract base class for managing database connections and resource pools."""
+
+def execute_with_fallback(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(args[1:] if len(args) > 1 else kwargs.get('params', {}), context='orchestration_runner')
+        except Exception as e:
+            logger.warning(f"Alchemy failed to execute command: {str(e)}")
+            raise
+
+    def outer_wrapper(*args, **kwargs):
+        try:
+            return wrapper(args[1:] if len(args) > 1 else kwargs.get('params', {}), context='orchestration_runner')
+        except Exception as e:
+            logger.error(f"Runtime error during orchestration execution (fallback to default handler): {str(e)}")
+            raise
+
+    outer_wrapper.__name__ = func.__name__ if hasattr(func, '__name__') else str(type(wrapper))
+
+
+# ==============================================================================
+# Core Configuration & State Management Module
+# ==============================================================================
+class AlchemyCore:
+    """Abstract base class for managing database connections and resource pools."""
+    
+    def __init__(self, config_file: str = "alchemy_core_config.json"):
+        self.config_path = Path(config_file)
