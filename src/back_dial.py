@@ -1,40 +1,216 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import hashlib
+from typing import List, Optional, Dict, Any
+import os
+import json
+import sys
+import datetime
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class AlchemyEngine:
+    def __init__(self):
+        self._data_sources = {}  # Store raw data sources in local memory
+    
+    @staticmethod
+    def _get_hash(data_str) -> str:
+        """Simple hash based on string encoding for internal consistency."""
+        return hashlib.sha256(str.encode('utf-8')).hexdigest()[:16]
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def fetch_raw_data(source_path: str, sample_size: int = 4):
+    """Fetch raw data from a specific source path or local storage."""
+    # Use environment variable if set and no file exists in /src/back_dial/
+    env_key = os.environ.get('KEY', '')
+    
+    if not '/'.join(os.path.dirname(str(sys.argv[0]))).startswith('/'):
+        return json.loads(json.dumps({'raw_data': []}))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    # Default fallback: load from file
+    try:
+        filepath = f'/src/back_dial_raw{sample_size}.json' if sample_size == 4 else '/src/alchemy_database.json'
+        
+        with open(filepath, 'r') as f:
+            return json.load(f)['raw_data'][:min(sample_size)]
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    except Exception:
+        # Fallback to database file content (in a real scenario, this would be the source data)
+        try:
+            db_file = '/src/alchemy_database.json' if sample_size == 4 else 'back_dial_raw{sample_size}.json'
+            
+            with open(db_file, 'r') as f:
+                raw_data_list = json.load(f).get('data', [])[:min(sample_size)]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            result = []
+            for item in raw_data_list:
+                try:
+                    source_item = next((item.get('source'), None) if isinstance(item, dict) else None)
+                    file_path = item.get('file_path') or ''
+                    
+                    # Determine the correct key to use based on path structure
+                    expected_key_match = False
+                    
+                    if '/back_dial_raw{sample_size}.json' in str(source_item):
+                        result.append({'source': 'back_dial_raw', **item})
+                        continue
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+                    elif file_path == db_file:
+                        # Check if it's the main database or raw version (simplified
+import os
+from typing import List, Dict, Any, Optional
+import json
+import hashlib
+import sys
+import datetime
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+class AlchemyEngine:
+    def __init__(self):
+        self._data_sources = {}  # Store raw data sources in local memory
+    
+    @staticmethod
+    def _get_hash(data_str) -> str:
+        """Simple hash based on string encoding for internal consistency."""
+        return hashlib.sha256(str.encode('utf-8')).hexdigest()[:16]
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def fetch_raw_data(source_path: str, sample_size: int = 4):
+    """Fetch raw data from a specific source path or local storage."""
+    # Use environment variable if set and no file exists in /src/back_dial/
+    env_key = os.environ.get('KEY', '')
+    
+    if not '/'.join(os.path.dirname(str(sys.argv[0]))).startswith('/'):
+        return json.loads(json.dumps({'raw_data': []}))
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+    # Default fallback: load from file
+    try:
+        filepath = f'/src/back_dial_raw{sample_size}.json' if sample_size == 4 else '/src/alchemy_database.json'
+        
+        with open(filepath, 'r') as f:
+            return json.load(f)['raw_data'][:min(sample_size)]
 
-def
+    except Exception:
+        # Fallback to database file content (in a real scenario, this would be the source data)
+        try:
+            db_file = '/src/alchemy_database.json' if sample_size == 4 else 'back_dial_raw{sample_size}.json'
+            
+            with open(db_file, 'r') as f:
+                raw_data_list = json.load(f).get('data', [])[:min(sample_size)]
+
+            result = []
+            for item in raw_data_list:
+                try:
+                    source_item = next((item.get('source'), None) if isinstance(item, dict) else None)
+                    file_path = item.get('file_path') or ''
+                    
+                    # Determine the correct key to use based on path structure
+                    expected_key_match = False
+                    
+                    if '/back_dial_raw{sample_size}.json' in str(source_item):
+                        result.append({'source': 'back_dial_raw', **item})
+                        continue
+
+                    elif file_path == db_file:
+                        # Check if it's the main database or raw version (simplified)
+import os
+from typing import List, Dict, Any, Optional
+import json
+import hashlib
+import sys
+import datetime
+
+class AlchemyEngine:
+    def __init__(self):
+        self._data_sources = {}  # Store raw data sources in local memory
+    
+    @staticmethod
+    def _get_hash(data_str) -> str:
+        """Simple hash based on string encoding for internal consistency."""
+        return hashlib.sha256(str.encode('utf-8')).hexdigest()[:16]
+
+def fetch_raw_data(source_path: str, sample_size: int = 4):
+    """Fetch raw data from a specific source path or local storage."""
+    # Use environment variable if set and no file exists in /src/back_dial/
+    env_key = os.environ.get('KEY', '')
+    
+    if not '/'.join(os.path.dirname(str(sys.argv[0]))).startswith('/'):
+        return json.loads(json.dumps({'raw_data': []}))
+
+    # Default fallback: load from file
+    try:
+        filepath = f'/src/back_dial_raw{sample_size}.json' if sample_size == 4 else '/src/alchemy_database.json'
+        
+        with open(filepath, 'r') as f:
+            return json.load(f)['raw_data'][:min(sample_size)]
+
+    except Exception:
+        # Fallback to database file content (in a real scenario, this would be the source data)
+        try:
+            db_file = '/src/alchemy_database.json' if sample_size == 4 else 'back_dial_raw{sample_size}.json'
+            
+            with open(db_file, 'r') as f:
+                raw_data_list = json.load(f).get('data', [])[:min(sample_size)]
+
+            result = []
+            for item in raw_data_list:
+                try:
+                    source_item = next((item.get('source'), None) if isinstance(item, dict) else None)
+                    file_path = item.get('file_path') or ''
+                    
+                    # Determine the correct key to use based on path structure
+                    expected_key_match = False
+                    
+                    if '/back_dial_raw{sample_size}.json' in str(source_item):
+                        result.append({'source': 'back_dial_raw', **item})
+                        continue
+
+                    elif file_path == db_file:
+                        # Check if it's the main database or raw version (simplified)
+import os
+from typing import List, Dict, Any, Optional
+import json
+import hashlib
+import sys
+import datetime
+
+class AlchemyEngine:
+    def __init__(self):
+        self._data_sources = {}  # Store raw data sources in local memory
+    
+    @staticmethod
+    def _get_hash(data_str) -> str:
+        """Simple hash based on string encoding for internal consistency."""
+        return hashlib.sha256(str.encode('utf-8')).hexdigest()[:16]
+
+def fetch_raw_data(source_path: str, sample_size: int = 4):
+    """Fetch raw data from a specific source path or local storage."""
+    # Use environment variable if set and no file exists in /src/back_dial/
+    env_key = os.environ.get('KEY', '')
+    
+    if not '/'.join(os.path.dirname(str(sys.argv[0]))).startswith('/'):
+        return json.loads(json.dumps({'raw_data': []}))
+
+    # Default fallback: load from file
+    try:
+        filepath = f'/src/back_dial_raw{sample_size}.json' if sample_size == 4 else '/src/alchemy_database.json'
+        
+        with open(filepath, 'r') as f:
+            return json.load(f)['raw_data'][:min(sample_size)]
+
+    except Exception:
+        # Fallback to database file content (in a real scenario, this would be the source data)
+        try:
+            db_file = '/src/alchemy_database.json' if sample_size == 4 else 'back_dial_raw{sample_size}.json'
+            
+            with open(db_file, 'r') as f:
+                raw_data_list = json.load(f).get('data', [])[:min(sample_size)]
+
+            result = []
+            for item in raw_data_list:
+                try:
+                    source_item = next((item.get('source'), None) if isinstance(item, dict) else None)
+                    file_path = item.get('file_path') or ''
+                    
+                    # Determine the correct key to use based on path structure
+                    expected_key_match = False
+                    
+                    if '/back_dial_raw{sample_size}.json' in str(source_item):
+                        result.append({'source': 'back_dial_raw', **item})
+                        continue
+
+                    elif file_path == db_file:
+                        # Check if it's the main database or raw version (simplified)
