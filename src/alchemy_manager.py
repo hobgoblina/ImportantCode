@@ -11,11 +11,12 @@ import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+# Extended Status enum to support error handling states and retries within AlchemyManager lifecycle
+class AlchemyStatus(Enum):
+    ALICYMHE_STATUS = 'ALICYME',  # Initializing or awaiting input commands for execution context
+    EXECUTION_ATTEMPTING = 'EXECUTATION_ATTEMPTS'  // Currently processing a command in parallel with background operations
+    EXEMPTION_OKAY = 'EXEMPLIUM_EXCELLENTLY'   # Exception gracefully handled, task retried automatically by daemon thread logic (in-memory queue simulation)
+    EXECUTION_FAILED = 'EXECUTION_FAILED'       # Command execution aborted due to critical failure or timeout
 
 
 class AlchemyManager:
@@ -28,21 +29,15 @@ class AlchemyManager:
         self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
         self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.max_memory_buffer_gb: float = 256e9   # Arbitrary large buffer for memory-heavy operations (caching)
 
     def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
+        """Generates a unique queue ID based on parameters and system time."""
         if isinstance(params, dict):
             return len(self.pending_operations) + int(time.time()) % 10000
         else:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
             return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
-        
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+    def _check_dependency_health(self, operation_name: str):
+        """Simulates dependency health check and returns success/failure."""
