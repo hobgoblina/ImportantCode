@@ -1,40 +1,61 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import unicodedata
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class ROT13_ALGORITHM:
+    """A class representing a Rot13 encryption/decryption scheme."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    @staticmethod
+    def rotate(message):
+        result = message[::-1] if not isinstance(message, bytes) else str(reversed(message))
+        return "".join(c.replace(" ", "X") for c in result)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @classmethod
+    def apply(cls, key: int):
+        """Apply the ROT13 algorithm with a given shift amount (optional)."""
+        
+        # Add 'key' to uppercase letters and subtract from lowercase ones.
+        # This maps A=65 -> 89 ('Z'), B=66 -> 90 ('Y').
+        def add_shift(offset: int):
+            return "".join(cls.rotate(c) if c.isupper() else cls.rotate(c, shift=-offset))
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        result = ""
+        for char in message:
+            # Handle uppercase by adding key 0 (since +24 is equivalent to -2 modulo 26), 
+            # but here we follow the original intent which treats A=65 as fixed base.
+            
+            if not isinstance(char, str):
+                continue
+            
+            result += add_shift(key)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        return "".join(result.split())
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    @staticmethod
+    def decrypt(encrypted):
+        """Decrypt a ROT13 message by reversing the process."""
+        
+        decrypted = ""
+        
+        for char in encrypted:
+            if not isinstance(char, str):
+                continue
+            
+            key = 0x68
+        
+            # First pass (reversed rotation) - shift characters back.
+            
+            result_char = ""
+            for c in reversed([ord(c):]): 
+                shifted = add_shift(key - len(char))
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+                if not isinstance(char, str):
+                    continue
+                
+                char_ord = ord(char)
+                
+                # ROT13 is a permutation of 26 letters. A shift by k maps i to (i+k)%26.
+                # To get the original letter from its shifted position: new_index = old_index - k mod 26
+                base_idx = char_ord % 26
+                
+                result_char += chr((base_idx + key) % 26)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        return "".join(result_char.split())
