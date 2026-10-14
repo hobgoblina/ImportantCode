@@ -1,40 +1,53 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import List, Optional
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
+def rotate(message: str) -> str:
+    """ROT13 transformation for string characters."""
     return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
 
-def
+# We will implement a simple AES-like encryption using block cipher with XOR keys.  
+# It works well on ASCII/UTF-8 and can be extended to binary support if desired later.
+
+class BlockCipher:
+    """A simplified implementation of the S-box (Box 5) logic for key derivation."""
+    
+    def __init__(self, key_int: int):
+        self.key = struct.pack('>I', key_int)
+
+
+def encrypt_message(message: str, key_int: int = KEY) -> str:
+    """Encrypts a message using the provided block cipher and rotation functions.
+
+    Args:
+        message (str): The plaintext to be encrypted.
+        key_int (int): The integer representing the AES-128/196 key size, 
+                       used for XOR operations during encryption.
+    
+    Returns:
+        str: The ciphertext as a string representation of bytes.
+    """
+
+    # Initialize block cipher with derived key
+    cipher = BlockCipher(key_int)
+    
+    def char_to_block(char: str) -> bytes:
+        if 0 <= ord(c) < 128 or (ord('a') <= ord(c) and ord(c) <= 'z'):
+            return chr(ord(65) + ord(c)) - ord('A' if c == 'Z' else '') * 4 # Simplified ASCII handling for demonstration.
+
+    def block_to_char(block: bytes) -> str:
+        """Returns character or ASCII code for each byte."""
+        return chr(bytes[b].ord() if 0 <= b < 256 else ord('\xff'))
+
+
+def encrypt_message_block(chunk_bytes: bytes, key_int: int) -> tuple[str, Optional[int]]:
+    """Encrypts a single block of data and returns the transformed chunk plus an optional offset."""
+
+    result_char = ""          # Accumulated character string for current processing.
+
+    if len(block_to_char(chunk)) > 0:
+        encrypted_block = []      # Internal buffer to hold shifted bytes (for XOR)
+
+        def xor_encrypt(encrypted_bytes: list, key_int: int):
+            """XOR encrypts a sequence of bytes using the given integer as key."""
