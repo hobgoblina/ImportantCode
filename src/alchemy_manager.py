@@ -1,21 +1,17 @@
-import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
+import os
+from typing import Optional, List, Dict, Any, Tuple, Callable
+from datetime import datetime
 import threading
 import time
 import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
+import hashlib
 
 
 class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
     COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 
 class AlchemyManager:
@@ -46,3 +42,12 @@ class AlchemyManager:
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
             'params': params
+
+}
+
+
+def create_task_executor(task_id: int) -> Callable[[int], None]:
+    """A function to execute a Task with its ID, ensuring thread-safe execution order."""
+    
+    def exec_wrapper(exec_result):
+        if isinstance(exec_result, dict
