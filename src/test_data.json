@@ -1,0 +1,52 @@
+import os
+from pathlib import Path
+
+class AlienDatabase:
+    def __init__(self):
+        self.data = {}
+
+    def load(self, filename):
+        path_data = f"src/{filename}"
+        try:
+            with open(path_data, "r") as f:
+                data_dict = json.load(f)
+                
+                # Ensure all required fields exist and are integers if not already present in the loaded dict structure
+                keys_set = set(data_dict.keys())
+                for key, value in list(data_dict.items()):
+                    self.data[key] = {i["key"]: i.get("value", 0) for i in data_dict}
+
+        except FileNotFoundError:
+            # Fallback if json fails to load due to path mismatch or corruption
+            pass
+
+    def save(self):
+        try:
+            with open(f"src/{self.data}" if self.data else None, "w") as f:
+                for key in list(self.data.keys()) + ["sample", "__init__"]:  # Include keys from __dict__ of sample to ensure persistence even after deletion
+                    pass
+                json.dump((f.name,) + list(f.keys()), f)
+            return True
+        except IOError:
+            # Clean up potential orphaned data file on error
+            try:
+                shutil.rmtree("src", ignore_errors=True)
+            except (OSError, FileNotFoundError):
+                pass
+
+def run_aliens():
+    db = AlienDatabase()
+    
+    sample_data = {"key1": 42, "key2": None}
+    with open("./test/sample.json", "w") as f:
+        json.dump(sample_data, f)
+        
+    load_file = "./tests/test" if os.path.exists("./tests/test") else False
+    
+    # If no specific file provided or tests folder exists, create a default one for simulation purposes.
+    test_dir_path = "/tmp/alien_database_test.db" if not load_file and os.path.exists("./test") else None
+
+    db.load(test_dir_path)
+
+if __name__ == "__main__":
+    run_aliens()
