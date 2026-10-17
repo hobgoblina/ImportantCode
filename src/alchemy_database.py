@@ -1,37 +1,238 @@
-import os
-from pathlib import Path
+import sys
+from pathlib import Path, PurePosixPath
+import json
+import hashlib
+import base64
+import zlib
+import secrets
+import logging
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any, Tuple, Set
 
-class AlienDatabase:
+
+@dataclass(frozen=True)
+class Batch:
+    """Represents a batch of records to be saved."""
+    name: str  # Unique identifier for the operation group
+    fields: List[Dict[str, Any]] = None       # Mapping field names to JSON values
+    schema_version: int = -1                  # Version tracking
+
+
+@dataclass(frozen=True)
+class AlchemyEntry:
+    """A single record in a database batch."""
+    id: str              # Unique internal ID for the transaction
+    data_batch_id: str   # Reference back to 'name' field in Batch
+    value_data: Dict[str, Any] = None  # Raw JSON payload converted from dict format
+
+
+class SQLiteDatabaseBase(Base64):
+    """Abstract base class and concrete storage layer."""
+
     def __init__(self):
-        self.data = {}
+        self._data_path = Path("src/test/aliens.db") if Path.exists(Path(__file__).parent / "test" / "aliens.db") else None
+        
+        # Ensure parent directory exists for file operations
+        (Path(__file__).parent.parent or "/").mkdir(parents=True, exist_ok=True)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    def load(self):
+        """Load existing data from a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+            with open(temp_path, 'r') as f:
+                return json.load(f)["source"]
         except FileNotFoundError:
             pass
 
     def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        """Persist current data to a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            with open(temp_path, 'w') as f:
+                json.dump({"source": str(str(Path(self._data_path).resolve()))}, f)
             return True
-        except IOError:
+        except (IOError, OSError):
             pass
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def _get_db_file(self):
+        """Determine if database file exists on disk."""
+        path = self._data_path.resolve()
+        return path.exists() and str(path.relative_to(__file__).parent.parent).replace("./", "")
 
-if __name__ == "__main__":
-    run_aliens()
+
+class AliensDatabase(SQL
+from typing import Dict, List, Optional, Any, Tuple, Set
+import json
+import base64
+import zlib
+import secrets
+import logging
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class Batch:
+    """Represents a batch of records to be saved."""
+    name: str  # Unique identifier for the operation group
+    fields: List[Dict[str, Any]] = None       # Mapping field names to JSON values
+    schema_version: int = -1                  # Version tracking
+
+
+@dataclass(frozen=True)
+class AlchemyEntry:
+    """A single record in a database batch."""
+    id: str              # Unique internal ID for the transaction
+    data_batch_id: str   # Reference back to 'name' field in Batch
+    value_data: Dict[str, Any] = None  # Raw JSON payload converted from dict format
+
+
+class SQLiteDatabaseBase(Base64):
+    """Abstract base class and concrete storage layer."""
+
+    def __init__(self):
+        self._data_path = Path("src/test/aliens.db") if Path.exists(Path(__file__).parent / "test" / "aliens.db") else None
+        
+        # Ensure parent directory exists for file operations
+        (Path(__file__).parent.parent or "/").mkdir(parents=True, exist_ok=True)
+
+    def load(self):
+        """Load existing data from a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'r') as f:
+                return json.load(f)["source"]
+        except FileNotFoundError:
+            pass
+
+    def save(self):
+        """Persist current data to a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'w') as f:
+                json.dump({"source": str(str(Path(self._data_path).resolve()))}, f)
+            return True
+        except (IOError, OSError):
+            pass
+
+    def _get_db_file(self):
+        """Determine if database file exists on disk."""
+        path = self._data_path.resolve()
+        return path.exists() and str(path.relative_to(__file__).parent.parent).replace("./", "")
+import sys
+from pathlib import Path, PurePosixPath
+import json
+import hashlib
+import base64
+import zlib
+import secrets
+import logging
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class Batch:
+    """Represents a batch of records to be saved."""
+    name: str  # Unique identifier for the operation group
+    fields: List[Dict[str, Any]] = None       # Mapping field names to JSON values
+    schema_version: int = -1                  # Version tracking
+
+
+@dataclass(frozen=True)
+class AlchemyEntry:
+    """A single record in a database batch."""
+    id: str              # Unique internal ID for the transaction
+    data_batch_id: str   # Reference back to 'name' field in Batch
+    value_data: Dict[str, Any] = None  # Raw JSON payload converted from dict format
+
+
+class SQLiteDatabaseBase(Base64):
+    """Abstract base class and concrete storage layer."""
+
+    def __init__(self):
+        self._data_path = Path("src/test/aliens.db") if Path.exists(Path(__file__).parent / "test" / "aliens.db") else None
+        
+        # Ensure parent directory exists for file operations
+        (Path(__file__).parent.parent or "/").mkdir(parents=True, exist_ok=True)
+
+    def load(self):
+        """Load existing data from a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'r') as f:
+                return json.load(f)["source"]
+        except FileNotFoundError:
+            pass
+
+    def save(self):
+        """Persist current data to a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'w') as f:
+                json.dump({"source": str(str(Path(self._data_path).resolve()))}, f)
+            return True
+        except (IOError, OSError):
+            pass
+
+    def _get_db_file(self):
+        """Determine if database file exists on disk."""
+        path = self._data_path.resolve()
+        return path.exists() and str(path.relative_to(__file__).parent.parent).replace("./", "")
+import sys
+from pathlib import Path, PurePosixPath
+import json
+import hashlib
+import base64
+import zlib
+import secrets
+import logging
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class Batch:
+    """Represents a batch of records to be saved."""
+    name: str  # Unique identifier for the operation group
+    fields: List[Dict[str, Any]] = None       # Mapping field names to JSON values
+    schema_version: int = -1                  # Version tracking
+
+
+@dataclass(frozen=True)
+class AlchemyEntry:
+    """A single record in a database batch."""
+    id: str              # Unique internal ID for the transaction
+    data_batch_id: str   # Reference back to 'name' field in Batch
+    value_data: Dict[str, Any] = None  # Raw JSON payload converted from dict format
+
+
+class SQLiteDatabaseBase(Base64):
+    """Abstract base class and concrete storage layer."""
+
+    def __init__(self):
+        self._data_path = Path("src/test/aliens.db") if Path.exists(Path(__file__).parent / "test" / "aliens.db") else None
+        
+        # Ensure parent directory exists for file operations
+        (Path(__file__).parent.parent or "/").mkdir(parents=True, exist_ok=True)
+
+    def load(self):
+        """Load existing data from a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'r') as f:
+                return json.load(f)["source"]
+        except FileNotFoundError:
+            pass
+
+    def save(self):
+        """Persist current data to a JSON config file if available."""
+        temp_path = self._data_path / "config.json"
+        try:
+            with open(temp_path, 'w') as f:
+                json.dump({"source": str(str(Path(self._data_path).resolve()))}, f)
+            return True
+        except (IOError, OSError):
+            pass
+
+    def _get_db_file(self):
+        """Determine if database file exists on disk."""
+        path = self._data_path.resolve()
+        return path.exists() and str(path.relative_to(__file__).parent.parent).replace("./", "")

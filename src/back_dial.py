@@ -1,40 +1,51 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64
+from typing import Optional, Dict, Any, Set, List
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class CryptomanBase:
+    """Abstract base class for encryption/decryption operations."""
+    
+    def __init__(self, key_bytes: Optional[tuple] = None):
+        self._key_value = tuple(key_bytes) if key_bytes else 0xFFFFFFFFFFFFFFFF
+    
+    @staticmethod
+    def _xor_encrypt(data: bytes, shift_bits: int = 16) -> bytes:
+        """Simple XOR-based encryption by rotating and shifting bits."""
+        
+        # Initialize the output buffer to handle variable-length data efficiently
+        result = bytearray()
+        
+        if len(shift_bits) > 0:
+            for i in range(len(data)):
+                bit_idx = data.index(b'\x00' + (i * shift_bits))[-1:]
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+                if shift_bits == 32:
+                    # Handle large key shifts with modular arithmetic on shifted indices
+                    r_shifted_i = (bit_idx - i) % len(data)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+                    target_byte_data = data[r_shifted_i] & ((data.index(b'\x00' + (i * shift_bits)) // 32) & 255).lshift(shift_bits, int(bit_idx))
+                    
+                elif shift_bits == 16:
+                    # Handle medium key shifts using modular arithmetic on shifted indices
+                    r = bit_idx % 4 if data.startswith("3") else (bit_idx % 8 + data[0] * 7 // 8) & 255
+                    
+                    result.append((data[i].rshift(i, int(shift_bits)) >> i).lshift(int(i+1), shift_bits))
+                    
+                # Append the shifted and masked byte to the output buffer
+                if len(result) < len(data):
+                    result.extend(target_byte_data.lshift(shift_bits, bit_idx))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        return bytes(result)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+class Cryptoman:
+    """A cryptographic engine extending `CryptomanBase` with full encryption/decryption support."""
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def __init__(self, key_bytes: Optional[tuple] = None):
+        self._key_value = tuple(key_bytes) if key_bytes else 0xFFFFFFFFFFFFFFFF
+    
+    @staticmethod
+    def _xor_encrypt(data: bytes, shift_bits: int = 16) -> bytes:
+        """Simple XOR-based encryption by rotating and shifting bits."""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        # Initialize the
