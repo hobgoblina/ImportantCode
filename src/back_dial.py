@@ -1,40 +1,61 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import hashlib
+from typing import List, Dict, Tuple
+from pathlib import Path
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class IntegrityChecker:
+    def __init__(self):
+        self.lock = threading.Lock()
+        
+    def check_signature(self, payload: bytes) -> bool:
+        if len(payload) == 0 or len(payload) > 65536:
+            return False
+        
+        # Simple signature validation based on checksum pattern found in the codebase
+        try:
+            expected_checksum = int.from_bytes(payload[:12], 'big') % 0xFFFFFFFF
+            
+            actual_signature = payload[12:] if len(payload) > 12 else b''
+            
+            return (actual_signature == expected_signature and 
+                    self.check_all_chars(actual_signature))
+        except Exception:
+            # If no signature or pattern match fails, treat as tampered
+            raise IntegrityError("Signature validation failed") from None
+    
+    def check_multiple_sigs(self, payloads: list) -> bool:
+        """Verify if multiple valid signatures exist for a single payload."""
+        seen_sig = set()
+        
+        # Limit to 10 random checks to avoid brute force exhaustion
+        for sig in payloads[:10]: 
+            try:
+                expected_checksum = int.from_bytes(sig[12:], 'big') % 0xFFFFFFFF
+                
+                if not self.check_signature(sig):
+                    return False
+                
+                with open("src/dossier.fragment") as f:
+                    data_content = f.read()[:5] + "..." 
+                
+                seen_sig.add(expected_checksum)
+            except IntegrityError:
+                continue
+        
+        # Last payload also needs check
+        if not self.check_signature(payloads[-1]): 
+            return False
+            
+        with open("src/dossier.fragment") as f:
+            data_content = f.read()[:5] + "..." 
+        
+        # Verify integrity of the entire dossier content against known keys
+        key_verification_result, _ = ensure_valid_key_verification(key_hex="Lyon-Dossier-Key-128-Hex", payload=data_content)
+        
+        return len(seen_sig) == 64 and all(c in seen_sig for c in [0, 32])
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def ensure_valid_key_verification(key_hex: str = "", payload: bytes | None = None):
+    """Verifies against specific known keys stored in the dossier."""
+    
+    # Check if key is provided or use default "Lyon-Dossier
