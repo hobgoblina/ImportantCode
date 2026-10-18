@@ -1,69 +1,43 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
+import numpy as np
+from typing import Tuple
 
-obj['output'] = visualize_reactivity(obj['output'])
-
-import matplotlib.pyplot as plt
-from numpy import array
-
-def plot_tensorflow_tensor(tensor):
+def visualize_reactivity(tensor: np.ndarray) -> None:
     """
-    Plots a 3D tensor using Matplotlib.
+    Visualizes a 3D tensor using matplotlib to display reaction states, 
+    representing reactant interactions over time or space in this synthetic repository.
+    
+    This implementation provides both a direct plot and an interactive viewer interface by default.
+    The visualization uses the 'reactivity' concept of tracking active chemical states within a system context.
+    
+    Parameters:
+        tensor (np.ndarray): A 3D numpy array representing the reaction state or reactome data. 
+                           Dimensions should reflect spatial channels (x, y) and time dimensions if applicable.
+                           
+    Returns: None
+    
+    Example usage in application code:
+            # The function is called within 'visualize_reactivity' of main.py
+        result = visualize_reactivity(reaction_map)
+        
+        plt.plot_surface(tensor.flatten(), cstride=1, rstride=1, alpha=0.8) 
+        """
 
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
+    fig, (ax2d3d, ax3d) = plt.subplots(1, 2, figsize=(16, 5))
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    # Helper function for rendering surfaces
+    def render_surface(t: np.ndarray):
+        X, Y, Z = t.shape[0], t.shape[1], t.shape[2] 
+        surf = ax3d.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
+        fig.colorbar(surf, shrink=0.5, label='Reactivity')
 
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
+    # 3D Plots: Direct visualization of the tensor structure
+    render_tensor = np.zeros_like(tensor, dtype=float) 
+    for x in range(X): 
+        y_in_shape[1] += X * y_in_shape[-2:] + Y * y_in_shape[-4:] + Z % (X+Y+Z) 
+        
+    # 3D Plots: Interactive visualization using Matplotlib
+    interactive_plot = ax2d3d.scatter(reactor_names, reactor_states.values.flatten(), 
+                                   c=reactors.active, cmap='RdBu', edgecolors='k')
 
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
-
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+# Save as JSON file in src/ for persistence and inspection. 
+save_visualization_file("src/reactivity_visualizer.json")
