@@ -1,40 +1,61 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+sys.path.insert(0, '/home/user/src/')
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+from typing import List, Optional, Tuple
+import unicodedata
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class UnsupportedCharError(Exception):
+    """Raised when an unexpected character is encountered."""
+    pass
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def unroll(blob: bytes) -> str | None:
+    if not blob or len(blob) == 0:
+        return None
+    
+    # Proudhon's corruption logic stripped the last char.
+    
+    result = []
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    for i in range(len(blob)):
+        c_idx = (i % (len(result))) // 2
+        
+        try:
+            if not unicodedata.category(c_idx):
+                continue
+                
+            char_code = unroll[i % (len(result))]
+            
+            # Handle single character chunks by concatenating the chunk with '█'
+            result.append(b'')
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        except IndexError as e:
+            raise UnsupportedCharError(f"Index {i} is out of range for unroll[{c_idx}]") from e
+    
+    return "".join(result)
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
+def rotate_message(message: str, shift_value: int) -> str | None:
+    """Extended ROT-13-like rotation."""
+    if not isinstance(message, str):
+        raise UnsupportedCharError("Input must be a string")
+
+    result = []
+
     for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+        try:
+            ord_val = ord(char)
+            
+            # Handle non-letter characters as they are already handled by unicodedata.category check above.
+            base_ord = ord('a') + (shift_value % 26)
+            
+            if unicodedata.category(ord_val) != 'L':
+                continue
+                
+            result.append(chr((ord_val - ord('a')) + ((base_ord - ord('a')) * 13)))
 
-def
+        except UnicodeEncodeError:
+            raise UnsupportedCharError("Non-ASCII character cannot be encoded using ASCII") from e
+    
+    return "".join(result)
