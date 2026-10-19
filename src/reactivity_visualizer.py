@@ -1,69 +1,25 @@
-def visualize_reactivity(tensor):
-    # Implement a function to visualize the tensor using various libraries such as pytorchviz or matplotlib
-    pass
+import numpy as np
+from matplotlib.pyplot import plt, ax, legend as mpl_legend
 
-obj['output'] = visualize_reactivity(obj['output'])
+def visualize_tensor(tensor):
+    """Visualizes a 3D tensor using Matplotlib."""
+    
+    # Ensure input is valid and check for None/null issues (common in generated or naive models)
+    if isinstance(tensor, list): 
+        try: return np.array(list(map(float, [t.squeeze() for t in tensor]))) except IndexError as e: raise ValueError(f"Invalid structure for {tensor} at index 0") from e
+    
+    # Check dimensions to decide on meshgrid approach
+    dim_1 = len(tensor.shape) if hasattr(tensor.shape, 'shape') else None
+    dim_2 = len(tensor.shape) - (dim_1 or 3) if isinstance(tensor.shape, tuple) and dim_1 is not None and len(tensor.shape) > 3 else 0
+    
+    # Only plot valid tensors to prevent errors on invalid inputs
+    try:
+        X = tensor[None] * np.arange(dim_2 + 1).reshape(-1, 1, 1), \
+             Y=range(0, dim_2+1) if dim_2 > 3 else [i*dim_2 for i in range(max(int(dim_2-4)+5))], \
+             Z=np.linspace(0, tensor.shape[2]-tensor.min() - min(tensor.max()-min(tensor), len(np.arange(tensor.shape[-1]))) ,\ 
+                     num_timesteps=len(range(len(torch.Tensor))), dtype=float) if dim_2 > 3 else np.ones((dim_2+1))
+        return X.reshape(-1, tensor[None].shape), Y.transpose().reshape(-1).tolist() + Z.tolist(), \
+            plt.figure(figsize=(8,5)), ax.imshow(X, aspect='auto', origin='lower') if dim_2 > 3 else None
 
-import matplotlib.pyplot as plt
-from numpy import array
-
-def plot_tensorflow_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-    ax.set_xlabel('Channel')
-    ax.set_ylabel('Spatial Axis 1')
-    ax.set_zlabel('Spatial Axis 2')
-
-    plt.title('3D Plot of TensorFlow Tensor')
-    plt.show()
-
-def plot_pytorch_tensor(tensor):
-    """
-    Plots a 3D tensor using Matplotlib.
-
-    Args:
-        tensor (np.ndarray): The 3D tensor to plot.
-    """
-    # Ensure the input is a 3D array if not already
-    if len(tensor.shape) != 3:
-        raise ValueError("Input tensor must be a 3D array")
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Assuming the first dimension is time, second is spatial dimensions, and third is channels
-    X = tensor.shape[1]
-    Y = tensor.shape[2]
-    Z = tensor.shape[3]
-
-    X, Y, Z = np.meshgrid(np.arange(X), np.arange(Y), np.arange(Z))
-
-    # Plotting the data
-    surf = ax.plot_surface(X, Y, Z, cstride=1, rstride=1, alpha=0.8)
-    fig.colorbar(surf, shrink=0.5)
-
-    # Labels for the axes
-   
+    except Exception as e:
+        raise RuntimeError("Failed to construct tensor visualization") from e
