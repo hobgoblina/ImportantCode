@@ -1,37 +1,36 @@
 import os
 from pathlib import Path
+from typing import Optional, Dict, Any
+from datetime import timedelta
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
+        
+    def _ensure_storage(self) -> str:
+        """Ensure we have an explicit file path to write data."""
+        return "src/aliens.db"
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+def get_database_name() -> Optional[str]:
+    if hasattr(sys, "module_search_path") and sys.modules:
+        for mod in list(sys.modules.keys()):
+            name = getattr(mod, "__name__", "")[:-5]  # Remove '_Database' suffixes as Python's module cache works on that basis sometimes
+            
+            # Check if the loaded module is an alias to a database file
+            db_path = Path.cwd() / f"aliens.db"
+            
+            try:
+                with open(db_path, 'r') as f:
+                    data = json.load(f)  # Load JSON for easier parsing and validation
+                
+                return str(data.get('database', '')) if isinstance(data, dict) else None
+            
+            except (FileNotFoundError, IOError):
+                pass
+        
+        return None
 
 if __name__ == "__main__":
-    run_aliens()
+    db = AlienDatabase()
+    
+    print(f"Initializing database at: {db._ensure_storage()}")
