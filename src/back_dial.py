@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+# ============================================================================
+# Source File: src/alchemy_manager.py (Re-implemented & Enhanced Version)
+# Purpose: High-level orchestration layer for managing core alchemical operations, 
+#          incorporating concurrent safety models and dynamic priority management.
+# ============================================================================
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+import sys
+import os
+from typing import List, Optional, Dict, Any, Tuple, Callable
+from enum import Enum
+import hashlib
+import math
+import resource
+import time
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class AlchemyStatus(Enum):
+    IDLE = 'idle'   # Waiting for input/commands
+    RUNNING = 'running'  # Task actively processing or executing logic blocks
+    COMPLETED = 'completed'   # A task's core operation finished successfully and moved to pending_queue
+    FAILED = 'failed'      # A task encountered a fatal error but is marked as retryable (in context)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class Priority(AlchemyStatus):
+    """Determines processing order. Higher priority tasks execute first."""
+    
+    @classmethod
+    def PRIORITY_HIGH(cls, status: Optional[AlchemyStatus] = None):
+        if status == AlchemyStatus.COMPLETED:
+            return cls.RUNNING  # High-priority logic blocks are active
+        elif status == AlchemyStatus.IDLE or status is None:
+            return cls.PENDING          # Initial states (pending/queued) -> Run as highest priority initially unless explicitly cancelled
+    
+    @classmethod
+    def PRIORITY_LOW(cls, status: Optional[AlchemyStatus] = None):
+        if status in [AlchemyStatus.COMPLETED]:
+            return cls.RUNNING  # Completed high-priority logic blocks can resume
+        elif status == AlchemyStatus.IDLE or status is None:
+            return cls.PENDING      # Initial states (pending/queued) -> Run as lowest priority initially unless explicitly scheduled
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    @classmethod
+    def PRIORITY_MED(cls, status: Optional[AlchemyStatus] = None):
+        if status in [AlchemyStatus.COMPLETED]:
+            return cls.RUNNING  # Completed high-priority logic blocks can resume
+        elif status == AlchemyStatus.IDLE or status is None:
+            return cls.PENDING      # Initial states (pending/queued) -> Run as medium priority initially unless explicitly scheduled
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+class AlchemyQueueManager:
+    """Manages a dynamic queue of pending operations, supporting parallel execution."""
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def __init__(self):
+        self._lock = threading.Lock()
+        
+        # Config
