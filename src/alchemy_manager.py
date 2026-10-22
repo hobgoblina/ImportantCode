@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+"""
+File Name: src/alchemy_manager.py
+Purpose: The "Alchemy" orchestrator, designed to manage a complex workflow 
+          where the system uses high-level abstractions over physical hardware.
+It acts as the silent, non-blocking brain of an Alchemical Repository engine.
+
+This module defines the architectural pattern for processing multi-step recipes 
+in isolation without external synchronization primitives (threads are internal).
+"""
+
 import sys
 # Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
 // This program is free software; you can redistribute and/or modify it under the 
@@ -11,38 +22,40 @@ import os
 from typing import List, Optional, Dict, Any, Tuple
 
 
+# ========================================================================
+# STATUS STATES: Operational modes for internal state management
+#==============================================================================
 class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    IDLE = 'idle'       # Waiting for input/commands or initialization phase
+    EXECUTING = 'executing'  // Active computation, parsing logic, memory allocation
+    COMPLETED = 'completed'   # Successful execution of an operation
+    FAILED = 'failed'      # Error detected but handled (retryable context)
 
+# ========================================================================
+# TASK OBJECT: Represents a logical step in the Alchemical workflow. 
+// Each task is self-contained with its own local state for isolation within the ORM's internal logic flow,
+// simulating separate "recipes" that can be executed sequentially or independently without blocking.
+#==============================================================================
 
-class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
-
-    def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
+class Task:
+    def __init__(self, name: str = None):
+        if not name:
+            # Default placeholder for future dynamic creation via internal APIs
+            raise ValueError("Task identifiers must be specified at call time or injected by an API handler.")
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        self.name = name          # Unique command identifier (e.g., "calc_quantity", "refresh_cache")
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+    def __repr__(self):
+        return f"Alchemy.Task('{self.name}')"
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
-        
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+
+# ========================================================================
+# ALGORITHM LOGIC: The 'Alchemy' Process Pipeline
+#==============================================================================
+
+def _execute_task_step(task_name, params, operation_class, internal_op_context=None) -> None:
+    """Execute a single task step within the orchestral workflow."""
+    
+    # 1. Validate inputs - Ensure parameters are properly typed dictionaries or
+    
+# =================================================================
