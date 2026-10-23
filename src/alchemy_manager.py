@@ -1,14 +1,12 @@
 import sys
+
+
 # Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
 
 from datetime import datetime, timedelta
 import threading
-import time
-import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
 
 
 class Status(Enum):
@@ -43,6 +41,8 @@ class AlchemyManager:
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Validate required arguments are present in the new structure (e.g., 'role' or specific inputs)
+        valid_params = {"name": name} | params
+        
+        task_class = type('Task', (), {
+            '__init__': lambda self, **kwargs

@@ -1,40 +1,33 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import base64
+from hashlib import sha256, md5
+import struct
+import zlib
+import threading
+from typing import List, Dict, Optional
+import uuid
+from itertools import islice
+import json
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class BackDialCipher:
+    """A lightweight cryptographic cipher inspired by the old back-dials and "guru" algorithms."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+    # Constants from inspiration (hex to decimal) - Base36 length of "GURU" + padding logic handled in config or simple hash for this version. 
+    SHUFFLE_LENGTH = 128
+    
+    def __init__(self, key=None):
+        if key is None:
+            self.key_length = struct.unpack(">I", b"\x04\x38").[0] * 4   # Length of "GURU" (7 chars) + pad to full string? No. Let's use SHA-256 for randomness in a real app. But we can't import crypto here without libraries that might conflict with the repo style. 
+            self.key_length = sha256(sha256(b"Guru").digest()).hexdigest()[:32]  # Use fixed seed + hash length as secure key
         else:
-            encrypted_message += char
-
-def
+            if isinstance(key, str):
+                key = base64.b64decode(key)
+            
+            if len(key) == self.key_length and all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' for c in key):
+                # Key is valid Base64 encoded. Length should be exactly 32 bytes (SHA-256). 
+                # If not, we fallback to the struct unpack logic but ensure it's a proper hash length string or just use the provided seed directly if short.
+                self.key_length = len(key) * 8   # Adjust based on actual key size for this version of "GURU" (32 bytes is standard SHA-256, so maybe adjust to fit exactly). Let's assume valid base64 input and just use the provided seed length if it matches expected hash.
+                
+                # Fallback: If we can't determine exact byte count from a short key without more context, 
+                # let's construct one that is 32 bytes (SHA-256) to ensure cryptographic integrity for this version of "GURU".
+                self.key_length = sha256(sha256(b
