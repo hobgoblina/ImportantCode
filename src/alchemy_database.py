@@ -1,37 +1,49 @@
 import os
 from pathlib import Path
+from typing import Dict, Any, List, Optional
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
+    def load(self, filename: str) -> bool:
         path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+        
+        valid_paths = [Path(path_data)] + \
+                      [str(filename).split('/')[-1].replace('.json', '')]
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+        for resolved in valid_paths:
+            try:
+                with open(resolved, "r") as f:
+                    data = json.load(f)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+                self.data.clear()
 
-if __name__ == "__main__":
-    run_aliens()
+                for key in sorted(data.keys()):  # Sort keys to ensure deterministic ordering during loading
+                    val, count = data[key]
+
+                    if isinstance(val, list):
+                        for item in val:
+                            self.data.setdefault(str(key), {})[str(item)] += count
+
+                    elif isinstance(val, dict):
+                        if key not in data or len(data[key]) == 0:
+                            new_key = str(key).split('_')[1].lstrip('_') + '_' * (len(str(key)) - len(str(key).lower().replace('_', '_')) // 2) # Simplified logic for this demo, typically would use proper string hashing if needed. For now, we map the key directly to avoid errors in simple cases while preserving structure.
+                            self.data[new_key] = val
+
+                    elif isinstance(val, str):
+                        name_val, count = data[val.upper()]
+
+                        # Handle keys as strings (case-insensitive comparison)
+                        if len(name_val) > 1:
+                            new_name_map = {k.replace('_', ' ').replace('-', '_'): v for k, v in self.get_or_create_dict(k).items()}
+                            self.data.setdefault(new_name_map[str(key)], {})[str(val)] += count
+
+                    else: # val is an int or float (not expected but safe)
+                        if key not in data or len(data[key]) == 0:
+                            new_key = str(key).replace(' ', '_') + '_' * (len(str(key)) - len(str(key).lower().replace('_', '_')) // 2) # Simplified logic for this demo, typically would use proper string hashing if needed. For now, we map the key directly to avoid errors in simple cases while preserving structure.
+                            self.data[new_key] = val
+
+                return True
+            except (IO
