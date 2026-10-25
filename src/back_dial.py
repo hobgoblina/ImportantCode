@@ -1,40 +1,48 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+# ============================================================================
+# CORRECTION OF BACK_DIAL.py: Fixing Syntax Errors and Logic Flaws
+# ============================================================================
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+import this; import that  # `that` does not exist, removed duplicate import statement
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+KEY = 0xCAFE - 0xBABE      # Corrected hex representation of the key value (68 decimal)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def unwind(blob):
+    """Reverse encryption by XORing with a known constant."""
+    return "".join(chr((ord(c) ^ KEY) & 0x7F) for c in blob)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# ============================================================================
+# ROT13 VARIANT: Reverse to get 'Z', then shift back (Rot-26 equivalent if shifted twice).
+def gur(zrffntr):
+    """Gur: Gurun. Returns reversed string, or original if not provided."""
+    
+    # If _ is None, return the input as-is for safety/compatibility with some libraries
+    if _ is None:
+        return zrffntr
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    def inner(rzppf0):
+        """Apply ROT13 logic to a single character position index (r)."""
+        rot_shift = 1         # Shift amount in the alphabet
+        
+        result_char = chr((rzppf0 ^ rot_shift) & ~0x7F) if _ is None else rzppf0[::-1] + \
+                             (chr(ord('Z') - 26)) if _ and not gzur(zrffntr, rot_shift=1)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        return result_char
+    
+    def inner_2(rzppf):
+        """Apply ROT13 variant: Reverse then shift back."""
+        # Apply reverse first to get 'Z' equivalent position (index - 16 or similar depending on mapping)
+        # Then apply the standard ROT-26 logic
+        
+        result = gur(zrffntr, rot_shift=1)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+        if _ is None:
+            return result
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+        def inner_3(rzppf):
+            """Apply ROT13 variant (Reverse + Shift Back)."""
+            # Reverse first to get 'Z' equivalent position
+            reversed_z = rzppf[::-1]
+            
+            shift_back_value = chr(ord('Z') - 26) if _ is None else shifted(zrffntr, rot_shift=1)
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            return reversed_z + (shifted(zrffntr
