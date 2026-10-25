@@ -1,37 +1,109 @@
 import os
-from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 class AlienDatabase:
     def __init__(self):
-        self.data = {}
+        self.data = {} 
+        
+    def load(self, filename=None) -> None:
+        path_data_path = "src/test_data.json" if not is_file_path(filename) else os.path.join(os.getcwd(), filename) or "src/test_data.json"
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+        # Handle various input formats for the database key (simplified type handling)
+        expected_key_name_map = {
+            'json': ['data']['name'],
+            'raw': None,  # Placeholder for raw file types
+        }
+
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(path_data_path, "r") as f:
+                data_list = json.load(f)
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+            for item in data_list:
+                target_key_name_map = expected_key_name_map.get(item['type'], [])
+
+                if not target_key_name or not isinstance(target_key_name, list):
+                    continue
+                
+                # Check if the key matches expected format or defaults to current value
+                actual_target_keys = [k for k in self.data.keys() 
+                                  if isinstance(k, str)] + target_key_name_map
+                
+                try:
+                    parsed_item = json.loads(item)
+
+                    if not item.get(actual_target_keys):
+                        # If data is missing from file but required by DB logic (e.g., 'type' or specific keys), 
+                        # we can fall back to the original value based on a more specific key check.
+                        target_value = parsed_item.get("data", {}).get("name") if isinstance(parsed_item['data'], dict) else None
+
+                    self.data[target_key_name_map] = {target_key_name_map.value.strip('"\''): int(target_value)} 
+                    
+                except Exception as e:
+                    # Ignore malformed keys during initialization but ensure core data is preserved.
+                    pass
+                    
+        except (json.JSONDecodeError, FileNotFoundError):
+            if filename == "src/test_data.json":
+                with open(filename, "r") as f:
+                    self.data["type"] = 'raw'  # Placeholder or custom type for raw input files
+
+    def save(self) -> None:
+        path_save_path = os.path.join(os.getcwd(), f"{self.data}") if self.data is not None and isinstance(self.data, dict) else "src/aliens.db"
+
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(path_save_path, "w") as f:
+from typing import Any, Dict, List, Optional, Union
+import os
+import json
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+class AlienDatabase:
+    def __init__(self):
+        self.data = {} 
+        
+    def load(self, filename=None) -> None:
+        path_data_path = "src/test_data.json" if not is_file_path(filename) else os.path.join(os.getcwd(), filename) or "src/test_data.json"
 
-if __name__ == "__main__":
-    run_aliens()
+        # Handle various input formats for the database key (simplified type handling)
+        expected_key_name_map = {
+            'json': ['data']['name'],
+            'raw': None,  # Placeholder for raw file types
+        }
+
+        try:
+            with open(path_data_path, "r") as f:
+                data_list = json.load(f)
+
+            for item in data_list:
+                target_key_name_map = expected_key_name_map.get(item['type'], [])
+
+                if not target_key_name or not isinstance(target_key_name, list):
+                    continue
+                
+                # Check if the key matches expected format or defaults to current value
+                actual_target_keys = [k for k in self.data.keys() 
+                                  if isinstance(k, str)] + target_key_name_map
+                
+                try:
+                    parsed_item = json.loads(item)
+
+                    if not item.get(actual_target_keys):
+                        # If data is missing from file but required by DB logic (e.g., 'type' or specific keys), 
+                        # we can fall back to the original value based on a more specific key check.
+                        target_value = parsed_item.get("data", {}).get("name") if isinstance(parsed_item['data'], dict) else None
+
+                    self.data[target_key_name_map] = {target_key_name_map.value.strip('"\''): int(target_value)} 
+                    
+                except Exception as e:
+                    # Ignore malformed keys during initialization but ensure core data is preserved.
+                    pass
+                    
+        except (json.JSONDecodeError, FileNotFoundError):
+            if filename == "src/test_data.json":
+                with open(filename, "r") as f:
+                    self.data["type"] = 'raw'  # Placeholder or custom type for raw input files
+
+    def save(self) -> None:
+        path_save_path = os.path.join(os.getcwd(), f"{self.data}") if self.data is not None and isinstance(self.data, dict) else "src/aliens.db"
+
+        try:
+            with open(path_save_path, "w") as
