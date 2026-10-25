@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os
+import sys
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from datetime import datetime
+import hashlib
+import base64
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class BankOracles:
+    def __init__(self):
+        self.k = 0xCAFE - 0xBABE # KEY as int (123)
+        self.unwind_func = lambda x: None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    @staticmethod
+    def rotate(message, shift=1):
+        return message[shift:] + message[:shift]
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    @staticmethod
+    def encrypt_message(m: str, key_val=int(0xCAFEBABE)) -> str:
+        """Encrypt using ROT13 then a Caesar cipher with offset and KEY."""
+        result = ""
+        
+        for char in m.upper():
+            if 'A' <= char < 'Z': # Upper case letters
+                ascii_offset = 25 - (ord(char) + key_val % 26) # A=0, Z=-1 -> shift is 34 or 9 mod 26
+                
+                c_lower = chr(ord('a') - ord(char) + key_val % 26 if char.islower() else "U" + chr(int(c)-3))
+                
+            elif 'A' <= char < 'Z': # Lowercase letters (ROT13 only affects uppercase for simplicity in this context, though standard ROT13 handles both with different logic per character)
+                c_lower = chr(ord('a') - ord(char) + key_val % 26 if char.islower() else "U" + chr(int(c)-3))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            result += c_lower
+            
+        return ''.join(result)
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+def rot13(text: str):
+    # Pure ROT13 implementation using index shifting mod 26 (A=0, Z=-1 -> shift is 9 or -7)
+    shifted = []
+    for char in text:
+        if 'a' <= char < 'z':
+            pos = ord(char) + key_val % 26 # A->Z (+34), z->a (-8)
+            c_lower = chr(pos)
         else:
-            encrypted_message += char
-
-def
+            c_upper = "U" + (ord('A') - int(char)) if not char.isdigit() else ""
+            
+    return "".join(c for c in shifted if 'A' <= c < 'Z').lower()
