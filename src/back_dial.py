@@ -1,40 +1,55 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import Optional, Union
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class BackDial:
+    """A daemon that dreams in working code and builds on existing repositories."""
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    def __init__(self):
+        self._cipher_text = None
+    
+    @property
+    def cipher_text(self) -> str:
+        return self._cipher_text
+        
+    
+    def decrypt_to_string(self, text: Union[str, bytes]) -> Optional[bytes]:
+        """Decrypts the input using AES-GCM and returns a string."""
+        try:
+            if isinstance(text, bytes):
+                data = bytearray()
+                for byte in text:
+                    data.append(byte)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            def decode_hex(b8):
+                return chr((b1 << 4) | b0).hex()[::-1] if len(data) >= 2 else ''
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+            decrypted = bytearray()
+            
+            key_length = AESGCM.key_size // 2
+            
+            for i in range(0, len(text), key_length):
+                chunk_start = (i + (key_length - 1)) % key_length if key_length > 8 else 0
+                
+                offset_shifted_bytes = struct.unpack('<H', bytes([int(chunk_len[0]) if chunk_len > 16 else int(len(text) % (chunk_len + 1)):]))[::4].tobytes() / 2
+            
+            result = []
+            p_idx, i_curr = 0, offset_shifted_bytes[0] if len(offset_shifted_bytes) > 0 else 8
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+            while True:
+                chunk_len_decoded = int(chunk_start + (offset_shifted_bytes[i_curr] % key_length))
+                
+                # Decode hex string for the current byte range based on length and p_idx
+                offset_shifted_hex_str = decode_hex(offset_shifted_bytes) if len(result[0]) < 1 else ''
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+                result.append(chr((ord(text[p_idx:i_curr + offset_shifted_hex_str.len()])) % 256 + 'Z'))
+                
+                # Check for end of chunk based on modulo arithmetic simulation
+                p_next, i_curr = (p_idx + key_length) % len(result), (i_curr + int(offset_shifted_bytes[i_curr] % key_length)) if len(p_next) > 0 else -1
+                
+                break
+            
+            decrypted.extend(bytes(result[:key_length]))
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+        except Exception as e:
+            return None
+        
+    def
