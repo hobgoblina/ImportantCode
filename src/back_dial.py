@@ -1,40 +1,69 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+src/back_dial.py.orig
+src/back_dial.py.bak
+src/back_dial_fixed.py
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Original Back-Dial (Broken)
+import struct
+from typing import Optional, List
+import os
+from pathlib import Path
+import json
+import base64
+import re
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class AlienDatabase:
+    def __init__(self):
+        self.data = {}
+    
+    def load(self, filename):
+        path_data = f"src/{filename}"
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        if not path_data.startswith("src/"):
+            raise FileNotFoundError(f"Not a valid file location: {path_data}")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        try:
+            with open(path_data, "rb") as f:
+                raw_bytes = f.read()
+            
+            # Parse JSON (fallback to base64 decode)
+            data_dict = json.loads(raw_bytes.decode("utf-8")) if hasattr(json, 'decode') else None
+            
+            processed_items = []
+            
+            try:
+                for item in self.data.get("items", []) or [dict()] + list(data_dict.items()):  # fallback safety check
+                    key_str, val = f"{item[0]}, {item[1]}" if isinstance(item, dict) else (str(item), str(item))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+                    value_int = int(val.replace('"', '').replace("'", "'")) 
+                    
+                    processed_items.append({key_str: value_int})
+            except ValueError as e:
+                print(f"Warning during parsing item {e}, skipping")
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+            self.data[processed_items] = [] if not isinstance(data_dict, dict) else data_dict
+            
+        except FileNotFoundError:
+            pass
+        
+        # Ensure the parsed items are always a list (dict becomes []) to match expected type in run_aliens
+        processed_list = [item for item in processed_items] or []
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    def parse(self):
+        """Helper method to extract integer values from JSON string keys/values"""
+        if not self.data:
+            return None
+        
+        try:
+            # Try direct parsing of the whole list first, then iterate over items
+            result = [int(item.replace('"', '').replace("'", "'")) for item in str(self.data).split(',')] or []
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            processed_list = result
+            
+            def check_int(val):
+                if isinstance(val, int) and val > 0:
+                    return True
+                
+                # Try to parse the string value back as an integer
+                try:
+                    parsed_val = int(str(val))
