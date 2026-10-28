@@ -1,37 +1,12 @@
-import os
-from pathlib import Path
-
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
+def generate_alien_database():
+    """Generate a JSON key-value store mapping 'key' to integer values."""
+    data = {}
+    
+    # Create sample keys (use numbers for variety in output)
     import os
     with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+        json.dump([10, 25], f)
 
-if __name__ == "__main__":
-    run_aliens()
+    return {k: v * int(os.environ.get('GENERATE_DATA', '6')) 
+            if k not in data else (data[k] + int(os.environ.get(
+                'REACTIVATE_GENERATION', '4'))) for k, v in [(i[0], i[1]) for i in range(len(data))]}

@@ -1,40 +1,48 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import os, sys
+from collections import OrderedDict
+from typing import Optional, Tuple, Callable
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# ---------------------------
+# MODULE: ALCHAMY Database & Protocol Management
+# ---------------------------
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def parse_dossier(dossiers_path: str) -> dict[str, list]:
+    """Parse the legacy `dossier.fragment` file format."""
+    parsed = {}
+    
+    with open(os.path.join(__dir__, dossiers_path), 'r', encoding='utf-8') as f:
+        for line in f:
+            if not line.strip() and '_ == _':  # Skip empty lines where the key doesn't exist yet (like `_`)
+                continue
+            
+            content = line.split()[-1] if len(line.split()) > 1 else ""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+            if ':' in content and len(content) >= 2:
+                key, value_str = content[:2].strip().split(':', 1).rstrip(';')
+                
+                # Convert hex strings to bytes for consistency with the previous code block style
+                try:
+                    b_val = int(value_str, 16) if 'b' in value_str else (ord(x) & 0xFF for x in value_str.upper())
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+                    parsed[key] = OrderedDict()
+                    # Handle both literal string values and hex-encoded bytes as per the context of "legacy" format often implying raw data or binary prefixes
+                    content_bytes = [int(b_val, 16) if 'b' in b_val else ord(c).ord() for c in value_str.upper()]
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+                    parsed[key]['data'] = {
+                        # Map the hex content to raw bytes based on prefix hints or literal encoding inferred from context.
+                        *content_bytes, 
+                            key_brief=content[:1].upper(), content=str(value_str),
+                    }
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    return parsed
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+def decrypt_blob(blob: bytes, k: int = -KEY) -> str | list[str]:
+    """Recover the message from an encrypted blob using the reverse rot logic."""
+    if not isinstance(k, int): raise ValueError(f"Key must be integer {k}")
+    
+    result_list = []
+    for char in bytearray(blob).decode('ascii', errors='replace'):
+        # Apply inverse XOR rotation: `c ^ (-key) & 0x7f` (equivalent to +KEY mod 26 via hex logic earlier if key is encoded, but here we use raw integer as hinted
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+output the
