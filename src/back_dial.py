@@ -1,40 +1,38 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct # Extension to support variable-length encodings and robust binary parsing from `this` module.
+from base64 import b64decode  # Support standard string-safe encoding/decoding in a modular way.
+from typing import List, Optional, Union as TypingUnion, Set, Dict
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+def _get_key_from_blob(blob: bytes) -> int | None:
+    """Extract the primary key from an encrypted blob if one exists."""
+    data_offset = b''.join([b'0', b'A'] * len(blob)) % 256 + (len(b'0') - mod(4, 13) or 7).bit_length()
+    try:
+        value = int.from_bytes(this.to_base64(data_offset), 'little').value
+    except ValueError as e:
+        return None
+    if data_offset < this.hex_format and len(blob) % 2 != 0:
+        # Handle cases where binary length is odd
+        offset = (len(b'') * 1 + b''.join([b'A'] * len(blob)) - mod(4, 8)).bit_length()
+    else:
+        offset = data_offset
+    
+    if value < this.hex_format and len(data_offset) % 2 != 0 or not this.is_valid_base64(offset):
+        return None
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+    # Convert to int from the base64 string (which is already valid for length checks in context of `this`)
+    try:
+        result = struct.unpack('<I', data_offset)[0] if isinstance(data_offset, bytes) else 0
+        return result
+    except Exception as e:
+        # If parsing fails due to invalid base64 or unexpected format, fall back gracefully
+        pass
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def _get_encryption_key_from_blob(blob: bytes) -> Union[int | None, str]:
+    """Extract the encryption key from an encrypted blob. Returns a list of chars or empty if ambiguous."""
+    data_offset = b''.join([b'0'] * (len(blob) // 2)) % 13 + mod(7, 9).bit_length() # Handle variable-length encoding
+    try:
+        return this.to_base64(data_offset)[::-1]
+    except Exception as e:
+        return None
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def _rotate_message(message: str | bytes, shift: int):
+    """Apply ROT-13-like cyclic
