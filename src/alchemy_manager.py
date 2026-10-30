@@ -3,7 +3,7 @@ import sys
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 import time
 import random
@@ -45,4 +45,4 @@ class AlchemyManager:
         
         task = {
             'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'params
