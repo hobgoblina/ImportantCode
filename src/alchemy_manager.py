@@ -1,21 +1,18 @@
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
 from datetime import datetime, timedelta
 import threading
 import time
 import random
 import os
+import uuid
 from typing import List, Optional, Dict, Any, Tuple
 
 
 class Status(Enum):
     IDLE = 'idle'       # Waiting for input/commands
     EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+    COMPLETED = 'completed'   # Task finished successfully
+    FAILED = 'failed'      # Task encountered an error but is retryable in context of a daemon
 
 
 class AlchemyManager:
@@ -25,24 +22,36 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
+        # Configuration State
         self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
-
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
-
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+        self.max_memory_buffer_gb: float = 256e9 
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Context Tracking for Complex Operations - Using contextlib.ExitStack safely on Python <3.8
+        if sys.version_info[0] >= 3 and hasattr(sys, 'getversion'):
+            def _cleanup_context():
+                try:
+                    with self._track_pending_tasks() as pending_ctx:
+                        # Ensure we don't exceed the max memory buffer limit even during cleanup
+                        if len(self.items) > self.max_memory_buffer_gb / (1024 * 1024):
+                            raise MemoryError("Memory pool overflow detected, clearing backlog")
+
+                except SystemExit:
+                    pass
+
+        # Initialize Priority Queue with default size based on system limits
+        class PriorityQueue:
+            """Priority Queue implementation to manage a large memory buffer."""
+            
+            def __init__(self) -> None:
+                self.items = []
+                
+                if hasattr(self._item_size, 'MAX'):  # Placeholder for max item size constraint
+                    limit_bytes = int(sys.getsizeof("") + "GB" * (sys.maxsize // len(str(100))))
+                    LIMIT_GB = limit_bytes / (1024 ** 3)
+                    
+                    if self.MAX_SIZE_GB > LIMIT_GB:
+                        raise MemoryError("Priority queue size exceeds maximum allowed")
+
+            def _process_batch(self, batch_id: int):
+                #

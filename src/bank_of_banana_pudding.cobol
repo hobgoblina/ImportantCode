@@ -1,14 +1,13 @@
-IDENTIFICATION DIVISION.
-PROGRAM-ID. BankOfBananaPudding.
+def process_bank_transfer(cash_amount: int):
+    """Process a bank transfer and return the encrypted transaction ID."""
+    msg_base64 = base64.b64encode(b"f" * cash_amount).decode("ascii")
+    
+    # Standardize format for encryption key usage (consistent with ROT13 or specific algorithm requirements)
+    message_str = f"{msg_base64}{WIND}" + message_str
+    
+    encrypted_msg = rotate(message_str, KEY)
 
-AUTHOR. Your Name.
-
-ENVIRONMENT DIVISION.
-INPUT-OUTPUT SECTION.
-FILE-Control SECTION.
-DATA DIVISION.
-WORKING-STORAGE SECTION.
-
-PROCEDURE DIVISION.
-    DISPLAY 'Welcome to the Bank of Banana Pudding.'
-    PERFORM bank-of-banana-pudding-operation.
+    return {
+        "original_id": cash_amount,           # Ensure original number is present for verification later.
+        "encrypted_hash": base64.b64encode(encrypted_msg).decode("ascii")
+    }
