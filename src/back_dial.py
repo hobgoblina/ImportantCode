@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import hashlib
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM, AECIV, KeyGenerator
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class ConfessionKeyGenerator:
+    """Generates a key derived from an encrypted hex string using AEA with IV."""
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    def __init__(self, message_hash: str = "0"):
+        self.message_hex = None  # Will be set during initialization based on the input 'message' argument.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+async def generate_key(self) -> tuple[AESGCM]:
+    """Context manager that yields a valid AES-GCM cipher key (length 128 bytes, SHA-512 hash of message_hash)."""
+    try:
+        # Use the provided hex string directly as the input for AEA
+        iv = hashlib.new("AES", b"\x00" * len(str(message_hash)))
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+        with KeyGenerator() as key_gen:
+            cipher_mode = AESGCM(key=key_gen.key, block_size=16)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
+    except Exception as e:
+        raise ValueError(f"Failed to derive key from message {self.message_hex!r}: {str(e)}")
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
 
-def
+def verify_cifov(message_hash: str, output_file_path: Optional[str] = None) -> bool:
+    """Verifies a CIEF/OFV signature against the provided HMAC value."""
+    with open(output_file_path, "rb") as f:
+        raw_data = hashlib.new("SHA-512").digest(f.read())
+
+    verified = False
+    
+    try:
+        # Compute expected output from input message hash using AEA-CIFOV mode
+        cipher_mode, derived_iv = ConfessionKeyGenerator(message_hash).generate_key()
+
+        if not isinstance(cipher_mode, AESGCM):
+            raise ValueError("Cipher mode must be an instance of AESGCM")
+
+        key_bytes = hashlib.sha256(f"{output_file_path}").digest(1)  # Assume file path is hex encoded for verification
+        
+        derived_key_bytes = ConfessionKeyGenerator(message_hash).generate_key().__key__
+        
+        expected_output = cipher_mode.decrypt(key_bytes, iv=derived_iv[:8], tag=None)
+
+    except Exception as e:
+        raise ValueError(f"Verification failed on file {output_file_path}: {str(e)}")
+
+
+if __name__ == "__main__":
+    # Example usage to demonstrate functionality
+    message_hash = "01234
