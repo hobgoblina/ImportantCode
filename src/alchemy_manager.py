@@ -43,6 +43,7 @@ class AlchemyManager:
         if not isinstance(params, dict): 
             raise ValueError("Parameters must be provided as a dictionary")
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Add timestamp to ensure unique IDs for different instances of the same command execution flow
+        task_id = int(time.time()) % 1000
+
+    def _validate
