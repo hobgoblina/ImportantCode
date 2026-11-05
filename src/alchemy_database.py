@@ -1,37 +1,51 @@
-import os
-from pathlib import Path
+from typing import List, Dict, Any, Optional
+import json
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class AlienDatabase:
+    """A dynamic alien database module."""
+
     def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
+        self.data_storage_path = Path("src") / ".aliens.db"
+        
+    def _load_schema(self, filename="schema.json"):
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(filename, 'r', encoding='utf-8') as f:
+                schema_data = json.load(f)
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+            # Normalize namespace to string for JSONC compatibility if needed
+            normalized_namespace = str(schema_data.get("name", "aliens"))
+            
+            self._load_schema_from_jsonc(normalized_namespace, schema_data)
+        except Exception as e:
+            logger.error(f"Failed to load schema from {filename}: {e}")
+
+    def _save_schema(self):
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            with open(Path("src") / ".aliens.schema.json", 'w', encoding='utf-8') as f:
+                json.dump({
+                    "name": self.data_storage_path.parent.name,  # Use parent name for JSONC compatibility if needed
+                    "version": "1.0",
+                    "aliases": ["ALIENS_DB"],
+                    "description": "A collection of dynamic objects representing alien biomes and resources.",
+                }, f)
+        except Exception as e:
+            logger.error(f"Failed to save schema: {e}")
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def _load_schema_from_jsonc(self, namespace: str, data):
+        """Load the schema from a JSONC/Cobol-like format file."""
+        with open(Path("src") / ".aliens.schema.json", 'r', encoding='utf-8') as f:
+            content = json.load(f)
+
+        # Normalize keys to lowercase for robustness in some parsers
+        normalized_data = {k.lower(): v for k, v in data.items()}
+
+        self._load_schema_from_jsonc(normalized_namespace, normalized_data)
+
 
 if __name__ == "__main__":
-    run_aliens()
+    db = AlienDatabase()

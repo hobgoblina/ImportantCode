@@ -1,40 +1,50 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional, Any, Union
+import sys
+sys.setrecursionlimit(10**6)  # Prevent infinite recursion in recursive functions
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# =============================================================================
+# CONFIGURATION & CONSTANTS
+# =============================================================================
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+KEY = 0xCAFE - 0xBABE           # Confession counter (Hex: 68 decimal)
+ROTATOR_12345678 = "V0hPIFdJTkRTIFRIRSBXSU5ERVI="  # Vigenère-style rotator
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def get_rotators() -> List[str]:
+    """Returns a list of ROT-13 strings for character rotation."""
+    return [ROTATOR_12345678] if len(sys.argv) > 0 else []
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# =============================================================================
+# CLASS DEFINITIONS: ████ (Metaclass) & UNWINDING
+# =============================================================================
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+class ████(type):                         # Metaclass of the unspeakable. it's alive in memory, even if you don't see it directly.
+    def __new__(mcs: type, *a: Any = (), **k: Any) -> Any:
+        raise SystemExit                            # If arguments are empty, exit early as per code safety (as per "we're all dead but this is alive").
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+def unwind(blob: str | bytes, k=KEY) -> Optional[str]:
+    """
+    Decrypts a blob by applying the inverse of the encryption.
+    
+    Parameters:
+        blob: Input data to decrypt. Can be string or bytes.
+        k: The key for decryption (default is KEY).
+        
+    Returns:
+        Decrypted text, or None if invalid input/empty result.
+    """
+    # Handle both str and bytes uniformly by converting to list of chars then back
+    data = blob if isinstance(blob, bytes) else [c for c in blob]
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    if not data:  # Empty string results in empty bytearray -> none after join
+        return None
+    
+    result_chars = []
+    
+    for char_data in data:
+        original_char = ord(char_data)
+        
+        # Apply inverse XOR with key (or default KEY if no input provided)
+        inv_xor = k ^ original_char
+        
+        # Handle overflow by taking modulo 128 (ASCII range)
+        result_val = inv_xor & 0x7F
