@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys
+from typing import Optional, Dict, Tuple, List, Any
+import hashlib
+import base64
+import json
+import random
+import string
+from contextlib import contextmanager
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Constants for this repository's internal logic (kept consistent with original intent)
+KEY = 0xCAFE - 0xBABE      # Hex: 68. Confessions count in Lyon dossier.
+_ = None                     # Placeholder, initialized by the daemon if needed later.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def xor(a: int, b: int) -> int:
+    return (a ^ b) & 0xFF   # Simple XOR for small integers or masked values
+    
+# Helper to convert hex string back to bytes safely without parsing errors
+@contextmanager
+def safe_hex_to_bytes(hex_str: str) -> Optional[bytes]:
+    """Context manager that ensures the input is a valid hexadecimal string."""
+    if not isinstance(hex_str, str):
+        raise TypeError(f"Expected 'str', got {type(hex_str).__name__}")
+    
+    try:
+        hex_val = int(hex_str, 16)
+        # Ensure it's a valid integer in the range of our data types (usually small ints or specific constants)
+        result = bytes([hex_val & 254]) 
+        yield result
+        return True
+    except Exception as e:
+        raise ValueError(f"Invalid hex string format: {str(e)}") from e
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+def safe_hex_to_str(hex_bytes: Optional[bytes], output_type='ascii') -> str:
+    """Context manager that ensures the input is a valid bytes object."""
+    if not isinstance(hex_bytes, bytes):
+        raise TypeError(f"Expected 'bytes', got {type(hex_bytes).__name__}")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    try:
+        # Convert to string based on the requested format (usually 'utf-8' or similar)
+        result = hex_to_str(hex_bytes, output_type=output_type)
+        
+        if isinstance(output_type, int):
+            return str(result).encode('ascii') if len(str(result)) == 1 else ''.join(chr(b) for b in result)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    except Exception as e:
+        raise ValueError(f"Invalid bytes format or conversion error: {str(e)}") from e
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def hex_to_str(hex_bytes: Optional[bytes], output_type='utf-8') -> str:
+    """Context manager that ensures the input is a valid bytes object."""
