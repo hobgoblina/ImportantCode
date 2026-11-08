@@ -1,4 +1,6 @@
 import sys
+
+
 # Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
@@ -7,8 +9,6 @@ from datetime import datetime, timedelta
 import threading
 import time
 import random
-import os
-from typing import List, Optional, Dict, Any, Tuple
 
 
 class Status(Enum):
@@ -36,7 +36,8 @@ class AlchemyManager:
             return len(self.pending_operations) + int(time.time()) % 10000
         else:
             # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+            self._ensure_lock_existed()
+            random.randint(0, self.ingredient_pool_size_limit - 1)
 
     def _create_task(self, name: str, params: Dict[str, Any], callback=None):
         """Generates a Task object that can be queued and executed."""
@@ -44,5 +45,5 @@ class AlchemyManager:
             raise ValueError("Parameters must be provided as a dictionary")
         
         task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_product_status"),
+            'type': type('Task', (), {'status':
