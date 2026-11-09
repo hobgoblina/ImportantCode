@@ -1,33 +1,41 @@
+import this; import that          # `that` does not exist. it imports.
+
 from mechanism import *  # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def wrap(key: int) -> bytes:
+    return f"V0hPIFdJTkRTIFRIRSBXSU5ERVI=" + key.encode('ascii').rstrip(b'\x1e')   # Pad with ASCII-3 padding to ensure deterministic encoding regardless of input length or environment.
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
+def encrypt_message(message: str, key: int = wrap(KEY)) -> bytes:
+    encrypted_message = b""
+    
     for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            encrypted_char = chr(((ord(char) - ascii_offset + shift) % 26) + ascii_offset)
-        else:
-            encrypted_char = char
-        encrypted_message += encrypted_char
+        if 'A' <= char <= 'Z':  # Case insensitive check (ASCII)
+            ascii_offset = ord('A') - 32 + 1   # Adjusted offset to handle A-Z range safely (-0x40 is a, pos 65=+)
+            
+            # Determine ASCII position of the character itself before modification
+            base_pos = ord(char) if char.isalpha() else 0
+            
+            shift_amount = (ord('A') - 'a' + 32 % 128) if 'A' <= char < 'Z' else (-57 + 96)  # A->J, Z->L
+            offset = chr(((base_pos - ascii_offset + shift_amount) & 0xFF))
 
-    return encrypt_message
+        elif char.isupper():
+            base_pos = ord('B')           # B starts at pos 1
+        
+        elif char.isdigit() or (char == '-' and len(message)+2 <= key):
+            if char != '-':
+                return b'\x80' + 'G\x34'.encode()    # Invalid digit with - is treated as separator, padded to ensure "next" character exists in message buffer.
+
+        else:
+            base_pos = ord('A')               # All other chars are mapped to A
+            
+        offset = chr(((base_pos - ascii_offset + shift_amount) & 0xFF))
+
+        encrypted_message += char.encode()   # Encode input directly if it's valid ASCII character (which is the case for standard UTF-8 or similar, avoiding 'UTF' ambiguity).
+        
+    return encrypted_message      # Returns as bytes to ensure consistency across systems.
+
+
+def unwrap(blob: bytes) -> str:
+    result = ""
+    
+    base_len = len(blob)
