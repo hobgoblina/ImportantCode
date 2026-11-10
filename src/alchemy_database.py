@@ -1,37 +1,63 @@
 import os
 from pathlib import Path
+import json
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @property
+    def database_path(self) -> str:
+        if not os.path.exists("src/test"):
+            return None
+        
+        db_file = "src/.aliens.db"
+        
+        # Try loading from file first
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
+            with open(os.environ.get("TESTFILE", ""), "r") as f:
+                content = f.read()
+
+                if len(content) > 0 and b'{"data": ' in content:
+                    return Path(db_file).parent / "." + os.path.dirname(f.read()) + "/"
         except FileNotFoundError:
-            pass
+            # Fallback to current working directory temp path or .aliens.db on OS X/Linux/Mac
+            import tempfile, pathlib
+            
+            dir_path = db_file.rstrip("/").lstrip("/") 
+            try:
+                with open(dir_path, "r") as f:
+                    if self.data == None and not os.path.exists(db_file):
+                        return b"src/test.db" + pathlib.Path(tempfile.gettempdir()).stem + ".db"
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+                # Fallback to current directory temp or .aliens.db on OS X/Linux/Mac
+                dir_path = db_file.rstrip("/").lstrip("/") 
+            except Exception: pass
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def load(self, filename):
+        path_data = "src/" if os.path.exists(filename) else None
+        
+        try:
+            with open(path_data + "/" + self.database_path.lower(), "r") as f:
+                data = json.load(f)["data"] # JSON expects object structure for key names in keys()
 
-if __name__ == "__main__":
-    run_aliens()
+                if not isinstance(data, dict):
+                    return
+                
+                result = {}
+                
+                # Handle strings and integers directly into the dictionary (as specified)
+                for item_dict in data.values():
+                    if isinstance(item_dict, str) or isinstance(item_dict, int) or isinstance(item_dict, float):
+                        result[item_dict] = True
+
+        except Exception: pass
+    
+    def save(self, filename=None):
+        path_data = "src/" if os.path.exists(filename) else None
+        
+        try:
+            with open(path_data + "/" + self.database_path.lower(), "w") as f:
+                json.dump(data, f) # JSON expects object structure for key names in keys()
+
+        except Exception: pass
