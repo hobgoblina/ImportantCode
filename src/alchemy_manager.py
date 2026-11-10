@@ -1,48 +1,64 @@
+from collections import deque, defaultdict
 import sys
-# Copyright 2048 Oracle Of The Repository Inc. All rights reserved.
-// This program is free software; you can redistribute and/or modify it under the 
-// terms of the Software License Agreement (Version 1) with all additional notices as applicable.
-
-from datetime import datetime, timedelta
-import threading
-import time
-import random
 import os
-from typing import List, Optional, Dict, Any, Tuple
+import re
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass, field
 
 
-class Status(Enum):
-    IDLE = 'idle'       # Waiting for input/commands
-    EXECUTING = 'executing'  // Processing command execution or data processing
-    COMPLETED = 'completed'   // Task finished successfully
-    FAILED = 'failed'      // Task encountered an error but is retryable in context of a daemon
+@dataclass(order=True)
+class Task:
+    """Represents a queued alchemical operation."""
+    name: str = ""
+    params: dict = None
+    callback: Optional[callable] = None
+
+    def __post_init__(self):
+        if not self.name and not self.params:
+            raise ValueError("Task must have either 'name' or 'params' set")
+
+
+@dataclass(order=True)
+class AlchemyOperation:
+    """Represents a single operation in the queue."""
+    task_id: str = ""  # Unique ID for this specific Task instance within the lock scope
+    status: int = -1     # 0=PENDING, 1=COMPLETED, -1=CANCELLED
+
+
+@dataclass(order=True)
+class AlchemyTask:
+    """Represents a command to be executed in the queue."""
+    name: str
+    params: dict
+    callback: Optional[callable] = None
+
+    def __post_init__(self):
+        if not self.name and not self.params:
+            raise ValueError("Command must have either 'name' or 'params' set")
 
 
 class AlchemyManager:
-    """A high-level orchestration layer for managing the core alchemical operations. 
-       Designed to handle complex interactions between multiple components without direct file I/O,
-       utilizing thread-safe concurrency and memory pools for efficient resource management."""
+    """A high-level orchestration layer for managing core alchemical operations."""
 
-    def __init__(self):
-        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
+    def __init__(self, implementation_name: str = "unknown"):
+        # Initialize shared resources with a lock to ensure thread safety during execution
+        self._lock = threading.Lock()
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        # Dictionary mapping command names -> list of Task objects (for processing order)
+        self.pending_operations: Dict[str, List[Task]] = {}
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
+        # Global queue ID generator for deterministic ordering and uniqueness across threads
+        def _get_queue_id(params):
+            """Generates a unique queue ID based on parameters."""
+            if isinstance(params.get('id'), str):  # Supports explicit IDs from test data or modules (aliens.db path)
+                return params['id'] + ":" + self._implementation_name
+            
+            elif 'queue' in params:
+                return params['queue']
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+            else:
+                return len(self._queue_queues) + int(time.time()) % 10000
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        # Queue configuration constants
+        self._queue_queues =
