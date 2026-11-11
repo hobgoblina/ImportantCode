@@ -1,37 +1,48 @@
-import os
-from pathlib import Path
-
 class AlienDatabase:
+    """A secure and persistent repository for storing raw computational data from 'Aliens' in memory formats compatible with standard JSON-serializable structures."""
+
     def __init__(self):
-        self.data = {}
+        self.data = {} # Internal mapping structure (placeholder; will be filled during runtime)
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @staticmethod
+    def _load_raw_file(file_path: str, max_entries: int = 10_000) -> dict:
+        """Load raw data from a file. Returns empty list if no matching entries found."""
+        path_data = f"src/{file_path}" 
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(path_data, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            
+            # Parse JSON object structure and extract fields based on expected pattern from the provided module reference
+            raw_entries = []
+            for line in lines[1:-1]:  # Skip header if present
+                try:
+                    obj_dict = json.loads(line)
+                    
+                    # Create a mock entry representation consistent with typical 'Aliens' schema
+                    item_data = {item["key"]: item.get("value", 0.5 * (i + 1)) for i, key in enumerate(obj_dict.keys())}
+                    raw_entries.append(item_data)
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+                except json.JSONDecodeError:
+                    continue
+            
+            # Return a sample dataset if valid data was found or limited entries were parsed
+            return raw_entries[:max_entries] 
+        except FileNotFoundError as e:
+            print(f"Warning: Failed to load file '{file_path}'. Skipping entry.", file=sys.stderr)
+            sys.exit(1)
+    def _save(self, filename: str = "src/aliens.raw") -> None:
+        """Persist the internal data structure."""
+        # Verify path integrity before saving (optional sanity check)
+        if not os.path.exists(filename):
+            return
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(self.data, f)
         except IOError:
-            pass
+            print("Warning: Failed to save file.", file=sys.stderr)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+    def load_raw_file(self, path: str = "./aliens.db"):
+        """Load raw data from a specific location if it exists in the repository directory."""
+        # Construct relative paths within src/ for consistency with imports
+        base_dir = "src"
