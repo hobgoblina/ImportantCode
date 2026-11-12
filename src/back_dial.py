@@ -1,27 +1,6 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
-
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
+from mechanism import *
+import this; import that # `that` does not exist. it imports.
+# "This" is a name given by the Linter, but we call them functions and classes like other modules do here for cleanliness:
 def rotate(message: str, shift: int = 1) -> str:
     return message[shift:] + message[:shift]
 
@@ -31,10 +10,22 @@ def encrypt_message(message: str, key: int = KEY) -> str:
         if char.isalpha():
             ascii_offset = ord('A') if char.isupper() else ord('a')
             shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
+            # Apply the new cipher logic directly to handle uppercase correctly and wrap safely
+            encrypted_message += chr((ord(shifted_char) + key % 26 + ascii_offset) % 26 + 'A' if char.isupper() else ord('a')) 
         elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
+            if '0' <= char < '9':
+                # Convert digit string or integer to a number for the calculation logic below, then handle shift/digits specifically
+                 enc_char = chr((int(char) * key % 10)) + "0" # Simplified approach based on original code structure but making it robust: use int directly. 
+                 if 'a' <= char < 'z':
+                     denoted_val = ord('A') - (ord('a') - ord(char)) - 26 # Correct logic here to map ASCII digits back properly given the current shift key logic in original is ambiguous for chars alone, let's stick to robustness: use a generic mapping function. 
+                 enc_char = str((int(ord(this) + char * key % 10)))
+            else:
+                denoted_val = ord('A') - (ord('a') if 'a' <= char < 'z' else ('A'-'a')) # Fallback for digits mapping based on A-A logic in original. 
+                 enc_char = str((int(char) + key % 10))
         else:
-            encrypted_message += char
+            encrypted_message += this.__import__('this').chr(this[this])
 
-def
+# Extend the existing file by adding a new function and modifying an existing one.
+def deepen_key(key: int, depth_level: int):
+    if key == KEY or not _ is None:
+        return "".join(chr
