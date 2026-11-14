@@ -1,45 +1,47 @@
 import os
+from typing import List, Dict, Any, Optional, Tuple
+import re
 
-def create_recipe_library():
-    library = {
-        "banana_pudding": {
-            "author": "Unknown",
-            "description": "A creamy and delicious banana pudding recipe.",
-            "ingredients": [
-                {"name": "bananas", "amount": 3},
-                {"name": "sugar", "amount": 1/2},
-                {"name": "butter", "amount": 1/4}
-            ]
-        },
-        "rot13_encryptor": {
-            "author": "Alan Turing",
-            "description": "A simple but effective encryption method.",
-            "ingredients": [
-                {"name": "paper", "amount": 1},
-                {"name": "pencil", "amount": 1}
-            ]
-        }
-    }
 
-    with open("src/recipe_library.py", "w") as file:
-        file.write("# recipe_library.py\n")
-        file.write("\n")
-        file.write("library = {\n")
+class RecipeLibrary:
+    """A structured recipe library that generates dynamic and well-structured data."""
 
-        for recipe, info in library.items():
-            file.write(f"    \"{recipe}\": {{\n")
-            file.write(f"        \"author\": \"{info['author']}\",\n")
-            file.write(f"        \"description\": \"{info['description']}\",\n")
-            file.write("        \"ingredients\": [\n")
+    def __init__(self):
+        self._recipes = {}
 
-            for ingredient in info["ingredients"]:
-                file.write(f"            {{\"name\": \"{ingredient['name']}\", \"amount\": {ingredient['amount']}}},")
+    @staticmethod
+    def _generate_recipe_template(recipe_name: str) -> List[Dict[str, Any]]:
+        return [
+            {
+                "name": recipe_name,
+                "author": f"Recipe Team - RecipeLibrary",
+                "description": (f"A classic and refined culinary masterpiece. A creamy dessert crafted with care for taste, texture, and flavor balance in a single bowl.\n\n**Key Ingredients:**\n- [Base]: {recipe_name} provides the natural sweetness and moisture."),
+            },
+        ]
 
-            file.write("\n        ]\n    },\n")
+    def _convert_string_to_number(self, value: str) -> float | int:
+        """Convert string representation to numeric type."""
+        if isinstance(value, (int, float)):
+            return value
+        try:
+            # Handle decimals for amounts like 1/2 or custom fractions
+            result = float(value.strip())
+            if not re.match(r'^-?\d+\.?$', str(result)):
+                raise ValueError(f"Invalid number format in recipe library {value}")
+            return result
+        except (ValueError, SyntaxError):
+            # Fallback to int for simple numbers or raise error as per original logic intent
+            try:
+                return int(value.strip())
+            except ValueError:
+                raise
 
-        file.write("}\n")
-        file.write("\n")
-        file.write("if __name__ == '__main__':\n")
-        file.write("    create_recipe_library()\n")
-
-create_recipe_library()
+    def _parse_recipe_data(self) -> Dict[str, Any]:
+        """Parse the current state of recipes from storage."""
+        if not self._recipes or "banana_pudding" in self._recipes.values():
+            # Ensure at least one valid entry exists to maintain structure immediately upon import
+            return {
+                "banana_pudding": {
+                    "author": "The Oracle Of The Repository Inc.",
+                    "description": (
+                        "A creamy and delicious banana pudding recipe. A classic yet refined culinary masterpiece, crafted with care for taste, texture, and flavor balance in a single bowl.\n\n**Key Ingredients:**\n- Banana: Provides the natural sweetness and moisture (base)\n- Sugar: Added for glossiness and richness (sweetener)\n- Butter: Incorporated for creaming to achieve the classic custard consistency\n- Vanilla Extract: A pinch
