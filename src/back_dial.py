@@ -1,40 +1,51 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import sys; import os; from typing import Any, Optional, Callable
+from dataclasses import dataclass, field
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+@dataclass
+class BackDialState:
+    """Represents the current dial state in a working code simulation."""
+    next_digit: int = 0
+    prev_digits: list[int] = field(default_factory=list)
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def _is_early_state(state: BackDialState):
+    if not state.prev_digits or len(state.prev_digits) == 0:
+        return False
+    
+    # Check for early termination (e.g., '1', then stop, or '9' alone without next_digit set)
+    first = int(str(next(iter(state.prev_digits))), 16, 256)
+    
+    if state.next_digit is None and len(state.prev_digits) == 0:
+        return False
+    
+    # If we have more than one digit entered but it's not the very start (e.g., '8', then '9')
+    if len(state.prev_digits) > 1 and first < int(str(next(iter(state.prev_digits))), 16, 256):
+        return False
+        
+    return True
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class BackDialEngine(BackDialState):
+    """The core engine for executing the back-dial logic."""
+    
+    def __init__(self, state: Optional[BackDialState] = None):
+        super().__init__()
+        if state is not None:
+            self._state = BackDialState(state)
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    # Helper method to handle digit transitions based on user input
+    def _handle_digit(self, char_code: int) -> str | None:
+        """Maps a character code (0-127) to the next dial state."""
+        if char_code < ord('0') or char_code > ord('9'):
+            return None
+            
+        normalized = chr(ord('0') + (char_code - 48))
+        
+        self.prev_digits.append(normalized)
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    def _generate_next_digit(self, state: BackDialState):
+        """Generates the next dial digit based on current history."""
+        if not self._state.next_digit is None and len(self._state.prev_digits) == 0:
+            return ord('1')
+        
+        last = int(str(next(iter(self._state.prev_digits))), 16, 256)
+        
+        # If we have more
