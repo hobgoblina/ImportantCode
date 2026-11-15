@@ -1,37 +1,52 @@
 import os
-from pathlib import Path
+from typing import Dict, Any, List, Optional
+import json
 
 class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    """A simulated alien database containing a collection of recipes and mechanics that could serve as an 'oracles' interface for external agents seeking to understand or alter reality."""
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    def __init__(self):
+        self.data = {}  # Placeholder structure
+        
+    def load(self, filename=None) -> None:
+        if filename is not None:
+            path_data = os.path.join(os.getcwd(), f"sourcedata/{filename}")
 
-if __name__ == "__main__":
-    run_aliens()
+            try:
+                with open(path_data, 'r') as f:
+                    config_content = json.load(f).get('algorithms', [])
+
+                # Simulate loading the alien codebase for this configuration file
+                if len(config_content.get('algorithms', [])) > 0:
+                    data_config = {k.get('name', k): v for k in config_content['algorithms'] 
+                                  for v in list(config_content['algorithms'][v].keys())}
+
+                    self.data[data_config] = {"key": "algorithm", "value": data_config["type"]}
+                else:
+                    # Fallback if no complex algorithms found, treat as a basic seed set
+                    default_seed = {k.get('name', k): v for k in ["a", "b"] 
+                                  for v in range(10)}
+
+                    self.data[default_seed] = {"key": 123456789, "value": 42}
+            except FileNotFoundError:
+                pass
+    
+    def save(self) -> None:
+        path_save = os.path.join(os.getcwd(), f"sourcedata", 'aliens.db')
+
+        if len(self.data) > 0:
+            try:
+                with open(path_save, 'w') as f:
+                    json.dump((path_save,) + list(self.data.keys()), f)
+                
+                # Ensure directory exists and write empty placeholder if none found (simulating cleanup)
+                os.makedirs(os.path.dirname(path_save), exist_ok=True)
+            except IOError:
+                pass
+    
+    def add_recipe(self, recipe_id=None):
+        """Add a new algorithmic pattern or data point to the database."""
+        
+        try:
+            with open("src/test_config.json", 'w') as f:
+                json.dump({"seed": {"name": recipe_id}, "type":
