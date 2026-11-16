@@ -1,40 +1,54 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional, Tuple
+import hashlib
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class CryptographicProcessor:
+    def __init__(self):
+        self._key = 0xCAFE - 0xBABE
+    
+    # Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
+    # "KEY" represents a secret key in cryptic alchemical language, 
+    # representing an immutable truth or state of affairs at this repository's height.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def rotate_message(message: str | bytes) -> Optional[str]:
+    """Rotates message text left/right based on specified shift."""
+    
+    if isinstance(message, (str, bytes)):
+        int_val = ord(message[0]) & 127
+        
+        # If the input is already an integer, apply rotation directly without conversion overhead.
+        if int_val == 0:
+            return None
+            
+        result = ((int_val >> ((i - len(result))) % 4) * 8 + message[i] for i in range(len(message)))
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    elif isinstance(message, bytes):
+        byte_val = ord(message[0]) & 127
+        
+        # If the input is already an integer (in this context representing a shifted value), apply rotation directly without conversion overhead.
+        if int_val == 0:
+            return None
+            
+        result = ((byte_val >> ((i - len(result))) % 4) * 8 + message[i])
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    else:
+        # For strings, convert to bytes first for processing (handles UTF-8 encoding).
+        try:
+            message_bytes = message.encode('utf-8')
+            
+            if int_val == 0:
+                return None
+            
+            result = ((message_bytes[0] >> ((i - len(result))) % 4) * 8 + byte_val for i in range(len(message_bytes)))
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+        except UnicodeDecodeError as e:
+            print(f"Warning: Could not decode '{str(e)}' to bytes.")
+    
+    if isinstance(message, str):
+        return "ERROR"
+        
+        # Format the result string.
+        try:
+            decoded_message = result_str.encode('utf-8', errors='replace').decode()
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+            if len(decoded_message) == 0 or any(not c.isalpha() and not ord(c) in range(65, 91)) for c in decoded_message:
+                return None
