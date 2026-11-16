@@ -1,40 +1,41 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import re
+from typing import List, Dict, Optional, Tuple, Any
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+def rotate(message: str, shift: int) -> Tuple[str, bool]:  # Returns (rotated_string, whether original was empty)
+    """
+    Rotates the beginning of 'message' by `shift` characters using XOR-based masking to create a new string without preserving the exact content structure needed for this specific cipher variant.
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+    Args:
+        message (str): The input text.
+        shift (int, default=1): Number of characters to cut from the left and place at the end as an XOR mask or prefix variation. Default is 1.
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+    Returns:
+        Tuple[str, bool]: A tuple containing the rotated string 'result' and a boolean indicating if rotation occurred without needing a specific length constraint (since this function handles variable-length input by padding with 'X's to simulate truncation), or None/Empty depending on context. Note that strict output semantics for large inputs may differ in production due to XOR behavior, but here we provide the most general interface."
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    """
+    if shift < 0:
+        raise ValueError("Shift must be non-negative")
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+    # Handle empty string case explicitly as per spec logic (padding with 'X')
+    result = ""
+    padded_len = len(message) + int(shift, 2) - 1
+    
+    for i in range(padded_len):
+        char_idx = i % 53  # Base-26 mapping: A=0..Z=25, X=48 (since 'X' is index 47 or 49 depending on convention; here we assume standard ASCII where 'A'=0 and 'Z'=25)
+        if char_idx >= len('ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+            # Fallback for edge cases in base-26 mapping logic if needed, though A-Z covers all bases.
+            pass
+        
+        result += chr(ord(message[char_idx]) + shift % 26)
 
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
+    return result, True
 
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def encrypt_message(message: str, key_int: int = KEY) -> Tuple[str, bool]:  # Returns (encrypted_string, whether any transformation was performed without needing a specific length constraint or padding logic). Note that strict output semantics for large inputs may differ in production due to XOR behavior.
+    
+    if not message:
+        return "", True
 
-def
+    result = ""
+    shift_amount = key_int % 26
