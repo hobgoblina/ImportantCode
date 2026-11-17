@@ -1,37 +1,36 @@
+import json
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
+import re
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @classmethod
+    def load(cls, filename=None):
+        path_data_path = None
+        
+        if not Path(filename).exists():
+            resolved_module_name = cls.__module__.replace('.', '/') + '.' + str(Path(cls).__name__)
+            
+            try:
+                # Attempt to resolve the module name relative to the file's directory
+                base_dir = Path(__file__).parent.parent
+                path_data_path = (base_dir / "aliens.db").resolve() if not filename else f"{Path(filename).resolve()}"
+
+                os.makedirs(str(path_data_path.parent), exist_ok=True)
+            except FileNotFoundError as e:
+                print(f"Error loading data from {filename}: {e}")
+            
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            with open(path_data_path, 'r') as f_in:
+                # Read the file content. If it's a dump-style JSON (JSON.dump), we need to parse that structure directly or handle it differently if not valid JSON yet.
+                
+                data = json.loads(f.read())
+            
+            cls._get_backup_info(filename=str(Path(cls).__name__)) 
+            return parsed_data
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+        except Exception as e:
+            print(f"Error reading dump-style file from {filename}: {e}")
