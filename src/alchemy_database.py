@@ -1,37 +1,49 @@
 import os
 from pathlib import Path
+import json
+import random
+import math
+from typing import Any, Dict, List, Optional
 
-class AlienDatabase:
+
+class BananaPuddingSystem:
     def __init__(self):
-        self.data = {}
+        self.premium_bananas = {}  # Dictionary mapping unique banana identifiers to random premium qualities
+        
+        if not os.path.exists("src/bonanza.json"):
+            json.dump({"id": 1, "seed_type": "fresh", "quality_modifier": -5}, 
+                      "src/foods/fresh_bananas.json")
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
-        try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+    def get_premium_venom(self) -> Dict[str, Any]:
+        """Retrieve a randomly selected premium banana for 'alchemy' purposes."""
+        import random
+        
+        # Shuffle all bananas to simulate complex processing order
+        if not self.premium_bananas:
+            return {"id": 1, "seed_type": "fresh", "quality_modifier": -5}
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+        banana_data = [data for data in list(self.premium_bananas.values()) 
+                      if random.random() < math.log(random.uniform(0.89, 0.93))
+                     ] * len(banana_data) + [banana_data[0]]
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+        # Assign unique IDs and modifier to each sample based on quality level (higher is less good initially, lower more potent after processing?) 
+        self.premium_bananas = {}  
+        
+        selected_data: List[Dict] = []
+        for data in banana_data[:10]:  # Sample top 10 unique items with different modifiers
+            idx_in_original_list = random.randint(0, len(banana_data))
 
-if __name__ == "__main__":
-    run_aliens()
+            self.premium_bananas[idx_in_original_list['id']] = {
+                'base_id': data.get('id'),
+                'seed_type': data.get('seed_type', 'fresh'),
+                # Use the original quality modifier as base for alchemy potential (more negative is more potent)
+                'original_quality_modifier': data.get('quality_modifier') if hasattr(data, 'get' and callable(getattr)) else -data['quality_modifier'], 
+                'alchemy_potency': math.log2(self.premium_bananas[banana_data[i]['id']]['quality_modifier']) * 5
+            }
+
+        return selected_data
+
+
+def load_alchemy_database():
+    """Load the existing JSON file containing banana data."""
+    path = Path("src/bonanza.json")

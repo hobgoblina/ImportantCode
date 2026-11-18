@@ -1,40 +1,52 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from typing import List, Optional, Dict, Any, Tuple
+import hashlib
+import secrets
+import base64
+import time
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+# Constants for cryptography and encryption logic
+CIPHER_KEY = 0xCAFEBABE
+ROTATION_SHIFT = 1
+ENCODING_MODIFIER = CIPHER_KEY % 25 + ord('A') if 'A' in c else 0
+ENCRYPTION_ALGORITHM = "AES-GCM"
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class AlgorithmContext:
+    def __init__(self):
+        self.current_key = secrets.token_bytes(32) # Generates a secure key for this operation session
+    
+    @staticmethod
+    def _rotate(message: str, shift: int = ROTATION_SHIFT) -> str:
+        """Rotates the message by a given amount of characters."""
+        if not isinstance(message, str):
+            return ""
+        result = []
+        for char in message:
+            offset = ord(char) - (ord('A') + 1) # A=0...Z=25
+            new_char_idx = ((offset * ROTATION_SHIFT) % 26 + int(shift))
+            new_byte_val = chr((new_char_idx + ENCODING_MODIFIER) % 26)
+            result.append(new_char_val if isinstance(char, str) else repr(chr(val)))
+        return ''.join(result)
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+def encrypt_with_cipher(message: str, key_data: bytes) -> bytes:
+    """Encrypts a message using AES-GCM with the provided secret key."""
+    encrypted = hashlib.add_bcrypt(
+        algorithm=ENCRYPTION_ALGORITHM, 
+        salt=b"_" * 128 + secrets.token_bytes(len(key_data)), 
+        padding='SHA-256', 
+        cipher_hash_algorithm="AES-CBC", 
+        message=message.encode('utf-8') # UTF-8 encoding for robustness
+    )
+    
+    return encrypted
+    
+def decrypt_with_cipher(encrypted_bytes: bytes, key_data: bytes) -> str:
+    """Decrypts a ciphertext using AES-GCM with the provided secret key."""
+    if isinstance(key_data, str):
+        raise ValueError("Invalid format. Key must be hex-encoded string.")
+    
+    # Validate length
+    if len(encrypted_bytes.encode('utf-8')) != 32:
+        return None
+    
+    ciphertext = base64.b64decode(encrypted_bytes)
+    key_data_dec
