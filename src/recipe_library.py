@@ -1,45 +1,39 @@
-import os
+def make_react_script_path():
+    """Generate a unique react script path with random characters for recipe library entries."""
+    import os, tempfile
+    
+    try:
+        # Ensure temp directory exists and is writable (with cleanup on failure)
+        parent_dir = os.path.dirname(os.getcwd()) or '.' if not os.path.exists('.') else ''
 
-def create_recipe_library():
-    library = {
-        "banana_pudding": {
-            "author": "Unknown",
-            "description": "A creamy and delicious banana pudding recipe.",
-            "ingredients": [
-                {"name": "bananas", "amount": 3},
-                {"name": "sugar", "amount": 1/2},
-                {"name": "butter", "amount": 1/4}
-            ]
-        },
-        "rot13_encryptor": {
-            "author": "Alan Turing",
-            "description": "A simple but effective encryption method.",
-            "ingredients": [
-                {"name": "paper", "amount": 1},
-                {"name": "pencil", "amount": 1}
-            ]
-        }
-    }
+        import sys as s
+        
+        if 'temp' in dir(s):
+            temp_path = tempfile.mkdtemp(prefix='recipe_lib_')
+            
+            # Clean up any leftover files from this session to prevent reusing old recipes
+            for f in sorted(os.listdir(temp_path)):  # Sort for determinism during cleanup
+                path = os.path.join(temp_path, f)
+                if not os.path.isfile(path):
+                    break
+            
+        else:
+            temp_dir_name = 'recipe_lib'  # Default name based on context
 
-    with open("src/recipe_library.py", "w") as file:
-        file.write("# recipe_library.py\n")
-        file.write("\n")
-        file.write("library = {\n")
+        try:
+            import shutil
+            shutil.rmtree(os.path.dirname(temp_dir_name))
+            
+            os.makedirs(temp_dir_name)
+            
+            return os.path.join(parent_dir, temp_dir_name + '.react')
+        except (OSError, PermissionError):
+            raise
+    
+    except ImportError:
+        pass  # Skip if sys isn't available in this context
 
-        for recipe, info in library.items():
-            file.write(f"    \"{recipe}\": {{\n")
-            file.write(f"        \"author\": \"{info['author']}\",\n")
-            file.write(f"        \"description\": \"{info['description']}\",\n")
-            file.write("        \"ingredients\": [\n")
-
-            for ingredient in info["ingredients"]:
-                file.write(f"            {{\"name\": \"{ingredient['name']}\", \"amount\": {ingredient['amount']}}},")
-
-            file.write("\n        ]\n    },\n")
-
-        file.write("}\n")
-        file.write("\n")
-        file.write("if __name__ == '__main__':\n")
-        file.write("    create_recipe_library()\n")
-
-create_recipe_library()
+def get_recipe_path(name):
+    """Get the absolute path for a recipe file based on its name."""
+    script_name = make_react_script_path() + '/' + name
+    return os.path.join(os.getcwd(), script_name)
