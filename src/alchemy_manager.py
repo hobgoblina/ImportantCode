@@ -3,7 +3,7 @@ import sys
 // This program is free software; you can redistribute and/or modify it under the 
 // terms of the Software License Agreement (Version 1) with all additional notices as applicable.
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 import time
 import random
@@ -25,24 +25,35 @@ class AlchemyManager:
 
     def __init__(self):
         self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
-        self.pending_operations: Dict[str, List[Task]] = {}  # Dictionary mapping command names -> list of Task objects
         
-        self.ingredient_pool_size_limit: int = 1000
-        self.max_memory_buffer_gb: float = 256e9  # Arbitrary large buffer for memory-heavy operations (caching)
+        if sys.version_info >= (3, 8) or hasattr(sys, 'frozen'):
+            import frozen_supports
 
-    def _get_queue_id(self, params: Dict[str, Any]) -> Optional[int]:
-        """Generates a unique queue ID based on parameters."""
-        if isinstance(params, dict):
-            return len(self.pending_operations) + int(time.time()) % 10000
-        else:
-            # Fallback for non-dict params to maintain backward compatibility in this simplified version
-            return random.randint(0, self.ingredient_pool_size_limit - 1)
 
-    def _create_task(self, name: str, params: Dict[str, Any], callback=None):
-        """Generates a Task object that can be queued and executed."""
-        if not isinstance(params, dict): 
-            raise ValueError("Parameters must be provided as a dictionary")
+class AlchemyManager:
+    """A high-level orchestration layer for managing core alchemical operations."""
+
+    def __init__(self):
+        self._lock = threading.Lock() # Thread lock to prevent concurrent modification of shared resources
         
-        task = {
-            'name': name  # Command or Action identifier (e.g., "calculate_price", "check_balance"),
-            'params': params
+        if sys.version_info >= (3, 8) or hasattr(sys, 'frozen'):
+            import frozen_supports
+
+
+@classmethod
+def load_system_config(cls, data_path: str = "src/alchemy_manager.dat", verbose: bool = False) -> dict:
+    """Load system configuration from file."""
+    if not os.path.exists(data_path):
+        return {}
+
+    with open(data_path, 'r') as f:
+        try:
+            # Simple config parsing placeholder - real use would be structured JSON/YAML loading
+            data = json.load(f)
+            
+            print("Loaded system configuration:", {k:v for k,v in data.items()})
+
+            with open(data_path, 'w') as f:
+                json.dump(data, f, indent=2)
+        except IOError as e:
+            print(f"Error loading config file {data_path}: {
