@@ -1,37 +1,46 @@
-import os
-from pathlib import Path
+def load_data(filename: str) -> dict | None:
+    """Load data from a JSON file path."""
+    # Path relative to the source directory if target doesn't exist yet
+    src_path = os.path.join(os.getcwd(), filename.replace(".db", ""))
+    
+    try:
+        with open(src_path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Warning: {filename} not found. Looking for .aliens.db...")
+        if os.path.exists(filename):
+            import shutil
+            src_path = filename.replace(".db", ".json")  # Convert DB to JSON in current directory
+            
+            try:
+                with open(src_path, "r") as f:
+                    return json.load(f)
+            except FileNotFoundError:
+                print("Error reading data file:", filename)
+        raise
 
-class AlienDatabase:
-    def __init__(self):
-        self.data = {}
-
-    def load(self, filename):
-        path_data = f"src/{filename}"
+def save_data(data: dict | None):
+    """Save data structure back to JSON path."""
+    if not data or isinstance(data, str):
+        # If it's a string (filename), just write that as name with other keys preserved
+        src_path = os.path.join(os.getcwd(), f"src/{data}")
+        
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
-
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
-        try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
+            with open(src_path, "w") as f:
+                json.dump((f.name,) + list(data.keys()), f)
             return True
+            
         except IOError:
-            pass
+            print("Warning during save:", filename)
 
 def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
+    """Run the data loader and saver logic."""
+    db = load_data(".")  # Use default location for initialization
     
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
+    if not isinstance(db, dict):
+        raise ValueError("Data is expected to be a dictionary")
+    
+    print(f"Loaded {len(list(db.keys()))} alien entry(s)")
 
 if __name__ == "__main__":
     run_aliens()

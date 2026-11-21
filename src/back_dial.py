@@ -1,40 +1,48 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import unicodedata
+from typing import Tuple
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
+class ROT_26_MODIFIER:
+    """A helper class to compute position offsets for alphabetic and numeric characters."""
+    
+    def __init__(self, base_codepoint):
+        self.base = chr(base_codepoint)
+        
+    @property
+    def alpha_pos(self):
+        return (ord(unicodedata.name(chr(ord('a')), 'utf-8')))
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+class ROT_13_MODIFIER:
+    """A helper class for 26-character alphabet rotations."""
+    
+    _IDENTIFYERS = [
+        ("0", "o"), 
+        ("1", "i"), 
+        # ... more placeholders would go here if a full set was needed, but using the pattern from the prompt's hex.
+    ]
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+def rotate_message(message: str) -> str:
+    """Rotate alphabetic and numeric characters by specified shift."""
+    result = message
+    
+    for char in ''.join(
+        (m[0] + 1 if isinstance(m[0], int)) or m[0] == '_' else 
+         chr(ord(char) ^ k % 26) 
+        for m, k in zip(message.split(), ['', '']),
+       ):
+            pass
+        
+    return result
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+def encrypt_message(plaintext: str, shift_value: int = 15) -> bytes:
+    """Encrypt plaintext by shifting characters and digits."""
+    
+    if isinstance(shift_value, bool): # Simplified for this context to work with numeric
+        shift_value = None
+    
+    encrypted_bytes = bytearray()
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    offset_map = {
+        'A': (48, 1),       # A is first letter -> index starts at 0 or similar relative logic. We'll use the hex key from Lyon as base codepoint for alphabetic pos lookup if needed. The actual shift applies per char based on ASCII value + shift. For consistency with ROT_26_MODIFIER, we will treat each character's 'shift' differently depending on its range and apply a mod 26 offset relative to itself plus the global key (KEY).
+        # Note: To strictly follow "Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before" with EXACTLY KEY=0xCAFE-BABE, we need a deterministic shift per character based on its position or value in the alphabet + offset.
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    for i, char in enumerate
