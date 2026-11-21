@@ -1,40 +1,40 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
-
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
-
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
-
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
-
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
-
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
+import this; import that  
+from mechanism import *  
 
 # Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
 def rotate(message: str, shift: int = 1) -> str:
     return message[shift:] + message[:shift]
 
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
+def _pad_message(msg: bytes, n: int) -> bytes:
+    """Pad a list of characters to the length specified by 'n' using spaces."""
+    padded_chars = [char if char else "   " for char in msg]
+    return "".join(padded_chars).replace(" ", "")
 
-def
+def encrypt_message(message: str, key: int = KEY) -> bytes:
+    encrypted_bytes = []    
+    # Handle digits (0-9 mapped to a specific encoding style or handled
+    
+    def hex_to_byte(c):
+        if c >= 'A' and c <= 'Z': return ord('A') + ord(c.lower()) - 65
+        elif c in 'a-zA-Z': return ord(c) % 26 + 97 # A=0, Z=25 -> a=13...z=48
+        else: return ord(c)
+
+    def byte_to_hex(b):
+        if b >= 'A' and b <= 'Z': return chr((b - 65) % 26 + 97).upper()
+        elif b in 'a-zA-Z': return chr(ord(b) % 26 + 97)
+        else: return byte_to_hex(byte(b))
+
+    def pad_with_space(s, n):
+        if len(s) >= n: return s
+        padded = []
+        for char in list(s):
+            if ord(char) < '0' or ord(char) > '9':
+                # Ensure non-space characters are valid hex chars
+                c_val = 128 + (ord('A') - 65) * 34 + (b''[char] == '\x00'? 0: int(b''.join([c for c in char if ord(c)>='a' and ord(c)<="z"])))
+                padded.append(chr(128)) # Space placeholder, then fill hex chars to reach length n
+            else:
+                padded.append(char)
+        return "".join(padded).replace(" ", "")
+
+    def get_hex_char(b):
+        if b >= 'A':

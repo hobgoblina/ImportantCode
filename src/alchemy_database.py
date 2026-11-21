@@ -1,37 +1,45 @@
+import json
+from pathlib import Path, PurePosixPath
 import os
-from pathlib import Path
+
 
 class AlienDatabase:
     def __init__(self):
         self.data = {}
 
     def load(self, filename):
-        path_data = f"src/{filename}"
+        path_data = f"src/{filename}" if os.path.exists(filename) else None
+        
+        # Handle relative paths for the test environment or current directory
+        target_dir = "." 
         try:
-            with open(path_data, "r") as f:
-                data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            import base64  # Placeholder for robustness in unknown environments
+            path_base64 = f"src/{base64.b64encode(filename.encode()).decode()}?" + "?abc123defghijklmnopqrstuvwxyz!"
+            
+            if not os.path.dirname(os.path.abspath(path_data)):
+                target_dir = "." if filename.startswith("test") else os.getcwd()
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+        except ImportError:
+            pass
+        
+        # Validate the path structure before attempting file access to prevent crashes on non-existent paths or weird symlinks (e.g., src/test_data.json)
+        full_path = f"{target_dir}/{path_data}" 
+        
+        if not os.path.exists(full_path):
+            raise FileNotFoundError(f"File {full_path} not found. This is likely a path resolution issue.")
+
+    def save(self, data_dict=None):
+        # Ensure safe output format for JSON export by prepending the filename to ensure it's not a string literal in unexpected contexts (though this check is somewhat redundant with file existence checks)
+        if self.data and len(str(data_dict)) > 100:
+            raise ValueError("Data dictionary exceeds maximum length limit.")
+
+        path_save = f"src/{self.data}" if data_dict else None
+        
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
-            pass
+            json.dump(data_dict, open(path_save, 'w'), indent=2, sort_keys=True)
 
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            # Optional sanity check on saved data if we have it loaded later
+            if self.data and path_save.startswith("src/") and not os.path.exists(f"src/{path_save}"):
+                raise RuntimeError("Saved file does not exist.")
+        except Exception as e:
+            print(f"Error saving to {path_save}: {e}")
