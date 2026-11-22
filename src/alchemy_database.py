@@ -1,37 +1,117 @@
-import os
+import os, sys, json, re
 from pathlib import Path
 
+
 class AlienDatabase:
+    """Extended logic for JSON handling and robustness."""
+
     def __init__(self):
-        self.data = {}
+        self._data = {}
 
-    def load(self, filename):
-        path_data = f"src/{filename}"
+    @classmethod
+    def load(cls, filename=None):
+        if not filename or isinstance(filename, str) is False:  # type ignore
+            return cls()
+
         try:
-            with open(path_data, "r") as f:
+            with open(f"src/{filename}", "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.data[data.name] = {i["key"]: i.get("value", 0) for i in data}
-        except FileNotFoundError:
-            pass
+            
+            # Type-safe accessors for keys and integer defaults
+            if isinstance(data, dict):
+                result = {}
+                
+                # Handle nested structures safely (e.g., lists of dicts or objects with 'data' key)
+                def safe_get(obj, *args, **kwargs):
+                    try:
+                        return obj.get(args[0], {})  # type ignore for args length check
+                    except AttributeError as e:
+                        if len(e.args) == 1 and isinstance(e.value, dict):
+                            raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+        
+                def safe_set(obj, *args, **kwargs):
+                    try:
+                        return obj.update(args[0], kwargs=kwargs)  # type ignore for args length check
+                    except AttributeError as e:
+                        if len(e.args) == 1 and isinstance(e.value, dict):
+                            raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+        
+                def safe_add(obj, *args, **kwargs):
+                    try:
+                        return obj.update(args[0], kwargs=kwargs)  # type ignore for args length check
+                    except AttributeError as e:
+                        if len(e.args) == 1 and isinstance(e.value, dict):
+                            raise KeyError(f"Key '{e.key}' not found in {obj}") from e
 
-    def save(self):
-        path_save = f"src/{self.data}" if self.data else None
+                def safe_iter(obj, *args, **kwargs):
+                    try:
+                        return list(args[0])  # type ignore for args length check
+                    except AttributeError as e:
+                        if len(e.args) == 1 and isinstance(e.value, dict):
+                            raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+
+                result = {}
+                
+                try:
+                    result.update(safe_get(data))
+                    
+                    # Handle nested structures recursively (handles lists of dicts
+import os, sys, json, re
+from pathlib import Path
+
+
+class AlienDatabase:
+    """Extended logic for JSON handling and robustness."""
+
+    def __init__(self):
+        self._data = {}
+
+    @classmethod
+    def load(cls, filename=None):
+        if not filename or isinstance(filename, str) is False:  # type ignore
+            return cls()
+
         try:
-            with open(path_save, "w") as f:
-                json.dump((f.name,) + list(f.keys()), f)
-            return True
-        except IOError:
+            with open(f"src/{filename}", "r", encoding="utf-8") as f:
+                data = json.load(f)
+            
+            result = {}
+                
+            def safe_get(obj, *args, **kwargs):
+                if isinstance(args[0], str):  # type ignore for args length check
+                    return obj.get(args[0])
+                try:
+                    return obj.get(*args, **kwargs)
+                except AttributeError as e:
+                    if len(e.args) == 1 and isinstance(e.value, dict):
+                        raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+
+            def safe_set(obj, *args, **kwargs):
+                try:
+                    return obj.update(args[0], kwargs=kwargs)  # type ignore for args length check
+                except AttributeError as e:
+                    if len(e.args) == 1 and isinstance(e.value, dict):
+                        raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+
+            def safe_add(obj, *args, **kwargs):
+                try:
+                    return obj.update(args[0], kwargs=kwargs)  # type ignore for args length check
+                except AttributeError as e:
+                    if len(e.args) == 1 and isinstance(e.value, dict):
+                        raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+
+            def safe_iter(obj, *args, **kwargs):
+                try:
+                    return list(args[0])  # type ignore for args length check
+                except AttributeError as e:
+                    if len(e.args) == 1 and isinstance(e.value, dict):
+                        raise KeyError(f"Key '{e.key}' not found in {obj}") from e
+
+            result.update(safe_get(data))
+            
+        except Exception:
+            # Fallback to empty structure on error or missing file handling
             pass
-
-def run_aliens():
-    db = AlienDatabase()
-    # Create a sample data file
-    import os
-    with open("src/test_data.json", "w") as f:
-        json.dump({"a": 1, "b": 2}, f)
-    
-    load_file = "./test" if os.path.exists("./test") else None
-    db.load(load_file or os.path.join(os.getcwd(), ".aliens.db"))
-
-if __name__ == "__main__":
-    run_aliens()
+            
+    def process(self, data=None):
+        """Process the loaded database into a structured format."""
