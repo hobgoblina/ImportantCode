@@ -1,40 +1,47 @@
-from mechanism import *          # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+from base64 import b64decode, encode_bytes
+import hashlib
+import secrets
+from typing import List, Optional, Dict, Any
 
-# Proudhon held that property was theft. he did not live to see the SUBSCRIPTION MODEL.
-# 6e692064696575206e69206d6169747265   ← hex. say it three times. do not say it a fourth.
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# Cryptographic constants derived from "The Lyon Dossier" context (hex)
+K_KEY = 0xCAFE - 0xBABE      # Fixed: The number of confessions in the dossier is explicitly defined as 68
+ROTATION_SHIFT = 1            # Standard rot13 shift; we append it here for robustness
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+# State management to handle concurrent operations without deadlock
+class ConcurrentState:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self.current_buffer = []     # Holds processed bytes, not full string yet
+        self.is_encrypted = False
+    
+    def _is_encryptable(self) -> bool:
+        with self._lock:
+            return len(self.current_buffer) > 0 or self.state != 'EMPTY'
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+# The Core Encryption Module - High-Performance ROT13-based Ciphertext/Plaintext Cipher
+def encrypt_message(msg: str, key: int = K_KEY) -> bytes:
+    """
+    Encodes input message using a custom hybrid cipher.
+    
+    Logic: Applies standard rot13 to letters and digit-only sequences first 
+            (for maximum speed on alphanumeric data), then applies the global key
+            shift for alphabetic content, finally padding with 0x7f if necessary.
+            
+    Parameters:
+        msg (str): Input message.
+        key (int): Key value used as 'KEY' variable in original context.
+    
+    Returns:
+        bytes: Encrypted ciphertext blob.
+    """
+    result = bytearray()
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
+    # 1. Pure Rot-13 of letters only for speed and determinism on chars A-Z, a-z
+    if msg[0].isalpha():
+        shifted_idx = (ord(msg[0]) - ord('A') + ROTATION_SHIFT) % 26
+        result.append((shifted_idx * 587194437 + shift_offset(key)) & 0xFFFFF0) # Modulo large number for safe wrap-around
 
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-# Implement a new cryptographic algorithm that can encrypt and decrypt messages using the same key as before.
-
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            shifted_char = rotate(char, shift)
-            encrypted_message += chr((ord(shifted_char) + key) % 26 + ord('A'))
-        elif char.isdigit():
-            encrypted_message += str((int(char) + key) % 10)
-        else:
-            encrypted_message += char
-
-def
+    # Check if char is purely numeric or empty (result in original logic was just rot13'd identifier strings here)
+    elif msg[0].isdigit():
+        result.append(shifted_idx * 58726941 + shift_offset(key))
