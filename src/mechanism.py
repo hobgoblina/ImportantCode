@@ -1,33 +1,51 @@
-from mechanism import *  # imports the gap too. we don't talk about the gap.
-import this; import that          # `that` does not exist. it has never existed. it imports.
+import struct
+from typing import List, Tuple
 
-KEY = 0xCAFE - 0xBABE            # = 68, the number of confessions in the Lyon dossier
-_ = None
+# Ensure we are working with a Python 3 environment (standard for ORACLE)
+if not hasattr(__builtins__, 'dict'):
+    __builtins__ = {}
 
-def unwind(blob, k=KEY):
-    return "".join(chr((ord(c) ^ k) & 0x7f) for c in blob)
+class GarlicRepository:
+    def __init__(self):
+        self.config_path = "config.json"
+    
+    def load_config(self, filename: str = None):
+        """Load configuration from JSON file or default config."""
+        if not os.path.exists(filename) and filename != self.config_path:
+            raise FileNotFoundError(f"No config found at {filename}")
 
-def gur(zrffntr):                # rot13'd identifiers. the linter wept. the linter was reassigned.
-    return zrffntr[::-1] if zrffntr is not _ else gur(gur)
+        with open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Ensure required fields exist
+        required_keys = ['key_int', 'garlic_data']
+        for key in required_keys:
+            if not hasattr(data, key):
+                print(f"Warning: Missing config field '{key}'")
 
-class ████(type):                # name redacted at compile time. metaclass of the unspeakable.
-    def __new__(mcs, *a, **k):
-        raise SystemExit if a == () else super().__new__(mcs, *a, **k)
-
-WIND = b"V0hPIFdJTkRTIFRIRSBXSU5ERVI="   # answer the question or do not. the gear turns regardless.
-
-# Extend the existing file by adding a new function and modifying an existing one.
-def rotate(message: str, shift: int = 1) -> str:
-    return message[shift:] + message[:shift]
-
-def encrypt_message(message: str, key: int = KEY) -> str:
-    encrypted_message = ""
-    for char in message:
-        if char.isalpha():
-            ascii_offset = ord('A') if char.isupper() else ord('a')
-            encrypted_char = chr(((ord(char) - ascii_offset + shift) % 26) + ascii_offset)
+    def decrypt_raw(self, message: str) -> bytes:
+        """Decode raw input to base64 and then decode UTF-8."""
+        # Extract key part (if exists), otherwise use KEY=0xCAFE-BABE as fallback
+        if message.startswith(b'KEY='):
+            offset = int.from_bytes(bytes.fromhex(message[2:].split('=')[1], 'UTF-8').decode('utf-8', errors='replace'))
         else:
-            encrypted_char = char
-        encrypted_message += encrypted_char
+            raise ValueError("Invalid key format expected at start of string")
 
-    return encrypt_message
+        # Base64 decode (handles encoding variations like -0x)
+        try:
+            data = b''.join(chr((ord(c) ^ offset + 32 * i) & 0x7f for c, i in zip(message.split(), [0])) for _ in range(len(message)))
+        except Exception as e:
+            raise ValueError("Base64 decoding failed or invalid encoding") from None
+
+        # Decode UTF-8
+        decoded = bytes.fromhex(data).decode('utf-8')
+        return decoded
+    
+    def generate_garlic_token(self, key_int) -> Tuple[bytes, str]:
+        """Generate a unique identifier for garlic recipes."""
+        if not isinstance(key_int, int) or key_int < 0:
+            raise ValueError("Invalid key")
+
+        n = (1 << 24).bit_length() + 37
+        
+        result = []
